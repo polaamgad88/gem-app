@@ -44,7 +44,7 @@ input, select {
 }
 
 .tab {
-    background: #007bff;
+    background: #0b2a59;
     color: white;
     padding: 1vw;
     margin-top: 1vw;
@@ -98,14 +98,12 @@ input, select {
     background-color: #218838;
 }
 
+
 @media (max-width: 768px) {
     .container {
         width: 90vw;
         height: 100vh;
 
-    }
-    h1{
-        font-size: 5vw;
     }
     img{
         height: 30vw;
@@ -127,11 +125,11 @@ input, select {
 
     #submit-order {
         padding: 1vw;
-        font-size: 5vw;
+        font-size: 4vw;
     }
     .tab {
         padding: 2vw;
-        font-size: 4vw;
+        font-size: 3vw;
     }
 
     .tab-content {
@@ -175,20 +173,35 @@ select, input {
     display: flex;
     align-items: center;
     gap: 5px;
+    flex-wrap: wrap;  /* Allows wrapping on smaller screens */
 }
 
-/* Plus & Minus Buttons */
+/* Ensure the quantity buttons and input are properly sized */
 .quantity-btn {
-    width: 30px;
-    height: 40px;
-    background-color: #0b2853;
-    color: white;
-    border: none;
-    font-size: 20px;
-    text-align: center;
-    cursor: pointer;
-    border-radius: 5px;
+    width: 30px; /* Reduce button size for mobile */
+    height: 30px;
+    font-size: 16px; /* Adjust font size */
 }
+
+.quantity-input {
+    width: 50px; /* Adjust input width for better fit */
+    height: 30px;
+    text-align: center;
+}
+
+/* Responsive: Stack items on very small screens */
+@media (max-width: 480px) {
+    .quantity-wrapper {
+        flex-direction: column; /* Stack buttons and input vertically */
+        align-items: center;
+    }
+
+    .quantity-btn,
+    .quantity-input {
+        width: 20px; /* Increase touch area for better UX */
+    }
+}
+
 
 .quantity-btn:hover {
     background-color: grey  ;
@@ -236,7 +249,7 @@ select, input {
 
 /* Style the Quantity Input */
 .quantity-input {
-    width: 60px;
+    width: 40px;
     height: 40px;
     font-size: 16px;
     text-align: center;
@@ -255,7 +268,7 @@ select, input {
 .quantity-btn {
     width: 30px;
     height: 40px;
-    background-color: #007bff;
+    background-color: #0b2a59;
     color: white;
     border: none;
     font-size: 20px;
@@ -265,7 +278,7 @@ select, input {
 }
 
 .quantity-btn:hover {
-    background-color: #0056b3;
+    background-color: #0b2a59;
 }
 
 /* Delete Button (Basket Icon) */

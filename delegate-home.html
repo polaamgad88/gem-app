@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Order</title>
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
+    <link rel="stylesheet" href="./styles/common.css">  
     <link rel="stylesheet" href="./styles/delegate-home.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <script src="./scripts/delegate-home.js" defer></script>
 </head>
+
 <body>
     <div class="container">
         <img src="./assets/GEM Group 2024.jpg" alt="gem logo">
-        <h1>New Order</h1>
+        <h2>New Order</h2>
 
         <div class="order-header">
             <input type="date" id="order-date" readonly>
@@ -24,54 +29,74 @@
         </div>
 
         <div class="tabs">
+
             <!-- Detailed Order Section -->
-<div class="tab" onclick="toggleTab('detailed-order-content')">
-    Detailed Order <span class="arrow">▼</span>
-</div>
-<div id="detailed-order-content" class="tab-content" style="display: none;">
-    <div class="order-row"  style="border: 2cm; border-color: black;">
-        <!-- Brand Dropdown -->
-        <select class="brand-select" onchange="filterProducts(this)">
-            <option value="">Select Brand</option>
-            <option value="brand1">Brand 1</option>
-            <option value="brand2">Brand 2</option>
-        </select>
-    
-        <div class="custom-dropdown">
-            <select class="product-select" >
-                <option value="">Select Product</option>
-                <option value="product1" data-status="green"> Product 1</option>
-                <option value="product2" data-status="yellow"> Product 2</option>
-                <option value="product3" data-status="red"> Product 3 </option>
-            </select>
-        </div>
-    
-     
+            <div class="tab" onclick="toggleTab('detailed-order-content')">
+                Detailed Order <span class="arrow">▼</span>
+            </div>
+            <div id="detailed-order-content" class="tab-content" style="display: none;">
+                <div class="order-row" style="border: 2cm; border-color: black;">
+                    <!-- Brand Dropdown -->
+                    <select class="brand-select" onchange="filterProducts(this)">
+                        <option value=""> Brand</option>
+                        <option value="brand1">Brand 1</option>
+                        <option value="brand2">Brand 2</option>
+                    </select>
 
-        <div class="quantity-wrapper">
-            <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
-            <input type="number" class="quantity-input" value="1" min="1">
-            <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
-        </div>
-    
-        <button class="delete-btn" onclick="deleteRow(this)">🗑️</button>
-    
-        
-    </div>
-    <div id="order-rows"></div>
-    <button onclick="addOrderRow()">Add Row</button>
-</div>
+                    <div class="custom-dropdown">
+                        <select class="product-select">
+                            <option value=""> Product</option>
+                            <option value="product1" data-status="green"> Product 1</option>
+                            <option value="product2" data-status="yellow"> Product 2</option>
+                            <option value="product3" data-status="red"> Product 3 </option>
+                        </select>
+                    </div>
 
-            
-            <div id="detailed-order" class="tab-content">
-                <!-- Detailed order content here -->
+
+
+                    <div class="quantity-wrapper">
+                        <!-- <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button> -->
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <!-- <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button> -->
+                    </div>
+
+                    <i class="material-icons" onclick="deleteRow(this)" style="font-size:33px;color:red">cancel</i>
+
+
+                </div>
+                <div id="order-rows"></div>
+                <button onclick="addOrderRowCombined()">Add Row</button>
             </div>
 
+            <!-- Detailed Order Section -->
             <div class="tab" onclick="toggleSection('combined-order')">
                 Combined Order <span class="arrow">▼</span>
             </div>
             <div id="combined-order" class="tab-content">
-                <!-- Combined order content here -->
+                <div class="order-row" style="border: 2cm; border-color: black;">
+                    <!-- Brand Dropdown -->
+                    <select class="brand-select" onchange="filterProducts(this)">
+                        <option value=""> Brand</option>
+                        <option value="brand1">Zerofrizz</option>
+                        <option value="brand2">Ravita</option>
+                    </select>
+
+                    <div class="custom-dropdown">
+                        <select class="product-select">
+                            <option value=""> Category</option>
+                            <option value="product1" data-status="green"> Shampoo</option>
+                            <option value="product2" data-status="yellow"> Therum 2</option>
+                            <option value="product3" data-status="red"> Mask </option>
+                        </select>
+                    </div>
+                    <div class="quantity-wrapper">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                    </div>
+
+                    <i class="material-icons" onclick="deleteRow(this)" style="font-size:33px;color:red">cancel</i>
+                </div>
+                <button onclick="addOrderRowCombined()">Add Row</button>
+
             </div>
         </div>
 
@@ -83,4 +108,5 @@
         <button id="submit-order">Submit New Oder</button>
     </div>
 </body>
+
 </html>

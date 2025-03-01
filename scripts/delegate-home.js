@@ -80,12 +80,50 @@ function addOrderRow() {
      
 
         <div class="quantity-wrapper">
-            <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+            <!-- <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button> -->
             <input type="number" class="quantity-input" value="1" min="1">
-            <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+            <!-- <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button> -->
         </div>
     
-        <button class="delete-btn" onclick="deleteRow(this)">🗑️</button>
+        <i class="material-icons" onclick="deleteRow(this)" class="" style="font-size:33px;color:red">cancel</i>
+
+    `;
+
+    document.getElementById("order-rows").appendChild(newRow);
+}
+
+
+
+function addOrderRowCombined() {
+    const newRow = document.createElement("div");
+    newRow.classList.add("order-row");
+    newRow.innerHTML = `
+       <!-- Brand Dropdown -->
+        <select class="brand-select" onchange="filterProducts(this)">
+            <option value="">Select Brand</option>
+            <option value="brand1">Zerofrizz</option>
+            <option value="brand2">Ravita</option>
+        </select>
+    
+        <div class="custom-dropdown">
+            <select class="product-select" >
+                <option value="">Select Category</option>
+                <option value="product1" data-status="green"> Shampoo</option>
+                <option value="product2" data-status="yellow"> Therum 2</option>
+                <option value="product3" data-status="red"> Mask </option>
+            </select>
+        </div>
+    
+     
+
+        <div class="quantity-wrapper">
+            <!-- <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button> -->
+            <input type="number" class="quantity-input" value="1" min="1">
+            <!-- <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button> -->
+        </div>
+    
+        <i class="material-icons" onclick="deleteRow(this)" class="" style="font-size:33px;color:red">cancel</i>
+
     `;
 
     document.getElementById("order-rows").appendChild(newRow);
@@ -121,3 +159,4 @@ function deleteRow(button) {
     let row = button.closest(".quantity-wrapper"); // Find closest row container
     row.remove();
 }
+
