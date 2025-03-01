@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="./styles/view-order.css">
+</head>
+<body>
+
+<div class="container">
+   <h1> <img src="./assets/GEM Group 2024.jpg" alt="gem logo"></h1>
+
+    <h1>Order Details - <span id="orderId">ORD001</span></h1>
+
+    <!-- Order Information -->
+    <div class="order-info">
+        <div class="row">
+            <p><strong>Order ID:</strong> <span id="order-id">ORD001</span></p>
+            <p><strong>Date:</strong> <span id="order-date">03/01/2024</span></p>
+        </div>
+        <div class="row">
+            <p><strong>PO State:</strong> <span id="order-state" class="state pending">Pending</span></p>
+            <p><strong>Delegate Name:</strong> <span id="delegate-name">Mohamed Hassan</span></p>
+        </div>
+    </div>
+
+    <!-- Customer Information -->
+    <div class="customer-info">
+        <h2>Customer Information</h2>
+        <p><strong>Name:</strong> <span id="customer-name">El Far</span></p>
+        <p><strong>ID:</strong> <span id="customer-id">CUST12345</span></p>
+        <p><strong>Address:</strong> <span id="customer-address">123 Main Street, Cairo</span></p>
+    </div>
+
+       <!-- Ordered Items -->
+       <div class="items-list">
+        <h2>Ordered Items</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Item Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Product A</td>
+                    <td>EGP75</td>
+                    <td>2</td>
+                    <td>EGP150</td>
+                </tr>
+                <tr>
+                    <td>Product B</td>
+                    <td>EGP100</td>
+                    <td>1</td>
+                    <td>EGP100</td>
+                </tr>
+                <tr>
+                    <td>Product C</td>
+                    <td>EGP100</td>
+                    <td>3</td>
+                    <td>EGP300</td>
+                </tr>
+
+
+                <tr>
+                    <td>Product C</td>
+                    <td>EGP100</td>
+                    <td>3</td>
+                    <td>EGP300</td>
+                </tr>
+
+                <tr>
+                    <td>Product C</td>
+                    <td>EGP100</td>
+                    <td>3</td>
+                    <td>EGP300</td>
+                </tr>
+
+                <tr>
+                    <td>Product C</td>
+                    <td>EGP100</td>
+                    <td>3</td>
+                    <td>EGP300</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Total Price -->
+    <div class="total">
+        <h2><span id="total-price">EGP550</span></h2>
+    </div>
+</div>
+
+</body>
+</html>

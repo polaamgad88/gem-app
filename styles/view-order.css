@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    text-align: center;
+}
+
+.order-info, .customer-info, .items-list, .total {
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f1f1f1;
+}
+
+/* Total Price Section */
+.total {
+    border: 1px  black;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: right;
+    background-color: none;
+    margin-top: 20px;
+}
+
+.total h2 {
+    margin: 0;
+    color: #112e5f;
+}
+
+#total-price {
+    background-color: green;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.pending {
+    background-color: yellow;
+    
+}
+
+.completed {
+    background-color: green;
+}
+
+.cancelled {
+    background-color: red;
+}
+
+
+img {
+    height: 10vw;
+    margin-bottom: 10px;
+    text-align: center;
+}
+@media screen and (max-width: 600px) {
+    img {
+        height: 30vw;
+    }
+    
+}
