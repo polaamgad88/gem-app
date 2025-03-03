@@ -113,3 +113,29 @@ th {
     border-radius: 5px;
     margin-left: 10px;
 }
+img {
+    height: 15vw;
+    margin-bottom: 10px;
+    text-align: center;
+
+}
+@media screen and (max-width: 768px) {
+    .container {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+    img {
+        height: 15vw;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    
+}

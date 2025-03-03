@@ -37,7 +37,3 @@ function updateTotalIncome() {
     document.getElementById("total-income").textContent = `EGP${total}`;
 }
 
-// 🚀 View Order Function
-function viewOrder(orderId) {
-    alert(`Viewing details for Order ID: ${orderId}`);
-}

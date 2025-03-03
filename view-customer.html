@@ -6,11 +6,15 @@
     <title>Customer Details</title>
     <link rel="stylesheet" href="./styles/view-customer.css">
     <script src="./scripts/view-customer.js"></script>
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
 </head>
 <body>
 
 <div class="container">
+   <h1> <img src="./assets/GEM Group 2024.jpg" alt="gem logo"></h1>
+
     <h1>Customer Details</h1>
 
     <!-- Customer Info Section -->
@@ -54,7 +58,9 @@
                 <td>2025-02-28</td>
                 <td>Mohamed Hassan</td>
                 <td class="price">EGP250</td>
-                <td><button class="view-btn" onclick="viewOrder('ORD001')">View</button></td>
+                <td><button class="view-btn" 
+                    <a href="./view-order.html">
+                    View </a></button></td>
             </tr>
             <tr>
                 <td>2</td>
@@ -77,7 +83,7 @@
 <div id="delegate-modal" class="modal">
     <div class="modal-content">
         <span class="close-btn">&times;</span>
-        <h2>Add Delegate</h2>
+            <!-- <h2>Add Delegate</h2> -->
         <label>Select Delegate:</label>
         <select id="delegate-dropdown">
             <option value="Mohamed Hassan">Mohamed Hassan</option>
