@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Details</title>
+    <link rel="stylesheet" href="./styles/view-customer.css">
+    <script src="./scripts/view-customer.js"></script>
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+</head>
+<body>
+
+<div class="container">
+   <h1> <img src="./assets/GEM Group 2024.jpg" alt="gem logo"></h1>
+
+    <h1>Customer Details</h1>
+
+    <!-- Customer Info Section -->
+    <div class="customer-info">
+        <div class="info-row">
+            <p><strong>Customer Name:</strong> <span id="customer-name">El Far</span></p>
+            <p><strong>Customer ID:</strong> <span id="customer-id">CUST001</span></p>
+        </div>
+        <div class="info-row">
+            <p><strong>Location:</strong> <span id="customer-location">Cairo</span></p>
+        </div>
+    </div>
+
+    <!-- Delegate Management -->
+    <div class="delegate-management">
+        <h2>Assigned Delegates</h2>
+        <ul id="delegate-list">
+            <li>Mohamed Hassan <button class="remove-btn" onclick="removeDelegate('Mohamed Hassan')"><i class="fas fa-trash-alt"></i></button></li>
+            <li>Ahmed Ali <button class="remove-btn" onclick="removeDelegate('Ahmed Ali')"><i class="fas fa-trash-alt"></i></button></li>
+        </ul>
+        <button id="add-delegate-btn">Add Delegate</button>
+    </div>
+
+    <!-- Order History -->
+    <h2>Order History</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Order ID</th>
+                <th style="width: 80px;">Date</th> 
+                <th>Delegate</th>
+                <th>Total Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="order-list">
+            <tr>
+                <td>1</td>
+                <td>ORD001</td>
+                <td>2025-02-28</td>
+                <td>Mohamed Hassan</td>
+                <td class="price">EGP250</td>
+                <td><button class="view-btn" 
+                    <a href="./view-order.html">
+                    View </a></button></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>ORD002</td>
+                <td>2025-02-27</td>
+                <td>Ahmed Ali</td>
+                <td class="price">EGP180</td>
+                <td><button class="view-btn" onclick="viewOrder('ORD002')">View</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Total Income -->
+    <div class="total-income">
+        <h2>Total Income from Customer: <span id="total-income">EGP0</span></h2>
+    </div>
+</div>
+
+<!-- Add Delegate Modal -->
+<div id="delegate-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+            <!-- <h2>Add Delegate</h2> -->
+        <label>Select Delegate:</label>
+        <select id="delegate-dropdown">
+            <option value="Mohamed Hassan">Mohamed Hassan</option>
+            <option value="Ahmed Ali">Ahmed Ali</option>
+            <option value="Sara Ibrahim">Sara Ibrahim</option>
+            <option value="Khaled Mostafa">Khaled Mostafa</option>
+        </select>
+        <button id="save-delegate-btn">Add</button>
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.container {
+    text-align: center;
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+@media screen and (max-width: 768px) {
+    .container {
+        width: 90%;
+        height: 70%;
+    }
+    img{
+        height: 100%;
+    }
+    
+}
+
+h1 {
+    margin-bottom: 40px;
+    font-size: 24px;
+}
+img {
+    height: 15vw;
+    margin-bottom: 10px;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.btn.view-orders {
+    background-color: rgb(207, 207, 207);
+    
+}
+
+.btn.view-orders:hover {
+    background-color: #007bff;
+}
+
+.btn.add-order {
+    background-color: rgba(207, 207, 207, 0.705);
+}
+
+.btn.add-order:hover {
+    background-color: #1e7e34;
+}
+
+.btn.logout {
+    background-color: #dc3545;
+    margin-top: 50px;
+
+}
+
+.btn.logout:hover {
+    background-color: #b02a37;
+}
+
+.btn.manage-customers {
+    background-color: #b8b5ae;
+}
+
+.btn.manage-customers:hover {
+    background-color: #d39e00;
+}
