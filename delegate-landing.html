@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,29 @@
 
 
 </head>
+
 <body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const username = localStorage.getItem("username");
+            const role = localStorage.getItem("user_role");
+            const isAdmin = localStorage.getItem("is_admin");
+
+            if (!username) {
+                window.location.href = "login.html"; // Redirect if not logged in
+            }
+
+            // Customize greeting
+            document.querySelector("h1").innerHTML = `Welcome, ${username}!`;
+
+            // Example role-based visibility
+            if (role !== "delegate") {
+                document.querySelector(".add-order").style.display = "none";
+            }
+
+            // You can use role or admin flag to toggle features here
+        });
+    </script>
 
     <div class="container">
         <img src="./assets/GEM Group 2024.jpg" alt="gem logo">
@@ -21,4 +44,5 @@
     </div>
 
 </body>
+
 </html>
