@@ -2,20 +2,20 @@ document.addEventListener("DOMContentLoaded", function () {
   const themeToggle = document.getElementById("theme-toggle");
   const themeIcon = document.getElementById("theme-icon");
 
-  themeToggle.addEventListener("click", function () {
+  // Dark-mode toggle (optional)
+  themeToggle?.addEventListener("click", function () {
     document.body.classList.toggle("dark-mode");
-
-    // Toggle icon
     themeIcon.textContent = document.body.classList.contains("dark-mode")
       ? "☀️"
       : "🌙";
   });
 
+  // Grab the form, username, and password fields
   const form = document.querySelector("form");
-  const emailInput = form.querySelector('input[type="text"]');
+  const usernameInput = form.querySelector('input[type="text"]');
   const passwordInput = form.querySelector('input[type="password"]');
 
-  // Create and append a loader + error container
+  // Create a loader and error container
   const loader = document.createElement("div");
   loader.id = "loader";
   loader.style.display = "none";
@@ -30,25 +30,32 @@ document.addEventListener("DOMContentLoaded", function () {
   errorDiv.style.display = "none";
   form.appendChild(errorDiv);
 
+  // Handle form submission
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
+
+    // Show loader, hide errors
     loader.style.display = "block";
     errorDiv.style.display = "none";
 
-    const username = emailInput.value;
+    // Read user input
+    const username = usernameInput.value;
     const password = passwordInput.value;
 
     try {
+      // Make the request to the Flask backend
       const response = await fetch("http://localhost:5000/login", {
         method: "POST",
-        body: new URLSearchParams({ username, password }),
+        body: new URLSearchParams({
+          username: username,
+          password: password,
+        }),
       });
-
       loader.style.display = "none";
 
       if (response.ok) {
         const data = await response.json();
-        // Store data in localStorage
+
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("user_role", data.role);
         localStorage.setItem("username", data.username);

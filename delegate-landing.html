@@ -8,39 +8,24 @@
     <link rel="stylesheet" href="./styles/delegate-landing.css">
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
 
-
+    <script src="./scripts/delegate-landing.js" defer></script>
 </head>
 
 <body>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const username = localStorage.getItem("username");
-            const role = localStorage.getItem("user_role");
-            const isAdmin = localStorage.getItem("is_admin");
 
-            if (!username) {
-                window.location.href = "login.html"; // Redirect if not logged in
-            }
-
-            // Customize greeting
-            document.querySelector("h1").innerHTML = `Welcome, ${username}!`;
-
-            // Example role-based visibility
-            if (role !== "delegate") {
-                document.querySelector(".add-order").style.display = "none";
-            }
-
-            // You can use role or admin flag to toggle features here
-        });
-    </script>
 
     <div class="container">
         <img src="./assets/GEM Group 2024.jpg" alt="gem logo">
 
         <h1>Welcome, NAME!</h1>
-        <a href="view-order.html" class="btn view-orders">View My Orders</a>
+
+        <!-- Existing -->
+        <a href="orders.html" class="btn view-orders">View My Orders</a>
+
         <a href="./delegate-home.html" class="btn add-order">Add New Order</a>
-        <a href="./login.html" class="btn logout">Logout</a>
+
+        <!-- Logout will be handled via JS -->
+        <button id="logout-btn" class="btn logout">Logout</button>
     </div>
 
 </body>

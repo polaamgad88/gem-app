@@ -20,21 +20,24 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
 @media screen and (max-width: 768px) {
     .container {
         width: 90%;
         height: 70%;
     }
-    img{
+
+    img {
         height: 100%;
     }
-    
+
 }
 
 h1 {
     margin-bottom: 40px;
     font-size: 24px;
 }
+
 img {
     height: 15vw;
     margin-bottom: 10px;
@@ -56,7 +59,7 @@ img {
 
 .btn.view-orders {
     background-color: #0b2a59;
-    
+
 }
 
 .btn.view-orders:hover {
