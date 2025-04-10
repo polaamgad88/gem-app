@@ -10,7 +10,20 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   try {
     const username = localStorage.getItem("username");
+    const admin = localStorage.getItem("is_admin");
+    const role = localStorage.getItem("user_role");
+
     if (!username) throw new Error("username not found");
+    if (admin == 1 || role !== "representative") {
+      const customersBtn = document.querySelector(".manage-customers");
+      if (customersBtn) customersBtn.style.display = "block";
+      const manageruserBtn = document.querySelector(".manage-user");
+      if (manageruserBtn) manageruserBtn.style.display = "block";
+    }
+    if (admin == 1) {
+      const productsBtn = document.querySelector(".manage-products");
+      if (productsBtn) productsBtn.style.display = "block";
+    }
 
     document.querySelector("h1").innerHTML = `Welcome, ${username}!`;
     const response = await fetch("http://localhost:5000/checklogin", {

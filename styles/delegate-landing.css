@@ -83,3 +83,27 @@ img {
 .btn.logout:hover {
     background-color: #b02a37;
 }
+
+.btn.manage-customers {
+    background-color: #b37d00;
+}
+
+.btn.manage-customers:hover {
+    background-color: #d39e00;
+}
+
+.btn.manage-user {
+    background-color: #b37d00;
+}
+
+.btn.manage-user:hover {
+    background-color: #d39e00;
+}
+
+.btn.manage-products {
+    background-color: #b37d00;
+}
+
+.btn.manage-products:hover {
+    background-color: #d39e00;
+}
