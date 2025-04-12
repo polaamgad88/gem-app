@@ -108,6 +108,15 @@ img {
     cursor: pointer;
 }
 
+.refund-btn {
+    background-color: #e73232;
+    color: black;
+}
+
+.refund-btn:hover {
+    background-color: #be2323;
+}
+
 .edit-btn {
     background-color: #ffc107;
     color: black;

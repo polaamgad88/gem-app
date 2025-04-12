@@ -1,4 +1,88 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("edit-order").addEventListener("click", () => {
+    alert("Redirect to edit page or enable edit mode.");
+  });
+
+  document
+    .getElementById("confirm-order")
+    .addEventListener("click", async () => {
+      const token = localStorage.getItem("access_token");
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get("order_id");
+
+      if (!orderId) {
+        alert("Order ID not found in the URL.");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/orders/confirm/${orderId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(data.message || "✅ Order confirmed successfully!");
+          location.reload();
+        } else {
+          alert(data.message || "❌ Failed to confirm order.");
+        }
+      } catch (error) {
+        console.error("Error confirming order:", error);
+        alert("❌ An unexpected error occurred.");
+      }
+    });
+
+  const refundBtn = document.getElementById("refund-order");
+
+  if (refundBtn) {
+    refundBtn.addEventListener("click", async () => {
+      const token = localStorage.getItem("access_token");
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get("order_id");
+
+      if (!orderId) {
+        alert("Order ID not found in the URL.");
+        return;
+      }
+
+      const confirm = window.confirm(
+        "Are you sure you want to refund this order?"
+      );
+      if (!confirm) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/orders/refund/${orderId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(data.message || "✅ Order refunded successfully!");
+          location.reload(); // Refresh to reflect new status
+        } else {
+          alert(data.message || "❌ Failed to refund order.");
+        }
+      } catch (err) {
+        console.error("Refund error:", err);
+        alert("❌ An unexpected error occurred during refund.");
+      }
+    });
+  }
   const token = localStorage.getItem("access_token");
   if (!token || !(await checkLogin(token))) {
     window.location.href = "login.html";
@@ -109,11 +193,3 @@ function formatDate(dateStr) {
     .toString()
     .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 }
-
-document.getElementById("edit-order").addEventListener("click", () => {
-  alert("Redirect to edit page or enable edit mode.");
-});
-
-document.getElementById("confirm-order").addEventListener("click", () => {
-  alert("Confirming order... (implement confirmation logic)");
-});
