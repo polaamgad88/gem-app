@@ -20,6 +20,7 @@ img {
     height: 8vw;
     margin-bottom: 0px;
 }
+
 h1 {
     font-size: 2vw;
     margin-bottom: 2vw;
@@ -31,7 +32,8 @@ h1 {
     margin-bottom: 2vw;
 }
 
-input, select {
+input,
+select {
     width: 48%;
     padding: 8px;
     border: 1px solid #ccc;
@@ -72,7 +74,8 @@ input, select {
     font-size: 1.5vw;
 }
 
-.total-items, .total-price {
+.total-items,
+.total-price {
     padding: 1vw;
     font-size: 1vw;
     border: 1px solid grey;
@@ -105,16 +108,19 @@ input, select {
         height: 100vh;
 
     }
-    img{
+
+    img {
         height: 30vw;
     }
 
-    input, select {
+    input,
+    select {
         width: 100%;
         font-size: 4vw;
     }
 
-    .total-items, .total-price {
+    .total-items,
+    .total-price {
         padding: 1vw;
         font-size: 4vw;
         border: 1px solid grey;
@@ -127,6 +133,7 @@ input, select {
         padding: 1vw;
         font-size: 4vw;
     }
+
     .tab {
         padding: 2vw;
         font-size: 3vw;
@@ -142,7 +149,8 @@ input, select {
 
 
 /* Dropdown styling */
-select, input {
+select,
+input {
     padding: 8px;
     font-size: 1rem;
     border-radius: 4px;
@@ -158,7 +166,8 @@ select, input {
     text-align: center;
     border: 1px solid #ccc;
     border-radius: 5px;
-    -moz-appearance: textfield; /* Remove default spinner in Firefox */
+    -moz-appearance: textfield;
+    /* Remove default spinner in Firefox */
 }
 
 /* Custom scrollbar for number input */
@@ -173,18 +182,22 @@ select, input {
     display: flex;
     align-items: center;
     gap: 5px;
-    flex-wrap: wrap;  /* Allows wrapping on smaller screens */
+    flex-wrap: wrap;
+    /* Allows wrapping on smaller screens */
 }
 
 /* Ensure the quantity buttons and input are properly sized */
 .quantity-btn {
-    width: 30px; /* Reduce button size for mobile */
+    width: 30px;
+    /* Reduce button size for mobile */
     height: 30px;
-    font-size: 16px; /* Adjust font size */
+    font-size: 16px;
+    /* Adjust font size */
 }
 
 .quantity-input {
-    width: 50px; /* Adjust input width for better fit */
+    width: 50px;
+    /* Adjust input width for better fit */
     height: 30px;
     text-align: center;
 }
@@ -192,35 +205,47 @@ select, input {
 /* Responsive: Stack items on very small screens */
 @media (max-width: 480px) {
     .quantity-wrapper {
-        flex-direction: column; /* Stack buttons and input vertically */
+        flex-direction: column;
+        /* Stack buttons and input vertically */
         align-items: center;
     }
 
     .quantity-btn,
     .quantity-input {
-        width: 20px; /* Increase touch area for better UX */
+        width: 20px;
+        /* Increase touch area for better UX */
     }
 }
 
 
 .quantity-btn:hover {
-    background-color: grey  ;
+    background-color: grey;
 }
 
 
 /* Small Availability Dots */
 .dot {
     display: inline-block;
-    width: 10px; /* Smaller Size */
+    width: 10px;
+    /* Smaller Size */
     height: 10px;
     border-radius: 50%;
-    margin-left: 10px; /* Space from Product Name */
+    margin-left: 10px;
+    /* Space from Product Name */
 }
 
 /* Dot Colors */
-.green { background-color: green; }
-.yellow { background-color: yellow; }
-.red { background-color: red; }
+.green {
+    background-color: green;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+.red {
+    background-color: red;
+}
 
 .order-row {
     display: flex;
@@ -238,7 +263,7 @@ select, input {
 }
 
 /* Product Select */
-.product-select  {
+.product-select {
     padding: 8px;
     font-size: 1rem;
     border-radius: 4px;
@@ -298,4 +323,38 @@ select, input {
 
 .delete-btn:hover {
     background-color: #b02a37;
+}
+
+.order-preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 16px;
+}
+
+.order-preview-table th,
+.order-preview-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.order-preview-table th {
+    background-color: #0b2a59;
+    color: #ffffff;
+    text-align: left;
+}
+
+.order-preview-table tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+.order-preview-table tbody tr:hover {
+    background-color: #edf2f7;
+}
+
+.order-preview img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
 }

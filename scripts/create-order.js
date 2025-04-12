@@ -105,42 +105,26 @@ function populateCustomerDropdown(customers) {
   });
 }
 
-function addOrderRow(
-  container,
-  filterOptions,
-  allProducts,
-  filterType = "brand"
-) {
+function addOrderRow(container, brands, products) {
   const row = document.createElement("div");
-  row.classList.add("order-row");
+  row.className = "order-row";
 
-  const selector = document.createElement("select");
-  selector.className = "brand-select";
-  selector.innerHTML = `<option value="">Select ${filterType}</option>`;
-  filterOptions.forEach((item) => {
-    const opt = document.createElement("option");
-    opt.value = item;
-    opt.textContent = item;
-    selector.appendChild(opt);
+  const brandSelect = document.createElement("select");
+  brandSelect.className = "brand-select";
+  brandSelect.innerHTML = `<option value="">Select Brand</option>`;
+  brands.forEach((b) => {
+    brandSelect.innerHTML += `<option value="${b}">${b}</option>`;
   });
-
-  const productWrapper = document.createElement("div");
-  productWrapper.className = "custom-dropdown";
 
   const productSelect = document.createElement("select");
   productSelect.className = "product-select";
   productSelect.innerHTML = `<option value="">Select Product</option>`;
-  productWrapper.appendChild(productSelect);
 
-  const quantityWrapper = document.createElement("div");
-  quantityWrapper.className = "quantity-wrapper";
   const quantityInput = document.createElement("input");
   quantityInput.className = "quantity-input";
   quantityInput.type = "number";
-  quantityInput.value = 1;
   quantityInput.min = 1;
-  quantityInput.addEventListener("input", updateTotals);
-  quantityWrapper.appendChild(quantityInput);
+  quantityInput.value = 1;
 
   const deleteBtn = document.createElement("i");
   deleteBtn.className = "material-icons";
@@ -148,35 +132,41 @@ function addOrderRow(
   deleteBtn.textContent = "cancel";
   deleteBtn.onclick = () => {
     row.remove();
+    updateOrderPreview();
     updateTotals();
   };
 
-  row.appendChild(selector);
-  row.appendChild(productWrapper);
-  row.appendChild(quantityWrapper);
+  row.appendChild(brandSelect);
+  row.appendChild(productSelect);
+  row.appendChild(quantityInput);
   row.appendChild(deleteBtn);
   container.appendChild(row);
 
-  selector.onchange = () => {
-    const selected = selector.value;
-    const filteredProducts = allProducts.filter(
-      (p) => p[filterType] === selected
-    );
+  brandSelect.onchange = () => {
     productSelect.innerHTML = `<option value="">Select Product</option>`;
+    const filteredProducts = products.filter(
+      (p) => p.brand === brandSelect.value
+    );
     filteredProducts.forEach((p) => {
-      const opt = document.createElement("option");
-      opt.value = p.product_id;
-      opt.textContent = p.product_name;
-      opt.dataset.price = p.price;
-      productSelect.appendChild(opt);
+      productSelect.innerHTML += `<option value="${p.product_id}" data-price="${p.price}">${p.product_name}</option>`;
     });
+    updateOrderPreview();
     updateTotals();
   };
 
-  productSelect.onchange = updateTotals;
+  // 🔸 Update the preview clearly whenever product or quantity changes
+  productSelect.onchange = () => {
+    updateOrderPreview();
+    updateTotals();
+  };
+
+  quantityInput.oninput = () => {
+    updateOrderPreview();
+    updateTotals();
+  };
 }
 
-function addCombinedRow(container, brands, categories) {
+function addCombinedRow(container, brands) {
   const row = document.createElement("div");
   row.classList.add("order-row");
 
@@ -184,28 +174,18 @@ function addCombinedRow(container, brands, categories) {
   brandSelect.className = "brand-select";
   brandSelect.innerHTML = `<option value="">Select Brand</option>`;
   brands.forEach((b) => {
-    const opt = document.createElement("option");
-    opt.value = b;
-    opt.textContent = b;
-    brandSelect.appendChild(opt);
+    brandSelect.innerHTML += `<option value="${b}">${b}</option>`;
   });
 
   const categorySelect = document.createElement("select");
-  categorySelect.className = "product-select";
+  categorySelect.className = "category-select";
   categorySelect.innerHTML = `<option value="">Select Category</option>`;
-  categories.forEach((c) => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    categorySelect.appendChild(opt);
-  });
 
   const quantityInput = document.createElement("input");
   quantityInput.className = "quantity-input";
   quantityInput.type = "number";
   quantityInput.value = 1;
   quantityInput.min = 1;
-  quantityInput.addEventListener("input", () => updateTotals());
 
   const deleteBtn = document.createElement("i");
   deleteBtn.className = "material-icons";
@@ -214,6 +194,7 @@ function addCombinedRow(container, brands, categories) {
   deleteBtn.onclick = () => {
     row.remove();
     updateTotals();
+    updateOrderPreview();
   };
 
   row.appendChild(brandSelect);
@@ -222,20 +203,55 @@ function addCombinedRow(container, brands, categories) {
   row.appendChild(deleteBtn);
   container.appendChild(row);
 
+  // Function to clearly update categories based on brand selection
+  const updateCategories = async () => {
+    const selectedBrand = brandSelect.value;
+
+    // Endpoint changes depending on if brand is selected
+    const url = selectedBrand
+      ? `http://localhost:5000/products/categories?brand=${encodeURIComponent(
+          selectedBrand
+        )}`
+      : `http://localhost:5000/products/categories`;
+
+    categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
+
+    try {
+      const categories = await fetchList(url, "categories");
+
+      categorySelect.innerHTML = `<option value="">Select Category</option>`;
+      categories.forEach((category) => {
+        categorySelect.innerHTML += `<option value="${category}">${category}</option>`;
+      });
+    } catch (err) {
+      categorySelect.innerHTML = `<option value="">Failed to load categories</option>`;
+      console.error("Error loading categories:", err);
+    }
+
+    // After categories update, reset totals and preview
+    onChange();
+  };
+
+  // Update totals and preview clearly
   const onChange = async () => {
     const brand = brandSelect.value;
     const category = categorySelect.value;
     const qty = parseInt(quantityInput.value) || 0;
-    if (!brand || !category || qty < 1) {
+
+    if ((!brand && !category) || qty < 1) {
+      delete row.dataset.totalItems;
+      delete row.dataset.totalPrice;
       updateTotals();
+      updateOrderPreview();
       return;
     }
 
-    const res = await fetch(
-      `http://localhost:5000/products?brand=${encodeURIComponent(
-        brand
-      )}&category=${encodeURIComponent(category)}`
-    );
+    const queryParts = [];
+    if (brand) queryParts.push(`brand=${encodeURIComponent(brand)}`);
+    if (category) queryParts.push(`category=${encodeURIComponent(category)}`);
+    const query = queryParts.join("&");
+
+    const res = await fetch(`http://localhost:5000/products?${query}`);
     if (!res.ok) return;
 
     const json = await res.json();
@@ -248,11 +264,16 @@ function addCombinedRow(container, brands, categories) {
     );
 
     updateTotals();
+    updateOrderPreview();
   };
 
-  brandSelect.addEventListener("change", onChange);
+  // Event listeners clearly defined
+  brandSelect.addEventListener("change", updateCategories);
   categorySelect.addEventListener("change", onChange);
   quantityInput.addEventListener("input", onChange);
+
+  // Initially populate categories clearly
+  updateCategories();
 }
 
 function updateTotals() {
@@ -277,6 +298,90 @@ function updateTotals() {
 
   document.getElementById("total-items").textContent = totalItems;
   document.getElementById("total-price").textContent = totalPrice.toFixed(2);
+}
+async function updateOrderPreview() {
+  const previewBody = document.getElementById("order-preview-body");
+  previewBody.innerHTML = "";
+  const token = localStorage.getItem("access_token");
+  const productQuantities = new Map();
+
+  document
+    .querySelectorAll("#detailed-order-rows .order-row")
+    .forEach((row) => {
+      const productId = row.querySelector(".product-select")?.value;
+      const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
+      if (productId && qty > 0) {
+        productQuantities.set(
+          productId,
+          (productQuantities.get(productId) || 0) + qty
+        );
+      }
+    });
+
+  const combinedRows = document.querySelectorAll(
+    "#combined-order-rows .order-row"
+  );
+  for (const row of combinedRows) {
+    const brand = row.querySelector(".brand-select")?.value;
+    const category = row.querySelector(".category-select")?.value;
+    const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
+    if ((!brand && !category) || qty <= 0) continue;
+
+    const query = [
+      brand ? `brand=${encodeURIComponent(brand)}` : "",
+      category ? `category=${encodeURIComponent(category)}` : "",
+    ]
+      .filter(Boolean)
+      .join("&");
+
+    const res = await fetch(`http://localhost:5000/products?${query}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) continue;
+    const data = await res.json();
+    (data.data || []).forEach((p) => {
+      productQuantities.set(
+        p.product_id.toString(),
+        (productQuantities.get(p.product_id.toString()) || 0) + qty
+      );
+    });
+  }
+
+  if (productQuantities.size === 0) {
+    previewBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No items selected</td></tr>`;
+    return;
+  }
+
+  for (const [productId, quantity] of productQuantities.entries()) {
+    const res = await fetch(`http://localhost:5000/product/find/${productId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) continue;
+
+    const result = await res.json();
+    const data = result.data;
+
+    const name = data.product_name || "Unnamed Product";
+    const price = parseFloat(data.price || 0).toFixed(2);
+    const total = (price * quantity).toFixed(2);
+    const photoUrl = data.image_path
+      ? `http://localhost:5000/images/${data.image_path}`
+      : "";
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+    <td>${
+      photoUrl
+        ? `<img src="${photoUrl}" alt="${name}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">`
+        : "<span>No Photo</span>"
+    }</td>
+      <td style="align-items:center; gap:8px;">${name}</td>
+      <td style="text-align:center;">${quantity}</td>
+      <td style="text-align:right;">EGP ${price}</td>
+      <td style="text-align:right;">EGP ${total}</td>
+    `;
+    previewBody.appendChild(row);
+  }
 }
 
 document.getElementById("submit-order").addEventListener("click", async () => {
@@ -303,7 +408,7 @@ document.getElementById("submit-order").addEventListener("click", async () => {
       }
     });
 
-  // 🔹 Collect products from Combined Order via API
+  // 🔹 Collect products from Combined Order
   const combinedRows = document.querySelectorAll(
     "#combined-order-rows .order-row"
   );
@@ -312,11 +417,13 @@ document.getElementById("submit-order").addEventListener("click", async () => {
     const category = row.querySelector(".product-select")?.value;
     const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
 
-    if (!brand || !category || qty <= 0) continue;
+    if ((!brand && !category) || qty <= 0) continue;
 
-    const query = `brand=${encodeURIComponent(
-      brand
-    )}&category=${encodeURIComponent(category)}`;
+    const queryParts = [];
+    if (brand) queryParts.push(`brand=${encodeURIComponent(brand)}`);
+    if (category) queryParts.push(`category=${encodeURIComponent(category)}`);
+    const query = queryParts.join("&");
+
     const res = await fetch(`http://localhost:5000/products?${query}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -335,14 +442,12 @@ document.getElementById("submit-order").addEventListener("click", async () => {
     return;
   }
 
-  // 🔹 Final payload
   const payload = {
     customer_id: parseInt(customerId),
     address_id: parseInt(addressId),
     products,
   };
 
-  // 🔹 Submit order
   try {
     const res = await fetch("http://localhost:5000/orders/create", {
       method: "POST",

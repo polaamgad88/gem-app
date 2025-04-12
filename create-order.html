@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Order</title>
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
-    <link rel="stylesheet" href="./styles/common.css">
     <link rel="stylesheet" href="./styles/create-order.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
@@ -55,6 +54,25 @@
         <div class="order-summary">
             <div class="total-items">Total Items: <span id="total-items">0</span></div>
             <div class="total-price">Total Price: $<span id="total-price">0.00</span></div>
+        </div>
+        <div class="order-preview">
+            <h3 style="margin-bottom:10px;">Order Preview</h3>
+            <table class="order-preview-table">
+                <thead>
+                    <tr>
+                        <th>Product image</th>
+                        <th>Product name</th>
+                        <th style="text-align:center;">Quantity</th>
+                        <th style="text-align:right;">Unit Price (EGP)</th>
+                        <th style="text-align:right;">Total (EGP)</th>
+                    </tr>
+                </thead>
+                <tbody id="order-preview-body">
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:10px;">No items selected</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <button id="submit-order">Submit New Oder</button>

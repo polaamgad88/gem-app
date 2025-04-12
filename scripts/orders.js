@@ -164,7 +164,7 @@ function renderOrders(orders) {
         <td>${index + 1}</td>
         <td>${order.order_id}</td>
         <td>${formatDate(order.order_date)}</td>
-        <td>${order.customer_id}</td>
+        <td>${order.customer_name}</td>
         <td>${order.username}</td>
         <td>${order.role}</td>
         <td>EGP${order.total_amount}</td>
