@@ -33,7 +33,8 @@ table {
     margin-top: 10px;
 }
 
-th, td {
+th,
+td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: center;
@@ -69,7 +70,8 @@ th {
         font-size: 14px;
     }
 
-    th, td {
+    th,
+    td {
         padding: 6px;
     }
 
@@ -78,6 +80,7 @@ th {
         font-size: 12px;
     }
 }
+
 img {
     height: 10vw;
     margin-bottom: 5%;
