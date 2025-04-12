@@ -167,6 +167,7 @@ function renderOrders(orders) {
         <td>${order.customer_name}</td>
         <td>${order.username}</td>
         <td>${order.role}</td>
+        <td>${order.status}</td>
         <td>EGP${order.total_amount}</td>
         <td><button class="view-btn" data-order-id="${
           order.order_id
