@@ -132,7 +132,7 @@ function addOrderRow(container, brands, products) {
   deleteBtn.textContent = "cancel";
   deleteBtn.onclick = () => {
     row.remove();
-    updateOrderPreview();
+    debouncePreviewUpdate();
     updateTotals();
   };
 
@@ -140,7 +140,9 @@ function addOrderRow(container, brands, products) {
   row.appendChild(productSelect);
   row.appendChild(quantityInput);
   row.appendChild(deleteBtn);
+  const scrollTopBefore = window.scrollY;
   container.appendChild(row);
+  window.scrollTo({ top: scrollTopBefore, behavior: "instant" });
 
   brandSelect.onchange = () => {
     productSelect.innerHTML = `<option value="">Select Product</option>`;
@@ -150,18 +152,18 @@ function addOrderRow(container, brands, products) {
     filteredProducts.forEach((p) => {
       productSelect.innerHTML += `<option value="${p.product_id}" data-price="${p.price}">${p.product_name}</option>`;
     });
-    updateOrderPreview();
+    debouncePreviewUpdate();
     updateTotals();
   };
 
   // 🔸 Update the preview clearly whenever product or quantity changes
   productSelect.onchange = () => {
-    updateOrderPreview();
+    debouncePreviewUpdate();
     updateTotals();
   };
 
   quantityInput.oninput = () => {
-    updateOrderPreview();
+    debouncePreviewUpdate();
     updateTotals();
   };
 }
@@ -193,15 +195,17 @@ function addCombinedRow(container, brands) {
   deleteBtn.textContent = "cancel";
   deleteBtn.onclick = () => {
     row.remove();
+    debouncePreviewUpdate();
     updateTotals();
-    updateOrderPreview();
   };
 
   row.appendChild(brandSelect);
   row.appendChild(categorySelect);
   row.appendChild(quantityInput);
   row.appendChild(deleteBtn);
+  const scrollTopBefore = window.scrollY;
   container.appendChild(row);
+  window.scrollTo({ top: scrollTopBefore, behavior: "instant" });
 
   // Function to clearly update categories based on brand selection
   const updateCategories = async () => {
@@ -241,8 +245,9 @@ function addCombinedRow(container, brands) {
     if ((!brand && !category) || qty < 1) {
       delete row.dataset.totalItems;
       delete row.dataset.totalPrice;
+      debouncePreviewUpdate();
       updateTotals();
-      updateOrderPreview();
+
       return;
     }
 
@@ -264,7 +269,7 @@ function addCombinedRow(container, brands) {
     );
 
     updateTotals();
-    updateOrderPreview();
+    debouncePreviewUpdate();
   };
 
   // Event listeners clearly defined
@@ -301,23 +306,28 @@ function updateTotals() {
 }
 async function updateOrderPreview() {
   const previewBody = document.getElementById("order-preview-body");
+  const loader = document.getElementById("preview-loader");
+
+  // Show loader and clear table
+  loader.style.display = "block";
   previewBody.innerHTML = "";
+
   const token = localStorage.getItem("access_token");
   const productQuantities = new Map();
 
+  // Collect from Detailed Order
   document
     .querySelectorAll("#detailed-order-rows .order-row")
     .forEach((row) => {
       const productId = row.querySelector(".product-select")?.value;
       const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
       if (productId && qty > 0) {
-        productQuantities.set(
-          productId,
-          (productQuantities.get(productId) || 0) + qty
-        );
+        const key = String(productId);
+        productQuantities.set(key, (productQuantities.get(key) || 0) + qty);
       }
     });
 
+  // Collect from Combined Order
   const combinedRows = document.querySelectorAll(
     "#combined-order-rows .order-row"
   );
@@ -338,20 +348,22 @@ async function updateOrderPreview() {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) continue;
+
     const data = await res.json();
     (data.data || []).forEach((p) => {
-      productQuantities.set(
-        p.product_id.toString(),
-        (productQuantities.get(p.product_id.toString()) || 0) + qty
-      );
+      const key = String(p.product_id);
+      productQuantities.set(key, (productQuantities.get(key) || 0) + qty);
     });
   }
 
+  // Show "no items" if empty
   if (productQuantities.size === 0) {
-    previewBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No items selected</td></tr>`;
+    previewBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:10px;">No items selected</td></tr>`;
+    loader.style.display = "none";
     return;
   }
 
+  // Render merged preview
   for (const [productId, quantity] of productQuantities.entries()) {
     const res = await fetch(`http://localhost:5000/product/find/${productId}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -370,11 +382,11 @@ async function updateOrderPreview() {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-    <td>${
-      photoUrl
-        ? `<img src="${photoUrl}" alt="${name}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">`
-        : "<span>No Photo</span>"
-    }</td>
+      <td>${
+        photoUrl
+          ? `<img src="${photoUrl}" alt="${name}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">`
+          : "<span>No Photo</span>"
+      }</td>
       <td style="align-items:center; gap:8px;">${name}</td>
       <td style="text-align:center;">${quantity}</td>
       <td style="text-align:right;">EGP ${price}</td>
@@ -382,6 +394,9 @@ async function updateOrderPreview() {
     `;
     previewBody.appendChild(row);
   }
+
+  // Hide loader when done
+  loader.style.display = "none";
 }
 
 document.getElementById("submit-order").addEventListener("click", async () => {
@@ -462,7 +477,7 @@ document.getElementById("submit-order").addEventListener("click", async () => {
 
     if (res.ok) {
       alert("✅ Order created successfully!");
-      window.location.href = "orders.html";
+      window.location.href = "view-order.html?order_id=" + result.created_order;
     } else {
       alert(`❌ Error: ${result.message || "Order failed."}`);
     }
@@ -471,3 +486,11 @@ document.getElementById("submit-order").addEventListener("click", async () => {
     alert("❌ Something went wrong while submitting the order.");
   }
 });
+
+let previewTimeout;
+function debouncePreviewUpdate(delay = 2000) {
+  clearTimeout(previewTimeout);
+  previewTimeout = setTimeout(() => {
+    updateOrderPreview();
+  }, delay);
+}

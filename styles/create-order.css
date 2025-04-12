@@ -3,7 +3,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #f3f4f6;
 }
 
@@ -166,7 +166,6 @@ input {
     text-align: center;
     border: 1px solid #ccc;
     border-radius: 5px;
-    -moz-appearance: textfield;
     /* Remove default spinner in Firefox */
 }
 
@@ -325,10 +324,12 @@ input {
     background-color: #b02a37;
 }
 
+/* Preview table layout */
 .order-preview-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
+    margin-bottom: 0;
     font-size: 16px;
 }
 
@@ -342,6 +343,10 @@ input {
     background-color: #0b2a59;
     color: #ffffff;
     text-align: left;
+    position: sticky;
+    /* Keep header visible on scroll */
+    top: 0;
+    z-index: 1;
 }
 
 .order-preview-table tbody tr:nth-child(even) {
@@ -352,9 +357,38 @@ input {
     background-color: #edf2f7;
 }
 
-.order-preview img {
+.order-preview-table img {
     width: 50px;
     height: 50px;
     object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Preview scroll container */
+.order-preview-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+/* Scrollable order rows */
+.order-rows-scrollable {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+/* Optional: prettier scrollbars */
+.order-rows-scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.order-rows-scrollable::-webkit-scrollbar-thumb {
+    background-color: #ccc;
     border-radius: 4px;
 }

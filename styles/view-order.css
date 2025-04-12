@@ -12,7 +12,7 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    
+
 }
 
 h1 {
@@ -21,7 +21,10 @@ h1 {
     text-align: center;
 }
 
-.order-info, .customer-info, .items-list, .total {
+.order-info,
+.customer-info,
+.items-list,
+.total {
     margin-bottom: 20px;
 }
 
@@ -35,7 +38,8 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
@@ -47,7 +51,7 @@ th {
 
 /* Total Price Section */
 .total {
-    border: 1px  black;
+    border: 1px black;
     padding: 15px;
     border-radius: 8px;
     text-align: right;
@@ -70,7 +74,7 @@ th {
 
 .pending {
     background-color: yellow;
-    
+
 }
 
 .completed {
@@ -87,9 +91,37 @@ img {
     margin-bottom: 10px;
     text-align: center;
 }
+
 @media screen and (max-width: 600px) {
     img {
         height: 30vw;
     }
-    
+
+}
+
+.order-actions button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: black;
+}
+
+.edit-btn:hover {
+    background-color: #e0a800;
+}
+
+.confirm-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.confirm-btn:hover {
+    background-color: #218838;
 }
