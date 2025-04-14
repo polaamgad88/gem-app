@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Order</title>
+    <link rel="stylesheet" href="./styles/edit-order.css" />
+    <script src="scripts/edit-order.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1><img src="./assets/GEM Group 2024.jpg" alt="gem logo" /></h1>
+        <h1>Edit Order - <span id="orderId"></span></h1>
+
+        <div class="order-info">
+            <div class="row">
+                <p><strong>Order ID:</strong> <span id="order-id"></span></p>
+                <p><strong>Date:</strong> <span id="order-date"></span></p>
+            </div>
+            <div class="row">
+                <p><strong>Status:</strong> <span id="order-state" class="state pending"></span></p>
+                <p><strong>Delegate Name:</strong> <span id="delegate-name"></span></p>
+            </div>
+        </div>
+
+        <div class="customer-info">
+            <h2>Customer Info</h2>
+            <p><strong>Name:</strong> <span id="customer-name"></span></p>
+            <p><strong>ID:</strong> <span id="customer-id"></span></p>
+            <p><strong>Address:</strong> <span id="customer-address"></span></p>
+
+        </div>
+
+        <div class="items-list">
+            <h2>Edit Items</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Item</th>
+                        <th>Unit Price</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="editable-items-body">
+
+                </tbody>
+
+            </table>
+            <div style="text-align: left; margin-top: 10px;">
+                <button id="add-product-btn" class="confirm-btn">➕ Add Product</button>
+            </div>
+        </div>
+
+        <div class="total">
+            <h2><span id="total-price">EGP 0</span></h2>
+        </div>
+
+        <div style="text-align: right;">
+            <button id="save-order" class="confirm-btn">💾 Save Changes</button>
+        </div>
+    </div>
+</body>
+
+</html>

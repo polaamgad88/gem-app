@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("edit-order").addEventListener("click", () => {
-    alert("Redirect to edit page or enable edit mode.");
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get("order_id");
+    window.location.href = "edit-order.html?order_id=" + orderId;
+    return;
   });
 
   document
