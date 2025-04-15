@@ -1,119 +1,154 @@
+/* Login Page Styles */
+@import url('./base.css');
+
 body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f3f4f6;
-    font-family: Arial, sans-serif;
-    transition: background 0.3s, color 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--gray-100);
+  padding: var(--spacing-md);
 }
-
-#theme-toggle {
-    position: fixed;
-    top: 2vw;
-    right: 2vw;
-    background: none;
-    border: none;
-    font-size: 4vw;
-    cursor: pointer;
-    transition: transform 0.3s;
-}
-
-#theme-toggle:hover {
-    transform: scale(1.1);
-}
-
 
 .container {
-    background: white;
-    padding: 5vw;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 300px;
-    transition: background 0.3s, color 0.3s;
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-md);
+  text-align: center;
 }
 
-img {
-    height: 15vw;
-    margin-bottom: 10px;
+.logo {
+  width: auto;
+  height: auto;
+  max-height: 100px;
+  max-width: 100%;
+  margin-bottom: var(--spacing-md);
 }
 
-input,
+h2 {
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-xl);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input:focus {
+  border-color: var(--primary-light);
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
 button {
-    width: 15vw;
-    padding: 8px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  margin-top: var(--spacing-md);
 }
 
 button:hover {
-    background-color: #0056b3;
+  background-color: var(--primary-dark);
+}
+
+#loader {
+  color: var(--primary-light);
+  font-weight: bold;
+  margin-top: var(--spacing-md);
+  animation: blink 1s linear infinite;
+}
+
+#error-message {
+  color: var(--danger-color);
+  margin-top: var(--spacing-md);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Dark mode styles */
 .dark-mode {
-    background-color: #1e1e1e;
-    color: white;
+  background-color: var(--gray-900);
+  color: white;
 }
 
 .dark-mode .container {
-    background-color: #333;
-    color: white;
+  background-color: var(--gray-800);
+  color: white;
 }
 
 .dark-mode input {
-    background-color: #444;
-    color: white;
-    border: 1px solid #666;
+  background-color: var(--gray-700);
+  color: white;
+  border: 1px solid var(--gray-600);
 }
 
 .dark-mode button {
-    background-color: #555;
+  background-color: var(--primary-light);
 }
 
 .dark-mode button:hover {
-    background-color: #777;
+  background-color: var(--primary-dark);
 }
 
-/* Responsive */
-@media (max-width: 800px) {
-    .container {
-        width: 60vw;
-    }
-
-    img {
-        height: 50vw;
-        width: 50vw;
-    }
-
-    h2 {
-        font-size: 3vw;
-    }
-
-    input,
-    button {
-        font-size: 3vw;
-    }
+/* Theme toggle button */
+#theme-toggle {
+  position: fixed;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s;
+  width: auto;
+  padding: var(--spacing-xs);
 }
 
-#loader {
-    color: #007bff;
-    font-weight: bold;
-    animation: blink 1s linear infinite;
+#theme-toggle:hover {
+  transform: scale(1.1);
 }
 
-@keyframes blink {
-    50% {
-        opacity: 0.5;
-    }
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .container {
+    padding: var(--spacing-lg);
+  }
+  
+  .logo {
+    max-height: 80px;
+  }
+  
+  h2 {
+    font-size: var(--font-size-lg);
+  }
+  
+  input, button {
+    padding: 0.6rem;
+  }
 }

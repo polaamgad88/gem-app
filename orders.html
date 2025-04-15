@@ -5,49 +5,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
-
     <title>Orders</title>
+    <link rel="stylesheet" href="./styles/base.css">
     <link rel="stylesheet" href="./styles/orders.css">
-    <script defer src="./scripts/orders.js"></script>
+    <script src="./scripts/utils.js" defer></script>
+    <script src="./scripts/orders.js" defer></script>
 </head>
 
 <body>
-    <div id="loader" style="display: none; text-align: center; margin-bottom: 15px;">
-        <strong style="color: #007bff;">Loading...</strong>
+    <a href="delegate-landing.html" class="back-link">Back to Dashboard</a>
+    
+    <div id="loader" style="display: none;">
+        <div class="loader"></div>
+        <strong>Loading orders...</strong>
     </div>
+    
     <div class="container">
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" style="align-items: center;">
+        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
         <h1>Orders</h1>
-        <div class="filters" style="margin-bottom: 20px; text-align: center;">
-            <label for="userFilter">Filter by User:</label>
-            <select id="userFilter">
-                <option value="all">All Users</option>
-            </select>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="userFilter">Filter by User:</label>
+                <select id="userFilter">
+                    <option value="all">All Users</option>
+                </select>
+            </div>
 
-            <label for="customerFilter" style="margin-left: 20px;">Filter by Customer:</label>
-            <select id="customerFilter">
-                <option value="all">All Customers</option>
-            </select>
+            <div class="filter-group">
+                <label for="customerFilter">Filter by Customer:</label>
+                <select id="customerFilter">
+                    <option value="all">All Customers</option>
+                </select>
+            </div>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Order ID</th>
-                    <th style="width: 120px; cursor: pointer;" onclick="sortTable(2, 'date')">Date ⬍</th>
-                    <!-- Sort by Date -->
-                    <th>Customer Name</th>
-                    <th>Delegate Name</th>
-                    <th>role</th>
-                    <th>status</th>
-                    <th style="cursor: pointer;" onclick="sortTable(5, 'price')">Total Price ⬍</th>
-                    <!-- Sort by Price -->
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="ordersTable">
-            </tbody>
-        </table>
+        
+        <!-- Table view (default for desktop) -->
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Order ID</th>
+                        <th style="cursor: pointer;" onclick="sortTable(2, 'date')">Date ⬍</th>
+                        <th>Customer Name</th>
+                        <th>Delegate Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th style="cursor: pointer;" onclick="sortTable(7, 'price')">Total Price ⬍</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTable">
+                    <!-- Table content will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Card view (for mobile, toggled by JS) -->
+        <div class="card-view" style="display: none;">
+            <div id="ordersCards">
+                <!-- Card content will be populated by JavaScript -->
+            </div>
+        </div>
     </div>
 
 </body>

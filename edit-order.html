@@ -5,13 +5,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Order</title>
+    <link rel="stylesheet" href="./styles/base.css" />
     <link rel="stylesheet" href="./styles/edit-order.css" />
-    <script src="scripts/edit-order.js" defer></script>
+    <script src="./scripts/utils.js" defer></script>
+    <script src="./scripts/edit-order.js" defer></script>
 </head>
 
 <body>
+    <a href="orders.html" class="back-link">Back to Orders</a>
+
     <div class="container">
-        <h1><img src="./assets/GEM Group 2024.jpg" alt="gem logo" /></h1>
+        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
         <h1>Edit Order - <span id="orderId"></span></h1>
 
         <div class="order-info">
@@ -29,28 +33,42 @@
             <h2>Customer Info</h2>
             <p><strong>Name:</strong> <span id="customer-name"></span></p>
             <p><strong>ID:</strong> <span id="customer-id"></span></p>
-            <p><strong>Address:</strong> <span id="customer-address"></span></p>
-
+            <p><strong>Address:</strong>
+                <select id="customer-address-select" class="address-dropdown">
+                    <!-- Addresses will be populated by JavaScript -->
+                </select>
+            </p>
         </div>
 
         <div class="items-list">
             <h2>Edit Items</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Item</th>
-                        <th>Unit Price</th>
-                        <th>Qty</th>
-                        <th>Total</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="editable-items-body">
 
-                </tbody>
+            <!-- Table view (for desktop) -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Item</th>
+                            <th>Unit Price</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="editable-items-body">
+                        <!-- Items will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
 
-            </table>
+            <!-- Card view (for mobile) -->
+            <div class="card-view">
+                <div id="editable-items-cards">
+                    <!-- Cards will be populated by JavaScript -->
+                </div>
+            </div>
+
             <div style="text-align: left; margin-top: 10px;">
                 <button id="add-product-btn" class="confirm-btn">➕ Add Product</button>
             </div>
@@ -60,7 +78,7 @@
             <h2><span id="total-price">EGP 0</span></h2>
         </div>
 
-        <div style="text-align: right;">
+        <div class="action-buttons" style="text-align: right;">
             <button id="save-order" class="confirm-btn">💾 Save Changes</button>
         </div>
     </div>

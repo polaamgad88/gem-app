@@ -1,419 +1,979 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const token = localStorage.getItem("access_token");
-  const orderId = getOrderIdFromUrl();
-
-  if (!token || !(await checkLogin(token))) {
-    return (window.location.href = "login.html");
-  }
-
+document.addEventListener("DOMContentLoaded", async function () {
+  // Get order ID from URL
+  const orderId = Utils.URL.getParam("order_id");
   if (!orderId) {
-    alert("Missing order ID");
+    alert("No order ID specified in the URL.");
+    window.location.href = "orders.html";
     return;
   }
 
+  // Check authentication
+  const token = await Utils.Auth.requireAuth();
+  if (!token) return;
+
+  // Load order data
   try {
-    const res = await fetch(`http://localhost:5000/orders/find/${orderId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    Utils.UI.showLoader("loader");
+    const order = await fetchOrderDetails(orderId, token);
 
-    if (!res.ok) {
-      return alert("Failed to fetch order");
-    }
+    // Populate order information
+    populateOrderInfo(order, token);
 
-    const order = await res.json();
-    await populateEditableForm(order, token);
-    const allProducts = await fetchList(
-      "http://localhost:5000/products",
-      "data"
-    );
-    const allBrands = [...new Set(allProducts.map((p) => p.brand))];
+    // Populate editable items
+    populateEditableItems(order, token);
 
-    document.getElementById("add-product-btn").addEventListener("click", () => {
-      addProductRow(allBrands, allProducts);
-    });
+    // Set up event listeners
+    setupEventListeners(orderId, token);
+
+    // Check screen size and toggle view if needed
+    Utils.UI.checkScreenSize();
+    window.addEventListener("resize", Utils.UI.checkScreenSize);
+
+    Utils.UI.hideLoader("loader");
   } catch (err) {
+    Utils.UI.hideLoader("loader");
     console.error("Error loading order:", err);
+    alert("Failed to load order details. Please try again.");
   }
-
-  document.getElementById("save-order").addEventListener("click", async () => {
-    const orderId = getOrderIdFromUrl();
-    const addressSelect = document.getElementById("address-select");
-    const selectedAddress = addressSelect?.value;
-
-    const updatedProducts = [];
-
-    document.querySelectorAll(".edit-row").forEach((row) => {
-      const productId = row.dataset.productId;
-      const qty = parseInt(row.querySelector(".qty").value);
-      if (productId && qty > 0) {
-        updatedProducts.push({
-          product_id: parseInt(productId),
-          quantity: qty,
-        });
-      }
-    });
-
-    if (updatedProducts.length === 0) {
-      return alert("Please add at least one product");
-    }
-
-    const payload = {
-      products: updatedProducts,
-    };
-
-    if (selectedAddress) {
-      payload.address_id = parseInt(selectedAddress);
-    }
-
-    try {
-      const res = await fetch(`http://localhost:5000/orders/edit/${orderId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("✅ Order updated successfully!");
-        window.location.href = `view-order.html?order_id=${orderId}`;
-      } else {
-        alert(`❌ ${data.message}`);
-      }
-    } catch (err) {
-      alert("❌ Error updating order");
-    }
-  });
 });
 
-function getOrderIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("order_id");
-}
+// Helper function to fetch order details
+async function fetchOrderDetails(orderId, token) {
+  const res = await fetch(`http://localhost:5000/orders/find/${orderId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    mode: "cors",
+    credentials: "include",
+  });
 
-async function checkLogin(token) {
-  try {
-    const res = await fetch("http://localhost:5000/checklogin", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.ok;
-  } catch {
-    return false;
+  if (!res.ok) {
+    throw new Error("Failed to fetch order details");
   }
+
+  return await res.json();
 }
 
-async function populateEditableForm(order, token) {
+// Helper function to fetch customer addresses
+async function fetchCustomerAddresses(customerId, token) {
+  // Using the endpoint specified by the user
+  const res = await fetch(
+    `http://localhost:5000/customers/${customerId}/addresses`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      mode: "cors",
+      credentials: "include",
+    }
+  );
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      return { addresses: [] }; // Return empty array if no addresses found
+    }
+    throw new Error("Failed to fetch customer addresses");
+  }
+
+  return await res.json();
+}
+
+// Helper function to populate order information
+async function populateOrderInfo(order, token) {
   document.getElementById("orderId").textContent = `#${order.order_id}`;
   document.getElementById("order-id").textContent = `#${order.order_id}`;
-  document.getElementById("order-date").textContent = formatDate(
+  document.getElementById("order-date").textContent = Utils.Format.date(
     order.order_date
   );
-  document.getElementById("order-state").textContent = order.status;
-  document.getElementById("order-state").className = `state ${order.status}`;
+
+  const orderState = document.getElementById("order-state");
+  orderState.textContent = order.status;
+  orderState.className = `state ${order.status.toLowerCase()}`;
+
   document.getElementById("delegate-name").textContent = order.username;
   document.getElementById("customer-name").textContent = order.customer_name;
   document.getElementById(
     "customer-id"
   ).textContent = `CUST-${order.customer_id}`;
 
-  const addrContainer = document.getElementById("customer-address");
-  const select = document.createElement("select");
-  select.id = "address-select";
-  select.style.padding = "8px";
-  select.style.borderRadius = "4px";
-  select.style.marginTop = "6px";
-
+  // Fetch customer addresses and populate dropdown
   try {
-    const res = await fetch(
-      `http://localhost:5000/customers/${order.customer_id}/addresses`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    const data = await res.json();
-    const addresses = data.addresses || [];
+    const addressSelect = document.getElementById("customer-address-select");
+    addressSelect.innerHTML = '<option value="">Loading addresses...</option>';
 
-    addresses.forEach((a) => {
-      const opt = document.createElement("option");
-      opt.value = a.address_id;
-      opt.textContent = a.address;
-      if (
-        a.address === order.address ||
-        a.address_id === order.customer_address_id
-      ) {
-        opt.selected = true;
+    const addressData = await fetchCustomerAddresses(order.customer_id, token);
+    // Handle both possible response formats (addresses array or direct array)
+    const addresses = addressData.addresses || addressData || [];
+
+    if (addresses.length === 0) {
+      // If no addresses found, show the current address as text
+      addressSelect.innerHTML = `<option value="">${
+        order.address || "No address available"
+      }</option>`;
+      return;
+    }
+
+    // Populate dropdown with addresses
+    addressSelect.innerHTML = "";
+    addresses.forEach((addr) => {
+      const option = document.createElement("option");
+      option.value = addr.address_id;
+      option.textContent = addr.address;
+
+      // Select the current address if it matches
+      if (addr.address === order.address) {
+        option.selected = true;
       }
-      select.appendChild(opt);
+
+      addressSelect.appendChild(option);
     });
 
-    addrContainer.innerHTML = ""; // remove text
-    addrContainer.appendChild(select);
+    // Store the customer ID in a data attribute for later use
+    addressSelect.dataset.customerId = order.customer_id;
   } catch (err) {
-    console.error("Failed to fetch addresses");
+    console.error("Error fetching customer addresses:", err);
+    // Fallback to displaying the current address as text
+    const addressSelect = document.getElementById("customer-address-select");
+    addressSelect.innerHTML = `<option value="">${
+      order.address || "No address available"
+    }</option>`;
   }
+}
 
-  const tbody = document.getElementById("editable-items-body");
-  tbody.innerHTML = "";
+// Helper function to populate editable items
+function populateEditableItems(order, token) {
+  const tableBody = document.getElementById("editable-items-body");
+  const cardsContainer = document.getElementById("editable-items-cards");
+
+  tableBody.innerHTML = "";
+  cardsContainer.innerHTML = "";
+
+  let total = 0;
 
   order.items.forEach((item) => {
-    const row = document.createElement("tr");
-    row.className = "edit-row";
-    row.dataset.productId = item.product_id;
+    const itemTotal = parseFloat(item.price) * item.quantity;
+    total += itemTotal;
 
     const imageUrl = item.image_path
       ? `http://localhost:5000/images/${item.image_path}`
       : "";
 
+    // Add table row
+    const row = document.createElement("tr");
+    row.dataset.productId = item.product_id;
+    row.dataset.price = item.price;
     row.innerHTML = `
-      <td><img src="${imageUrl}" style="width:50px; height:50px; object-fit:cover;"></td>
+      <td>
+        ${
+          imageUrl
+            ? `<img src="${imageUrl}" alt="${item.product_name}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">`
+            : "No image"
+        }
+      </td>
       <td>${item.product_name}</td>
-      <td>EGP ${item.price.toFixed(2)}</td>
-      <td><input type="number" class="qty" value="${
-        item.quantity
-      }" min="1" style="width:60px"></td>
-      <td class="item-total">EGP ${(item.quantity * item.price).toFixed(2)}</td>
-      <td><button class="remove-btn">🗑️</button></td>
+      <td>EGP ${parseFloat(item.price).toFixed(2)}</td>
+      <td>
+        <input type="number" class="qty" value="${item.quantity}" min="1">
+      </td>
+      <td>EGP ${itemTotal.toFixed(2)}</td>
+      <td>
+        <button class="remove-btn">Remove</button>
+      </td>
     `;
+    tableBody.appendChild(row);
 
-    row.querySelector(".qty").addEventListener("input", () => {
-      const qty = parseInt(row.querySelector(".qty").value) || 0;
-      const newTotal = qty * item.price;
-      row.querySelector(".item-total").textContent = `EGP ${newTotal.toFixed(
-        2
-      )}`;
-      updateTotal();
-    });
-
-    row.querySelector(".remove-btn").addEventListener("click", () => {
-      row.remove();
-      updateTotal();
-    });
-
-    tbody.appendChild(row);
+    // Add card for mobile view
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.dataset.productId = item.product_id;
+    card.dataset.price = item.price;
+    card.innerHTML = `
+      <div class="item-card-header">
+        ${
+          imageUrl
+            ? `<img src="${imageUrl}" alt="${item.product_name}">`
+            : "<div style='width:50px;height:50px;background:#eee;display:flex;align-items:center;justify-content:center;border-radius:4px;'>No img</div>"
+        }
+        <h3>${item.product_name}</h3>
+      </div>
+      <div class="item-card-body">
+        <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
+          item.price
+        ).toFixed(2)}</p>
+        <p>
+          <span class="item-card-label">Quantity:</span>
+          <input type="number" class="qty" value="${item.quantity}" min="1">
+        </p>
+        <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toFixed(
+          2
+        )}</p>
+      </div>
+      <div class="item-card-footer">
+        <button class="remove-btn">Remove</button>
+      </div>
+    `;
+    cardsContainer.appendChild(card);
   });
 
-  updateTotal();
+  // Set total price
+  document.getElementById("total-price").textContent = `EGP ${total.toFixed(
+    2
+  )}`;
+
+  // Add event listeners to quantity inputs
+  document.querySelectorAll(".qty").forEach((input) => {
+    input.addEventListener("change", updateTotals);
+  });
+
+  // Add event listeners to remove buttons
+  document.querySelectorAll(".remove-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      // FIX: Only remove the specific row/card that was clicked, not all with same product ID
+      const element = this.closest("tr") || this.closest(".item-card");
+      if (element) {
+        element.remove();
+        updateTotals();
+      }
+    });
+  });
 }
 
-function updateTotal() {
+// Helper function to update totals
+function updateTotals() {
   let total = 0;
-  document.querySelectorAll(".edit-row").forEach((row) => {
-    const qty = parseInt(row.querySelector(".qty").value) || 0;
-    const priceText = row.children[2].textContent.replace("EGP", "").trim();
-    const price = parseFloat(priceText);
-    total += qty * price;
+
+  // Calculate from table rows
+  document.querySelectorAll("#editable-items-body tr").forEach((row) => {
+    // Skip temporary rows
+    if (row.classList.contains("temp-product-row")) return;
+
+    const price = parseFloat(row.dataset.price);
+    const qty = parseInt(row.querySelector(".qty").value);
+    const itemTotal = price * qty;
+
+    // Update item total cell
+    row.cells[4].textContent = `EGP ${itemTotal.toFixed(2)}`;
+
+    total += itemTotal;
   });
+
+  // Update card totals
+  document.querySelectorAll(".item-card").forEach((card) => {
+    // Skip temporary cards
+    if (card.classList.contains("temp-product-card")) return;
+
+    const price = parseFloat(card.dataset.price);
+    const qty = parseInt(card.querySelector(".qty").value);
+    const itemTotal = price * qty;
+
+    // Update item total in card
+    const totalElement = card.querySelector(".item-card-body p:last-child");
+    if (totalElement) {
+      totalElement.innerHTML = `<span class="item-card-label">Total:</span> EGP ${itemTotal.toFixed(
+        2
+      )}`;
+    }
+  });
+
+  // Update total price
   document.getElementById("total-price").textContent = `EGP ${total.toFixed(
     2
   )}`;
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}-${(d.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
-}
+// Helper function to set up event listeners
+function setupEventListeners(orderId, token) {
+  // Add product button
+  document
+    .getElementById("add-product-btn")
+    .addEventListener("click", async () => {
+      try {
+        // Fetch brands first for the dropdown
+        const brandsResponse = await fetch(
+          "http://localhost:5000/products/brands",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            mode: "cors",
+            credentials: "include",
+          }
+        );
 
-async function fetchList(url, key) {
-  const token = localStorage.getItem("access_token");
-  try {
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
+        if (!brandsResponse.ok) {
+          throw new Error("Failed to fetch brands");
+        }
+
+        const brandsData = await brandsResponse.json();
+        const brands = brandsData.brands || [];
+
+        // Add temporary product row to both table and card views
+        addTemporaryProductRow(brands, token);
+      } catch (err) {
+        console.error("Error fetching brands:", err);
+        alert("Failed to load brands. Please try again.");
+      }
     });
-    const json = await res.json();
-    return json[key] || [];
-  } catch {
-    return [];
-  }
+
+  // Save order button
+  document.getElementById("save-order").addEventListener("click", async () => {
+    await saveOrder(orderId, token);
+  });
 }
-function addProductRow(brands, products) {
-  const tbody = document.getElementById("editable-items-body");
-  const row = document.createElement("tr");
-  row.className = "edit-row";
 
-  let selectedProduct = null;
+// Helper function to add a temporary product row to both table and card views
+function addTemporaryProductRow(brands, token) {
+  // Remove any existing temporary rows first to prevent multiple search interfaces
+  document
+    .querySelectorAll(".temp-product-row, .temp-product-card")
+    .forEach((el) => el.remove());
 
-  // 📦 Image cell
-  const imageCell = document.createElement("td");
-  imageCell.innerHTML = `<span style="color:#888;">No Image</span>`;
-
-  // 📦 Product selection cell with mode selector
-  const itemCell = document.createElement("td");
-  const modeSelector = document.createElement("select");
-  modeSelector.innerHTML = `
-    <option value="brand">Brand + Product</option>
-    <option value="barcode">Barcode</option>
+  // Create a temporary row in the table
+  const tableBody = document.getElementById("editable-items-body");
+  const tempRow = document.createElement("tr");
+  tempRow.className = "temp-product-row";
+  tempRow.innerHTML = `
+    <td colspan="6">
+      <div class="search-container">
+        <div class="search-options">
+          <label>
+            <input type="radio" name="search-type" value="brand-product" checked> 
+            Search by Brand/Product
+          </label>
+          <label>
+            <input type="radio" name="search-type" value="barcode"> 
+            Search by Barcode
+          </label>
+        </div>
+        
+        <div class="search-inputs">
+          <div class="brand-product-search">
+            <div class="brand-select-container">
+              <select id="brand-select" class="search-input">
+                <option value="">Select Brand</option>
+                ${brands
+                  .map((brand) => `<option value="${brand}">${brand}</option>`)
+                  .join("")}
+              </select>
+            </div>
+            <div class="product-select-container" style="display:none; margin-top:10px;">
+              <select id="product-select" class="search-input">
+                <option value="">Select Product</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="barcode-search" style="display:none;">
+            <input type="text" id="barcode-search" placeholder="Scan or enter barcode" class="search-input">
+            <button id="search-barcode-btn" class="search-btn">Search</button>
+          </div>
+        </div>
+        
+        <div class="quantity-wrapper">
+          <label for="product-quantity">Quantity:</label>
+          <input type="number" id="product-quantity" value="1" min="1">
+        </div>
+        
+        <div class="action-buttons">
+          <button id="confirm-add-product" class="confirm-btn">Add</button>
+          <button id="cancel-add-product" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </td>
   `;
-  modeSelector.style.marginBottom = "4px";
 
-  const inputWrapper = document.createElement("div");
-  itemCell.appendChild(modeSelector);
-  itemCell.appendChild(inputWrapper);
+  tableBody.appendChild(tempRow);
 
-  // 📦 Price, Qty, Total
-  const priceCell = document.createElement("td");
-  priceCell.textContent = "EGP 0";
+  // Create a temporary card for mobile view
+  const cardsContainer = document.getElementById("editable-items-cards");
+  const tempCard = document.createElement("div");
+  tempCard.className = "item-card temp-product-card";
+  tempCard.innerHTML = `
+    <div class="search-container">
+      <div class="search-options">
+        <label>
+          <input type="radio" name="search-type-mobile" value="brand-product" checked> 
+          Search by Brand/Product
+        </label>
+        <label>
+          <input type="radio" name="search-type-mobile" value="barcode"> 
+          Search by Barcode
+        </label>
+      </div>
+      
+      <div class="search-inputs">
+        <div class="brand-product-search-mobile">
+          <div class="brand-select-container-mobile">
+            <select id="brand-select-mobile" class="search-input">
+              <option value="">Select Brand</option>
+              ${brands
+                .map((brand) => `<option value="${brand}">${brand}</option>`)
+                .join("")}
+            </select>
+          </div>
+          <div class="product-select-container-mobile" style="display:none; margin-top:10px;">
+            <select id="product-select-mobile" class="search-input">
+              <option value="">Select Product</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="barcode-search-mobile" style="display:none;">
+          <input type="text" id="barcode-search-mobile" placeholder="Scan or enter barcode" class="search-input">
+          <button id="search-barcode-btn-mobile" class="search-btn">Search</button>
+        </div>
+      </div>
+      
+      <div class="quantity-wrapper">
+        <label for="product-quantity-mobile">Quantity:</label>
+        <input type="number" id="product-quantity-mobile" value="1" min="1">
+      </div>
+      
+      <div class="action-buttons">
+        <button id="confirm-add-product-mobile" class="confirm-btn">Add</button>
+        <button id="cancel-add-product-mobile" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  `;
 
-  const qtyInput = document.createElement("input");
-  qtyInput.type = "number";
-  qtyInput.min = 1;
-  qtyInput.value = 1;
-  qtyInput.className = "qty";
-  qtyInput.style.width = "60px";
+  cardsContainer.appendChild(tempCard);
 
-  const qtyCell = document.createElement("td");
-  qtyCell.appendChild(qtyInput);
+  // Set up search type toggle for desktop
+  document.querySelectorAll('input[name="search-type"]').forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const brandProductSearch = document.querySelector(
+        ".brand-product-search"
+      );
+      const barcodeSearch = document.querySelector(".barcode-search");
 
-  const totalCell = document.createElement("td");
-  totalCell.className = "item-total";
-  totalCell.textContent = "EGP 0";
-
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "🗑️";
-  removeBtn.className = "remove-btn";
-  removeBtn.onclick = () => {
-    row.remove();
-    updateTotal();
-  };
-
-  const actionCell = document.createElement("td");
-  actionCell.appendChild(removeBtn);
-
-  row.appendChild(imageCell);
-  row.appendChild(itemCell);
-  row.appendChild(priceCell);
-  row.appendChild(qtyCell);
-  row.appendChild(totalCell);
-  row.appendChild(actionCell);
-  tbody.appendChild(row);
-
-  // --- Functions to switch between modes ---
-  function setBrandProductInputs() {
-    inputWrapper.innerHTML = "";
-
-    const brandSelect = document.createElement("select");
-    brandSelect.innerHTML = `<option value="">Select Brand</option>`;
-    brands.forEach((b) => {
-      const opt = document.createElement("option");
-      opt.value = b;
-      opt.textContent = b;
-      brandSelect.appendChild(opt);
+      if (this.value === "barcode") {
+        barcodeSearch.style.display = "flex";
+        brandProductSearch.style.display = "none";
+      } else {
+        barcodeSearch.style.display = "none";
+        brandProductSearch.style.display = "flex";
+      }
     });
+  });
 
-    const productSelect = document.createElement("select");
-    productSelect.innerHTML = `<option value="">Select Product</option>`;
+  // Set up search type toggle for mobile
+  document
+    .querySelectorAll('input[name="search-type-mobile"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", function () {
+        const brandProductSearch = document.querySelector(
+          ".brand-product-search-mobile"
+        );
+        const barcodeSearch = document.querySelector(".barcode-search-mobile");
 
-    inputWrapper.appendChild(brandSelect);
-    inputWrapper.appendChild(document.createElement("br"));
-    inputWrapper.appendChild(productSelect);
-
-    brandSelect.addEventListener("change", () => {
-      const brand = brandSelect.value;
-      productSelect.innerHTML = `<option value="">Select Product</option>`;
-      const filtered = products.filter((p) => p.brand === brand);
-      filtered.forEach((p) => {
-        const opt = document.createElement("option");
-        opt.value = p.product_id;
-        opt.textContent = p.product_name;
-        opt.dataset.price = p.price;
-        opt.dataset.image = p.image_path || "";
-        productSelect.appendChild(opt);
+        if (this.value === "barcode") {
+          barcodeSearch.style.display = "flex";
+          brandProductSearch.style.display = "none";
+        } else {
+          barcodeSearch.style.display = "none";
+          brandProductSearch.style.display = "flex";
+        }
       });
     });
 
-    productSelect.addEventListener("change", () => {
-      const selected = productSelect.selectedOptions[0];
-      if (!selected) return;
+  // Set up brand select change event for desktop
+  const brandSelect = document.getElementById("brand-select");
+  const productSelect = document.getElementById("product-select");
+  const productContainer = document.querySelector(".product-select-container");
 
-      const productId = selected.value;
-      const price = parseFloat(selected.dataset.price || 0);
-      const image = selected.dataset.image;
-      const quantity = parseInt(qtyInput.value);
+  brandSelect.addEventListener("change", async function () {
+    const selectedBrand = this.value;
 
-      row.dataset.productId = productId;
-      selectedProduct = { product_id: productId, price };
+    if (!selectedBrand) {
+      productContainer.style.display = "none";
+      return;
+    }
 
-      imageCell.innerHTML = image
-        ? `<img src="http://localhost:5000/images/${image}" style="width:50px;height:50px;object-fit:cover;">`
-        : `<span style="color:#888;">No Image</span>`;
-
-      priceCell.textContent = `EGP ${price.toFixed(2)}`;
-      totalCell.textContent = `EGP ${(price * quantity).toFixed(2)}`;
-      updateTotal();
-
-      const lastRow = [...tbody.querySelectorAll(".edit-row")].at(-1);
-      if (lastRow === row) addProductRow(brands, products);
-    });
-  }
-
-  function setBarcodeInput() {
-    inputWrapper.innerHTML = "";
-    const barcodeInput = document.createElement("input");
-    barcodeInput.type = "text";
-    barcodeInput.placeholder = "Enter barcode";
-    inputWrapper.appendChild(barcodeInput);
-
-    let timer;
-    barcodeInput.addEventListener("input", () => {
-      clearTimeout(timer);
-      const value = barcodeInput.value.trim();
-      if (value.length < 3) return;
-
-      timer = setTimeout(async () => {
-        const token = localStorage.getItem("access_token");
-        const res = await fetch(
-          `http://localhost:5000/product/search_by_barcode?barcode=${encodeURIComponent(
-            value
-          )}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const json = await res.json();
-        const matches = json.data || [];
-
-        if (matches.length === 1) {
-          const p = matches[0];
-          const quantity = parseInt(qtyInput.value);
-
-          row.dataset.productId = p.product_id;
-          selectedProduct = { product_id: p.product_id, price: p.price };
-
-          imageCell.innerHTML = p.image_path
-            ? `<img src="http://localhost:5000/images/${p.image_path}" style="width:50px;height:50px;object-fit:cover;">`
-            : `<span style="color:#888;">No Image</span>`;
-
-          priceCell.textContent = `EGP ${Number(p.price).toFixed(2)}`;
-          totalCell.textContent = `EGP ${(Number(p.price) * quantity).toFixed(
-            2
-          )}`;
-
-          updateTotal();
-
-          const lastRow = [...tbody.querySelectorAll(".edit-row")].at(-1);
-          if (lastRow === row) addProductRow(brands, products);
+    try {
+      // Fetch products for the selected brand
+      const res = await fetch(
+        `http://localhost:5000/products?brand=${encodeURIComponent(
+          selectedBrand
+        )}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          mode: "cors",
+          credentials: "include",
         }
-      }, 500);
-    });
-  }
+      );
 
-  modeSelector.addEventListener("change", () => {
-    if (modeSelector.value === "barcode") {
-      setBarcodeInput();
-    } else {
-      setBrandProductInputs();
+      if (!res.ok) throw new Error("Failed to fetch products");
+
+      const data = await res.json();
+      const products = data.data || [];
+
+      // Populate product dropdown
+      productSelect.innerHTML = '<option value="">Select Product</option>';
+      products.forEach((product) => {
+        productSelect.innerHTML += `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
+      });
+
+      productContainer.style.display = "block";
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      alert("Failed to load products for this brand. Please try again.");
     }
   });
 
-  setBrandProductInputs();
+  // Set up brand select change event for mobile
+  const brandSelectMobile = document.getElementById("brand-select-mobile");
+  const productSelectMobile = document.getElementById("product-select-mobile");
+  const productContainerMobile = document.querySelector(
+    ".product-select-container-mobile"
+  );
 
-  qtyInput.addEventListener("input", () => {
-    if (!selectedProduct) return;
-    const qty = parseInt(qtyInput.value) || 1;
-    totalCell.textContent = `EGP ${(selectedProduct.price * qty).toFixed(2)}`;
-    updateTotal();
+  brandSelectMobile.addEventListener("change", async function () {
+    const selectedBrand = this.value;
+
+    if (!selectedBrand) {
+      productContainerMobile.style.display = "none";
+      return;
+    }
+
+    try {
+      // Fetch products for the selected brand
+      const res = await fetch(
+        `http://localhost:5000/products?brand=${encodeURIComponent(
+          selectedBrand
+        )}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          mode: "cors",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch products");
+
+      const data = await res.json();
+      const products = data.data || [];
+
+      // Populate product dropdown
+      productSelectMobile.innerHTML =
+        '<option value="">Select Product</option>';
+      products.forEach((product) => {
+        productSelectMobile.innerHTML += `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
+      });
+
+      productContainerMobile.style.display = "block";
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      alert("Failed to load products for this brand. Please try again.");
+    }
   });
+
+  // Set up barcode search for desktop
+  const barcodeInput = document.getElementById("barcode-search");
+  const searchBarcodeBtn = document.getElementById("search-barcode-btn");
+
+  searchBarcodeBtn.addEventListener("click", async function () {
+    const barcode = barcodeInput.value.trim();
+    if (!barcode) {
+      alert("Please enter a barcode");
+      return;
+    }
+
+    try {
+      // Use the provided backend endpoint for barcode search
+      const res = await fetch(
+        `http://localhost:5000/product/search_by_barcode?barcode=${encodeURIComponent(
+          barcode
+        )}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          mode: "cors",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          alert("No product found with this barcode");
+          return;
+        }
+        throw new Error("Failed to search by barcode");
+      }
+
+      const data = await res.json();
+      const matchedProducts = data.data || [];
+
+      // If exactly one product is found, automatically select it
+      if (matchedProducts.length === 1) {
+        const product = matchedProducts[0];
+        barcodeInput.dataset.selectedId = product.product_id;
+        barcodeInput.dataset.selectedPrice = product.price;
+        barcodeInput.value = `${product.product_name} (${barcode})`;
+
+        // Automatically add the product
+        const quantity =
+          parseInt(document.getElementById("product-quantity").value) || 1;
+        addProductToOrder(product.product_id, product.price, quantity, token);
+      } else if (matchedProducts.length > 1) {
+        // If multiple products found, do nothing as per requirements
+        alert(
+          "Multiple products found with this barcode. Please refine your search."
+        );
+        barcodeInput.dataset.selectedId = "";
+        barcodeInput.dataset.selectedPrice = "";
+      } else {
+        // No products found (this shouldn't happen due to 404 handling above)
+        alert("No product found with this barcode");
+        barcodeInput.dataset.selectedId = "";
+        barcodeInput.dataset.selectedPrice = "";
+      }
+    } catch (err) {
+      console.error("Error searching by barcode:", err);
+      alert("Failed to search by barcode. Please try again.");
+    }
+  });
+
+  // Set up barcode search for mobile
+  const barcodeInputMobile = document.getElementById("barcode-search-mobile");
+  const searchBarcodeBtnMobile = document.getElementById(
+    "search-barcode-btn-mobile"
+  );
+
+  searchBarcodeBtnMobile.addEventListener("click", async function () {
+    const barcode = barcodeInputMobile.value.trim();
+    if (!barcode) {
+      alert("Please enter a barcode");
+      return;
+    }
+
+    try {
+      // Use the provided backend endpoint for barcode search
+      const res = await fetch(
+        `http://localhost:5000/product/search_by_barcode?barcode=${encodeURIComponent(
+          barcode
+        )}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          mode: "cors",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          alert("No product found with this barcode");
+          return;
+        }
+        throw new Error("Failed to search by barcode");
+      }
+
+      const data = await res.json();
+      const matchedProducts = data.data || [];
+
+      // If exactly one product is found, automatically select it
+      if (matchedProducts.length === 1) {
+        const product = matchedProducts[0];
+        barcodeInputMobile.dataset.selectedId = product.product_id;
+        barcodeInputMobile.dataset.selectedPrice = product.price;
+        barcodeInputMobile.value = `${product.product_name} (${barcode})`;
+
+        // Automatically add the product
+        const quantity =
+          parseInt(document.getElementById("product-quantity-mobile").value) ||
+          1;
+        addProductToOrder(product.product_id, product.price, quantity, token);
+      } else if (matchedProducts.length > 1) {
+        // If multiple products found, do nothing as per requirements
+        alert(
+          "Multiple products found with this barcode. Please refine your search."
+        );
+        barcodeInputMobile.dataset.selectedId = "";
+        barcodeInputMobile.dataset.selectedPrice = "";
+      } else {
+        // No products found (this shouldn't happen due to 404 handling above)
+        alert("No product found with this barcode");
+        barcodeInputMobile.dataset.selectedId = "";
+        barcodeInputMobile.dataset.selectedPrice = "";
+      }
+    } catch (err) {
+      console.error("Error searching by barcode:", err);
+      alert("Failed to search by barcode. Please try again.");
+    }
+  });
+
+  // Set up cancel button for desktop
+  document
+    .getElementById("cancel-add-product")
+    .addEventListener("click", function () {
+      document
+        .querySelectorAll(".temp-product-row, .temp-product-card")
+        .forEach((el) => el.remove());
+    });
+
+  // Set up cancel button for mobile
+  document
+    .getElementById("cancel-add-product-mobile")
+    .addEventListener("click", function () {
+      document
+        .querySelectorAll(".temp-product-row, .temp-product-card")
+        .forEach((el) => el.remove());
+    });
+
+  // Set up confirm button for desktop
+  document
+    .getElementById("confirm-add-product")
+    .addEventListener("click", async function () {
+      const searchType = document.querySelector(
+        'input[name="search-type"]:checked'
+      ).value;
+      let productId, price;
+
+      if (searchType === "brand-product") {
+        productId = productSelect.value;
+        price =
+          productSelect.options[productSelect.selectedIndex]?.dataset.price;
+
+        if (!productId) {
+          alert("Please select a product");
+          return;
+        }
+      } else {
+        // barcode search
+        productId = barcodeInput.dataset.selectedId;
+        price = barcodeInput.dataset.selectedPrice;
+
+        if (!productId) {
+          alert("Please search for a valid barcode");
+          return;
+        }
+      }
+
+      const quantity =
+        parseInt(document.getElementById("product-quantity").value) || 1;
+      addProductToOrder(productId, price, quantity, token);
+    });
+
+  // Set up confirm button for mobile
+  document
+    .getElementById("confirm-add-product-mobile")
+    .addEventListener("click", async function () {
+      const searchType = document.querySelector(
+        'input[name="search-type-mobile"]:checked'
+      ).value;
+      let productId, price;
+
+      if (searchType === "brand-product") {
+        productId = productSelectMobile.value;
+        price =
+          productSelectMobile.options[productSelectMobile.selectedIndex]
+            ?.dataset.price;
+
+        if (!productId) {
+          alert("Please select a product");
+          return;
+        }
+      } else {
+        // barcode search
+        productId = barcodeInputMobile.dataset.selectedId;
+        price = barcodeInputMobile.dataset.selectedPrice;
+
+        if (!productId) {
+          alert("Please search for a valid barcode");
+          return;
+        }
+      }
+
+      const quantity =
+        parseInt(document.getElementById("product-quantity-mobile").value) || 1;
+      addProductToOrder(productId, price, quantity, token);
+    });
+}
+
+// Helper function to add a product to the order
+async function addProductToOrder(productId, price, quantity, token) {
+  try {
+    // Fetch product details to get image and name
+    const res = await fetch(`http://localhost:5000/product/find/${productId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      mode: "cors",
+      credentials: "include",
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch product details");
+
+    const product = await res.json();
+    const productData = product.data;
+    const imageUrl = productData.image_path
+      ? `http://localhost:5000/images/${productData.image_path}`
+      : "";
+
+    // Remove temporary rows/cards
+    document
+      .querySelectorAll(".temp-product-row, .temp-product-card")
+      .forEach((el) => el.remove());
+
+    // Add actual product row to table
+    const tableBody = document.getElementById("editable-items-body");
+    const row = document.createElement("tr");
+    row.dataset.productId = productId;
+    row.dataset.price = price;
+    row.innerHTML = `
+      <td>
+        ${
+          imageUrl
+            ? `<img src="${imageUrl}" alt="${productData.product_name}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">`
+            : "No image"
+        }
+      </td>
+      <td>${productData.product_name}</td>
+      <td>EGP ${parseFloat(price).toFixed(2)}</td>
+      <td>
+        <input type="number" class="qty" value="${quantity}" min="1">
+      </td>
+      <td>EGP ${(parseFloat(price) * quantity).toFixed(2)}</td>
+      <td>
+        <button class="remove-btn">Remove</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+
+    // Add card for mobile view
+    const cardsContainer = document.getElementById("editable-items-cards");
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.dataset.productId = productId;
+    card.dataset.price = price;
+    card.innerHTML = `
+      <div class="item-card-header">
+        ${
+          imageUrl
+            ? `<img src="${imageUrl}" alt="${productData.product_name}">`
+            : "<div style='width:50px;height:50px;background:#eee;display:flex;align-items:center;justify-content:center;border-radius:4px;'>No img</div>"
+        }
+        <h3>${productData.product_name}</h3>
+      </div>
+      <div class="item-card-body">
+        <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
+          price
+        ).toFixed(2)}</p>
+        <p>
+          <span class="item-card-label">Quantity:</span>
+          <input type="number" class="qty" value="${quantity}" min="1">
+        </p>
+        <p><span class="item-card-label">Total:</span> EGP ${(
+          parseFloat(price) * quantity
+        ).toFixed(2)}</p>
+      </div>
+      <div class="item-card-footer">
+        <button class="remove-btn">Remove</button>
+      </div>
+    `;
+    cardsContainer.appendChild(card);
+
+    // Add event listeners to quantity inputs
+    const qtyInputs = [row.querySelector(".qty"), card.querySelector(".qty")];
+
+    qtyInputs.forEach((input) => {
+      input.addEventListener("change", function () {
+        // Sync quantity between table and card views
+        const value = this.value;
+        qtyInputs.forEach((inp) => {
+          if (inp !== this) inp.value = value;
+        });
+        updateTotals();
+      });
+    });
+
+    // Add event listeners to remove buttons
+    const removeButtons = [
+      row.querySelector(".remove-btn"),
+      card.querySelector(".remove-btn"),
+    ];
+
+    removeButtons.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        // Only remove the specific element that was clicked
+        const element = this.closest("tr") || this.closest(".item-card");
+        if (element) {
+          element.remove();
+          updateTotals();
+        }
+      });
+    });
+
+    // Update totals after adding the product
+    updateTotals();
+  } catch (err) {
+    console.error("Error adding product:", err);
+    alert("Failed to add product. Please try again.");
+  }
+}
+
+// Helper function to save the order
+async function saveOrder(orderId, token) {
+  try {
+    Utils.UI.showLoader("loader");
+
+    // Get the selected address ID
+    const addressSelect = document.getElementById("customer-address-select");
+    const addressId = addressSelect.value;
+    const customerId = addressSelect.dataset.customerId;
+
+    if (!addressId) {
+      Utils.UI.hideLoader("loader");
+      alert("Please select a valid address.");
+      return;
+    }
+
+    // Collect all products from the table
+    const products = [];
+    document.querySelectorAll("#editable-items-body tr").forEach((row) => {
+      // Skip temporary rows
+      if (row.classList.contains("temp-product-row")) return;
+
+      const productId = row.dataset.productId;
+      const quantity = parseInt(row.querySelector(".qty").value) || 0;
+
+      if (productId && quantity > 0) {
+        products.push({
+          product_id: parseInt(productId),
+          quantity: quantity,
+        });
+      }
+    });
+
+    if (products.length === 0) {
+      Utils.UI.hideLoader("loader");
+      alert("Please add at least one product to the order.");
+      return;
+    }
+
+    // Prepare the request data in the format specified by the user
+    const requestData = {
+      customer_id: parseInt(customerId),
+      address_id: parseInt(addressId),
+      products: products,
+    };
+
+    console.log("Sending order update with data:", requestData);
+
+    // Send request as JSON directly
+    const res = await fetch(`http://localhost:5000/orders/edit/${orderId}`, {
+      method: "POST", // Using proper PUT method with JSON
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+      mode: "cors",
+      credentials: "include",
+    });
+
+    Utils.UI.hideLoader("loader");
+
+    if (res.ok) {
+      alert("Order updated successfully!");
+      window.location.reload();
+    } else {
+      const data = await res.json();
+      alert(`Failed to update order: ${data.message || "Unknown error"}`);
+    }
+  } catch (err) {
+    Utils.UI.hideLoader("loader");
+    console.error("Error saving order:", err);
+    alert("An error occurred while saving the order. Please try again.");
+  }
 }

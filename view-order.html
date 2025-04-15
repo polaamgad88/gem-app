@@ -5,15 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details</title>
+    <link rel="stylesheet" href="./styles/base.css">
     <link rel="stylesheet" href="./styles/view-order.css">
-    <script src="scripts/view-order.js"></script>
+    <script src="./scripts/utils.js" defer></script>
+    <script src="./scripts/view-order.js" defer></script>
 </head>
 
 <body>
+    <a href="orders.html" class="back-link">Back to Orders</a>
 
     <div class="container">
-        <h1> <img src="./assets/GEM Group 2024.jpg" alt="gem logo"></h1>
-
+        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
         <h1>Order Details - <span id="orderId"></span></h1>
 
         <!-- Order Information -->
@@ -23,7 +25,7 @@
                 <p><strong>Date:</strong> <span id="order-date"></span></p>
             </div>
             <div class="row">
-                <p><strong>PO State:</strong> <span id="order-state" class="state pending"></span></p>
+                <p><strong>Status:</strong> <span id="order-state" class="state pending"></span></p>
                 <p><strong>Delegate Name:</strong> <span id="delegate-name"></span></p>
             </div>
         </div>
@@ -39,21 +41,32 @@
         <!-- Ordered Items -->
         <div class="items-list">
             <h2>Ordered Items</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Item Name</th>
-                        <th>Item Price</th>
-                        <th>Quantity</th>
-                        <th>Total Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            
+            <!-- Table view (for desktop) -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Item Name</th>
+                            <th>Item Price</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-table-body">
+                        <!-- Items will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Card view (for mobile) -->
+            <div class="card-view">
+                <div id="items-card-view">
+                    <!-- Cards will be populated by JavaScript -->
+                </div>
+            </div>
         </div>
-
 
         <!-- Total Price -->
         <div class="total">
@@ -61,14 +74,12 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="order-actions" style="text-align: right; margin-top: 20px;">
-            <button id="refund-order" class="refund-btn">❌ refund Order</button>
+        <div class="order-actions">
+            <button id="refund-order" class="refund-btn">❌ Refund Order</button>
             <button id="edit-order" class="edit-btn">✏️ Edit Order</button>
             <button id="confirm-order" class="confirm-btn">✅ Confirm Order</button>
         </div>
-
     </div>
-
 </body>
 
 </html>

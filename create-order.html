@@ -6,15 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Order</title>
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
+    <link rel="stylesheet" href="./styles/base.css">
     <link rel="stylesheet" href="./styles/create-order.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+    <script src="./scripts/utils.js" defer></script>
     <script src="./scripts/create-order.js" defer></script>
 </head>
 
 <body>
+    <a href="delegate-landing.html" class="back-link">Back to Dashboard</a>
+
     <div class="container">
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo">
+        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
         <h2>New Order</h2>
 
         <div class="order-header">
@@ -25,12 +28,9 @@
             <select id="address-select">
                 <option value="">Select Address</option>
             </select>
-
-
         </div>
 
         <div class="tabs">
-
             <!-- Detailed Order Section -->
             <div class="tab" onclick="toggleTab('detailed-order-content')">
                 Detailed Order <span class="arrow">▼</span>
@@ -48,20 +48,20 @@
                 <div class="order-rows-scrollable" id="combined-order-rows"></div>
                 <button class="add-row-btn" data-type="combined">Add Row</button>
             </div>
-
-
         </div>
 
         <div class="order-summary">
             <div class="total-items">Total Items: <span id="total-items">0</span></div>
-            <div class="total-price">Total Price: $<span id="total-price">0.00</span></div>
+            <div class="total-price">Total Price: EGP <span id="total-price">0.00</span></div>
         </div>
+
         <div class="order-preview">
-            <div id="preview-loader" style="text-align: center; padding: 1rem; display: none;">
+            <div id="preview-loader" style="display: none;">
+                <div class="loader"></div>
                 <span>Loading preview...</span>
             </div>
 
-            <h3 style="margin-bottom:10px;">Order Preview</h3>
+            <h3>Order Preview</h3>
             <div class="order-preview-container">
                 <table class="order-preview-table">
                     <thead>
@@ -82,8 +82,7 @@
             </div>
         </div>
 
-
-        <button id="submit-order">Submit New Oder</button>
+        <button id="submit-order" class="btn btn-primary">Submit New Order</button>
     </div>
 </body>
 
