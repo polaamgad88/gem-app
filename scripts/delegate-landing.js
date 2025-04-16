@@ -10,16 +10,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     const role = localStorage.getItem("user_role");
 
     if (!username) throw new Error("Username not found");
-    
+
     // Display username
     const usernameElement = document.getElementById("username");
     if (usernameElement) {
       usernameElement.textContent = username;
     }
-    
+
     // Show admin buttons if applicable
     setupAdminButtons(admin, role);
-    
+
     // Verify token is still valid
     await verifyToken(token);
   } catch (err) {
@@ -36,11 +36,11 @@ function setupAdminButtons(admin, role) {
   if (admin == 1 || role !== "representative") {
     const customersBtn = document.querySelector(".manage-customers");
     if (customersBtn) customersBtn.style.display = "block";
-    
+
     const manageUserBtn = document.querySelector(".manage-user");
     if (manageUserBtn) manageUserBtn.style.display = "block";
   }
-  
+
   if (admin == 1) {
     const productsBtn = document.querySelector(".manage-products");
     if (productsBtn) productsBtn.style.display = "block";
@@ -73,7 +73,7 @@ function setupLogoutButton() {
           window.location.href = "login.html";
           return;
         }
-        
+
         const logoutRes = await fetch("http://localhost:5000/logout", {
           method: "GET",
           headers: {

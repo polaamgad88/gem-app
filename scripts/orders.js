@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     date: true,
     price: true,
   };
-  
+
   let allOrders = [];
 
   // Check authentication
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // Set up event listeners
   setupEventListeners();
-  
+
   // Fetch and render orders
   try {
     await populateUsers(token);
@@ -27,18 +27,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   } finally {
     Utils.UI.hideLoader();
   }
-  
+
   // Check screen size and toggle view if needed
   Utils.UI.checkScreenSize();
-  window.addEventListener('resize', Utils.UI.checkScreenSize);
+  window.addEventListener("resize", Utils.UI.checkScreenSize);
 
   // Helper function to set up event listeners
   function setupEventListeners() {
-    document.getElementById("userFilter").addEventListener("change", async () => {
-      Utils.UI.showLoader();
-      await fetchAndRenderOrders(token);
-      Utils.UI.hideLoader();
-    });
+    document
+      .getElementById("userFilter")
+      .addEventListener("change", async () => {
+        Utils.UI.showLoader();
+        await fetchAndRenderOrders(token);
+        Utils.UI.hideLoader();
+      });
 
     document.getElementById("customerFilter").addEventListener("change", () => {
       filterOrdersByCustomer();
@@ -128,15 +130,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     const customerFilter = document.getElementById("customerFilter");
     customerFilter.innerHTML = `<option value="all">All Customers</option>`;
 
-    const customerSet = new Set();
+    const customerMap = new Map();
     orders.forEach((order) => {
-      customerSet.add(order.customer_id);
+      customerMap.set(order.customer_name, order.customer_id);
     });
 
-    customerSet.forEach((id) => {
+    customerMap.forEach((id, name) => {
       const option = document.createElement("option");
-      option.value = id;
-      option.textContent = `Customer #${id}`;
+      option.value = name;
+      option.textContent = name;
       customerFilter.appendChild(option);
     });
   }
@@ -154,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       renderOrders(allOrders);
     } else {
       const filtered = allOrders.filter(
-        (order) => order.customer_id.toString() === selectedCustomer
+        (order) => order.customer_name === selectedCustomer
       );
       renderOrders(filtered);
     }
@@ -180,14 +182,16 @@ document.addEventListener("DOMContentLoaded", async function () {
           <td>${order.customer_name}</td>
           <td>${order.username}</td>
           <td>${order.role}</td>
-          <td><span class="status-${order.status.toLowerCase()}">${order.status}</span></td>
+          <td><span class="status-${order.status.toLowerCase()}">${
+        order.status
+      }</span></td>
           <td>EGP${order.total_amount}</td>
           <td><button class="view-btn" data-order-id="${
             order.order_id
           }">View</button></td>
         `;
       tableBody.appendChild(row);
-      
+
       // Card view for mobile
       const card = document.createElement("div");
       card.className = "order-card";
@@ -197,13 +201,23 @@ document.addEventListener("DOMContentLoaded", async function () {
           <span>${Utils.Format.dateSlash(order.order_date)}</span>
         </div>
         <div class="order-card-body">
-          <p><span class="order-card-label">Customer:</span> ${order.customer_name}</p>
-          <p><span class="order-card-label">Delegate:</span> ${order.username}</p>
-          <p><span class="order-card-label">Status:</span> <span class="status-${order.status.toLowerCase()}">${order.status}</span></p>
-          <p><span class="order-card-label">Total:</span> EGP${order.total_amount}</p>
+          <p><span class="order-card-label">Customer:</span> ${
+            order.customer_name
+          }</p>
+          <p><span class="order-card-label">Delegate:</span> ${
+            order.username
+          }</p>
+          <p><span class="order-card-label">Status:</span> <span class="status-${order.status.toLowerCase()}">${
+        order.status
+      }</span></p>
+          <p><span class="order-card-label">Total:</span> EGP${
+            order.total_amount
+          }</p>
         </div>
         <div class="order-card-footer">
-          <button class="view-btn" data-order-id="${order.order_id}">View Details</button>
+          <button class="view-btn" data-order-id="${
+            order.order_id
+          }">View Details</button>
         </div>
       `;
       cardsContainer.appendChild(card);
@@ -221,13 +235,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   function renderNoOrders() {
     const tableBody = document.getElementById("ordersTable");
     tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px;">No orders available</td></tr>`;
-    
+
     const cardsContainer = document.getElementById("ordersCards");
     cardsContainer.innerHTML = `<div style="text-align: center; padding: 20px;">No orders available</div>`;
   }
 
   // Sort table function
-  window.sortTable = function(colIndex, type) {
+  window.sortTable = function (colIndex, type) {
     let table = document.getElementById("ordersTable");
     let rows = Array.from(table.rows);
 
@@ -252,7 +266,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     sortOrder[type] = !sortOrder[type];
     rows.forEach((row) => table.appendChild(row));
-    
+
     // Also sort the card view
     sortCards(type);
   };
@@ -261,23 +275,29 @@ document.addEventListener("DOMContentLoaded", async function () {
   function sortCards(type) {
     const cardsContainer = document.getElementById("ordersCards");
     const cards = Array.from(cardsContainer.children);
-    
+
     cards.sort((cardA, cardB) => {
       if (type === "date") {
-        const dateA = new Date(cardA.querySelector(".order-card-header").children[1].innerText);
-        const dateB = new Date(cardB.querySelector(".order-card-header").children[1].innerText);
+        const dateA = new Date(
+          cardA.querySelector(".order-card-header").children[1].innerText
+        );
+        const dateB = new Date(
+          cardB.querySelector(".order-card-header").children[1].innerText
+        );
         return sortOrder.date ? dateA - dateB : dateB - dateA;
       }
-      
+
       if (type === "price") {
-        const priceTextA = cardA.querySelector(".order-card-body").lastElementChild.innerText;
-        const priceTextB = cardB.querySelector(".order-card-body").lastElementChild.innerText;
+        const priceTextA =
+          cardA.querySelector(".order-card-body").lastElementChild.innerText;
+        const priceTextB =
+          cardB.querySelector(".order-card-body").lastElementChild.innerText;
         const priceA = parseFloat(priceTextA.replace("Total: EGP", ""));
         const priceB = parseFloat(priceTextB.replace("Total: EGP", ""));
         return sortOrder.price ? priceA - priceB : priceB - priceA;
       }
     });
-    
-    cards.forEach(card => cardsContainer.appendChild(card));
+
+    cards.forEach((card) => cardsContainer.appendChild(card));
   }
 });
