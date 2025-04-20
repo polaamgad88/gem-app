@@ -1,3 +1,4 @@
+let currentEditAddressId = null;
 document.addEventListener("DOMContentLoaded", async function () {
   const customerId = new URLSearchParams(window.location.search).get(
     "customer_id"
@@ -52,8 +53,95 @@ document.addEventListener("DOMContentLoaded", async function () {
         alert(data.message || "Failed to assign delegate");
       }
     });
-});
+  document.getElementById("address-save-btn").addEventListener("click", () => {
+    const address = document.getElementById("address-input").value.trim();
+    const token = localStorage.getItem("access_token");
+    const customerId = new URLSearchParams(window.location.search).get(
+      "customer_id"
+    );
 
+    if (!address) return alert("Address cannot be empty");
+
+    let url = "";
+    let method = "POST";
+    let body = new URLSearchParams();
+
+    if (currentEditAddressId) {
+      // Edit mode
+      url = `http://localhost:5000/customers/address/edit/${currentEditAddressId}`;
+      body.append("address", address);
+    } else {
+      // Create mode
+      url = `http://localhost:5000/customers/address/create`;
+      body.append("customer_id", customerId);
+      body.append("address", address);
+    }
+
+    fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message?.includes("success")) {
+          loadCustomerAddresses(customerId, token);
+          document.getElementById("address-modal").style.display = "none";
+          document.getElementById("address-input").value = "";
+          currentEditAddressId = null;
+        } else {
+          alert(data.message || "Operation failed.");
+        }
+      });
+  });
+
+  document.getElementById("address-close").addEventListener("click", () => {
+    document.getElementById("address-modal").style.display = "none";
+    currentEditAddressId = null;
+  });
+
+  document.getElementById("add-address-btn")?.addEventListener("click", () => {
+    currentEditAddressId = null;
+    document.getElementById("address-input").value = "";
+    document.getElementById("address-modal").style.display = "block";
+  });
+});
+async function loadCustomerAddresses(customerId, token) {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/customers/${customerId}/addresses`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to load addresses");
+    const data = await res.json();
+
+    const ul = document.getElementById("address-list");
+    ul.innerHTML = "";
+
+    (data.addresses || []).forEach((addr) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${addr.address}</span>
+        <div class="address-actions">
+          <button class="edit-btn" onclick="editAddress(${addr.address_id}, '${addr.address}')">Edit</button>
+          <button class="delete-btn" onclick="deleteAddress(${addr.address_id})">Delete</button>
+        </div>
+      `;
+
+      ul.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Error loading addresses:", err);
+  }
+}
 async function loadCustomerDetails(customerId, token) {
   try {
     const [custRes, ordersRes] = await Promise.all([
@@ -110,6 +198,7 @@ async function loadCustomerDetails(customerId, token) {
     document.getElementById("total-income").textContent = `EGP${total.toFixed(
       2
     )}`;
+    await loadCustomerAddresses(customerId, token);
 
     renderOrderCards(orders);
   } catch (err) {
@@ -225,4 +314,34 @@ async function removeDelegate(userId, username) {
 
 function viewOrder(orderId) {
   window.location.href = `view-order.html?order_id=${orderId}`;
+}
+// Handle Edit Address (modal)
+function editAddress(addressId, oldValue) {
+  currentEditAddressId = addressId;
+  document.getElementById("address-input").value = oldValue;
+  document.getElementById("address-modal").style.display = "block";
+}
+
+// Handle Delete Address
+function deleteAddress(addressId) {
+  const token = localStorage.getItem("access_token");
+  if (!confirm("Are you sure you want to delete this address?")) return;
+
+  fetch(`http://localhost:5000/customers/address/delete/${addressId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.message?.includes("success")) {
+        const customerId = new URLSearchParams(window.location.search).get(
+          "customer_id"
+        );
+        loadCustomerAddresses(customerId, token);
+      } else {
+        alert(data.message || "Failed to delete address.");
+      }
+    });
 }

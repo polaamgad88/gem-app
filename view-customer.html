@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Details</title>
     <link rel="stylesheet" href="./styles/view-customer.css">
+    <script src="./scripts/utils.js"></script>
     <script src="./scripts/view-customer.js"></script>
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -28,6 +29,13 @@
             <div class="info-row">
                 <p><strong>phone:</strong> <span id="customer-phone"></span></p>
             </div>
+            <div class="address-section">
+                <h2>Customer Addresses</h2>
+                <ul id="address-list"></ul>
+                <button id="add-address-btn">Add Address</button>
+            </div>
+
+
         </div>
 
         <!-- Delegate Management -->
@@ -82,6 +90,16 @@
             <button id="save-delegate-btn">Add</button>
         </div>
     </div>
+    <!-- Address Modal -->
+    <div id="address-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="address-close">&times;</span>
+            <label for="address-input">Enter Address:</label>
+            <input type="text" id="address-input" />
+            <button id="address-save-btn">Save</button>
+        </div>
+    </div>
+
 
 
 </body>
