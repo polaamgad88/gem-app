@@ -15,6 +15,64 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   toggleOrderViews();
   window.addEventListener("resize", toggleOrderViews);
+  document.getElementById("edit-customer-btn").addEventListener("click", () => {
+    document.getElementById("edit-name").value =
+      document.getElementById("customer-name").textContent;
+    document.getElementById("edit-phone").value =
+      document.getElementById("customer-phone").textContent;
+    document.getElementById("edit-email").value =
+      document.getElementById("customer-email").textContent;
+
+    document.getElementById("edit-customer-modal").style.display = "block";
+  });
+
+  document
+    .getElementById("edit-customer-close")
+    .addEventListener("click", () => {
+      document.getElementById("edit-customer-modal").style.display = "none";
+    });
+  document
+    .getElementById("save-customer-btn")
+    .addEventListener("click", async () => {
+      const token = localStorage.getItem("access_token");
+      const customerId = new URLSearchParams(window.location.search).get(
+        "customer_id"
+      );
+
+      const fullName = document.getElementById("edit-name").value.trim();
+      const phone = document.getElementById("edit-phone").value.trim();
+      const email = document.getElementById("edit-email").value.trim();
+
+      const [first_name, ...last_name_parts] = fullName.split(" ");
+      const last_name = last_name_parts.join(" ");
+
+      const res = await fetch(
+        `http://localhost:5000/customers/edit/${customerId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            first_name,
+            last_name,
+            phone,
+            email,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById("edit-customer-modal").style.display = "none";
+        document.getElementById("customer-name").textContent = fullName;
+        document.getElementById("customer-phone").textContent = phone;
+        document.getElementById("customer-email").textContent = email;
+      } else {
+        alert(data.message || "Failed to update customer details");
+      }
+    });
 
   // Modal interactions
   document.getElementById("add-delegate-btn").addEventListener("click", () => {
@@ -163,6 +221,7 @@ async function loadCustomerDetails(customerId, token) {
       "customer-id"
     ).textContent = `CUST-${customer.customer_id}`;
     document.getElementById("customer-phone").textContent = customer.phone;
+    document.getElementById("customer-email").textContent = customer.email;
 
     const list = document.getElementById("delegate-list");
     list.innerHTML = "";

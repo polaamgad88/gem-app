@@ -59,9 +59,6 @@ function renderCustomers(customers) {
           <button class="btn-view" onclick="window.location.href='view-customer.html?customer_id=${
             c.customer_id
           }'">View</button>
-          <button class="btn-edit" onclick="window.location.href='edit-customer.html?customer_id=${
-            c.customer_id
-          }'">Edit</button>
         </td>`;
     tableBody.appendChild(row);
 
@@ -82,9 +79,6 @@ function renderCustomers(customers) {
           <button class="btn-view" onclick="window.location.href='view-customer.html?customer_id=${
             c.customer_id
           }'">View</button>
-          <button class="btn-edit" onclick="window.location.href='edit-customer.html?customer_id=${
-            c.customer_id
-          }'">Edit</button>
         </div>`;
     cardContainer.appendChild(card);
   });

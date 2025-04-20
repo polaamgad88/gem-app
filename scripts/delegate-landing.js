@@ -33,10 +33,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 // Helper function to set up admin buttons
 function setupAdminButtons(admin, role) {
-  if (admin == 1 || role !== "representative") {
-    const customersBtn = document.querySelector(".manage-customers");
-    if (customersBtn) customersBtn.style.display = "block";
-
+  if (admin == 1 || role !== "delegate") {
     const manageUserBtn = document.querySelector(".manage-user");
     if (manageUserBtn) manageUserBtn.style.display = "block";
   }

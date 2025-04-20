@@ -289,3 +289,21 @@ th {
     border: 1px solid var(--gray-300);
     border-radius: var(--border-radius-sm);
 }
+
+.modal-content input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius-sm);
+}
+
+.btn-edit {
+    background-color: var(--primary-light);
+    color: white;
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    margin-top: var(--spacing-sm);
+}
