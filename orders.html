@@ -13,17 +13,18 @@
 </head>
 
 <body>
-    <a href="delegate-landing.html" class="back-link">Back to Dashboard</a>
-    
+
+
     <div id="loader" style="display: none;">
         <div class="loader"></div>
         <strong>Loading orders...</strong>
     </div>
-    
+
     <div class="container">
+        <a href="delegate-landing.html" class="back-link">Back to Dashboard</a>
         <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
         <h1>Orders</h1>
-        
+
         <div class="filters">
             <div class="filter-group">
                 <label for="userFilter">Filter by User:</label>
@@ -39,7 +40,7 @@
                 </select>
             </div>
         </div>
-        
+
         <!-- Table view (default for desktop) -->
         <div class="table-responsive">
             <table>
@@ -61,7 +62,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Card view (for mobile, toggled by JS) -->
         <div class="card-view" style="display: none;">
             <div id="ordersCards">
