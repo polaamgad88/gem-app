@@ -1,39 +1,228 @@
-document.addEventListener("DOMContentLoaded", function () {
-    updateTotalIncome();
-});
+document.addEventListener("DOMContentLoaded", async function () {
+  const customerId = new URLSearchParams(window.location.search).get(
+    "customer_id"
+  );
+  const token = localStorage.getItem("access_token");
 
-// 🚀 Remove Delegate
-function removeDelegate(delegateName) {
-    if (confirm(`Are you sure you want to remove ${delegateName}?`)) {
-        let delegates = [...document.getElementById("delegate-list").children];
-        delegates.forEach((item) => {
-            if (item.textContent.includes(delegateName)) {
-                item.remove();
-            }
-        });
-    }
-}
+  if (!customerId || !token) {
+    alert("Missing customer ID or access token.");
+    return;
+  }
 
-// 🚀 Show Add Delegate Modal
-document.getElementById("add-delegate-btn").addEventListener("click", () => {
+  await loadCustomerDetails(customerId, token);
+  await setupAddDelegateDropdown(token);
+
+  toggleOrderViews();
+  window.addEventListener("resize", toggleOrderViews);
+
+  // Modal interactions
+  document.getElementById("add-delegate-btn").addEventListener("click", () => {
     document.getElementById("delegate-modal").style.display = "block";
-});
+  });
 
-// 🚀 Save Delegate
-document.getElementById("save-delegate-btn").addEventListener("click", function () {
-    const delegateName = document.getElementById("delegate-dropdown").value;
-    const newDelegate = document.createElement("li");
-    newDelegate.innerHTML = `${delegateName} <button class="remove-btn" onclick="removeDelegate('${delegateName}')"><i class="fas fa-trash-alt"></i></button>`;
-    document.getElementById("delegate-list").appendChild(newDelegate);
+  document.querySelector(".close-btn").addEventListener("click", () => {
     document.getElementById("delegate-modal").style.display = "none";
+  });
+
+  document
+    .getElementById("save-delegate-btn")
+    .addEventListener("click", async () => {
+      const userId = document.getElementById("delegate-dropdown").value;
+      const username =
+        document.getElementById("delegate-dropdown").selectedOptions[0].text;
+
+      const res = await fetch("http://localhost:5000/customers/assign", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          customer_id: customerId,
+          target_user_id: userId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        addDelegateToList(userId, username);
+        document.getElementById("delegate-modal").style.display = "none";
+      } else {
+        alert(data.message || "Failed to assign delegate");
+      }
+    });
 });
 
-// 🚀 Update Total Income
-function updateTotalIncome() {
-    let total = 0;
-    document.querySelectorAll(".price").forEach(price => {
-        total += parseFloat(price.textContent.replace("EGP", ""));
+async function loadCustomerDetails(customerId, token) {
+  try {
+    const [custRes, ordersRes] = await Promise.all([
+      fetch(`http://localhost:5000/customer/find/${customerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`http://localhost:5000/orders?customer_id=${customerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
+
+    const customer = (await custRes.json()).customer;
+    const orders = (await ordersRes.json()).orders || [];
+
+    document.getElementById(
+      "customer-name"
+    ).textContent = `${customer.first_name} ${customer.last_name}`;
+    document.getElementById(
+      "customer-id"
+    ).textContent = `CUST-${customer.customer_id}`;
+    document.getElementById("customer-phone").textContent = customer.phone;
+
+    const list = document.getElementById("delegate-list");
+    list.innerHTML = "";
+    customer.assigned_users.forEach(({ user_id, username }) => {
+      addDelegateToList(user_id, username);
     });
-    document.getElementById("total-income").textContent = `EGP${total}`;
+
+    const tbody = document.getElementById("order-list");
+    let total = 0;
+    tbody.innerHTML = "";
+
+    orders
+      .sort((a, b) => new Date(b.order_date) - new Date(a.order_date))
+      .forEach((o, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${o.order_id}</td>
+          <td>${new Date(o.order_date).toISOString().slice(0, 10)}</td>
+          <td>${o.username}</td>
+          <td>${o.status}</td>
+          <td class="price">EGP${parseFloat(o.total_amount).toFixed(2)}</td>
+          <td><button class="view-btn" onclick="viewOrder(${
+            o.order_id
+          })">View</button></td>`;
+        tbody.appendChild(tr);
+
+        if (!["refunded", "canceled"].includes(o.status.toLowerCase())) {
+          total += parseFloat(o.total_amount);
+        }
+      });
+
+    document.getElementById("total-income").textContent = `EGP${total.toFixed(
+      2
+    )}`;
+
+    renderOrderCards(orders);
+  } catch (err) {
+    console.error("Failed to load customer info", err);
+  }
 }
 
+function renderOrderCards(orders) {
+  const cardsContainer = document.getElementById("ordersCards");
+  cardsContainer.innerHTML = "";
+
+  orders.forEach((order) => {
+    const card = document.createElement("div");
+    card.className = "order-card";
+    card.innerHTML = `
+        <div class="order-card-header">
+          <span>Order #${order.order_id}</span>
+          <span>${new Date(order.order_date).toISOString().slice(0, 10)}</span>
+        </div>
+        <div class="order-card-body">
+          <p><strong>Delegate:</strong> ${order.username}</p>
+          <p><strong>Status:</strong> ${order.status}</p>
+          <p><strong>Total:</strong> EGP${parseFloat(
+            order.total_amount
+          ).toFixed(2)}</p>
+        </div>
+        <div class="order-card-footer">
+          <button class="view-btn" onclick="viewOrder(${
+            order.order_id
+          })">View</button>
+        </div>`;
+    cardsContainer.appendChild(card);
+  });
+}
+
+function toggleOrderViews() {
+  const table = document.querySelector("table");
+  const cardView = document.querySelector(".card-view");
+
+  if (window.innerWidth <= 768) {
+    table.style.display = "none";
+    cardView.style.display = "block";
+  } else {
+    table.style.display = "table";
+    cardView.style.display = "none";
+  }
+}
+
+async function setupAddDelegateDropdown(token) {
+  try {
+    const res = await fetch("http://localhost:5000/users", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const users = (await res.json()).users;
+    const select = document.getElementById("delegate-dropdown");
+    select.innerHTML = "";
+
+    users.forEach((u) => {
+      const opt = document.createElement("option");
+      opt.value = u.user_id;
+      opt.textContent = u.username;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Failed to fetch users:", err);
+  }
+}
+
+function addDelegateToList(userId, username) {
+  const li = document.createElement("li");
+  li.innerHTML = `
+      ${username}
+      <button class="remove-btn" onclick="removeDelegate(${userId}, '${username}')">
+        <i class="fas fa-trash-alt"></i>
+      </button>`;
+  document.getElementById("delegate-list").appendChild(li);
+}
+
+async function removeDelegate(userId, username) {
+  const token = localStorage.getItem("access_token");
+  const customerId = new URLSearchParams(window.location.search).get(
+    "customer_id"
+  );
+
+  if (!confirm(`Are you sure you want to remove ${username}?`)) return;
+
+  try {
+    const res = await fetch("http://localhost:5000/customers/deassign", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        customer_id: customerId,
+        target_user_id: userId,
+      }),
+    });
+
+    if (res.ok) {
+      [...document.getElementById("delegate-list").children].forEach((li) => {
+        if (li.textContent.includes(username)) li.remove();
+      });
+    } else {
+      const data = await res.json();
+      alert(data.message || "Failed to remove delegate");
+    }
+  } catch (err) {
+    console.error("Failed to remove delegate", err);
+    alert("Error occurred while removing delegate.");
+  }
+}
+
+function viewOrder(orderId) {
+  window.location.href = `view-order.html?order_id=${orderId}`;
+}
