@@ -1,0 +1,50 @@
+@import url('./base.css');
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow-md);
+    margin-top: var(--spacing-xl);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--primary-color);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+input[type="text"],
+input[type="email"] {
+    padding: 0.75rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-md);
+}
+
+.success {
+    color: var(--secondary-color);
+    margin-top: var(--spacing-md);
+    text-align: center;
+}
+
+.error {
+    color: var(--danger-color);
+    margin-top: var(--spacing-md);
+    text-align: center;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: var(--spacing-lg);
+    color: var(--primary-color);
+    font-weight: bold;
+}

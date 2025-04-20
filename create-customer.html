@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Customer</title>
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/create-customer.css" />
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/create-customer.js" defer></script>
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+</head>
+
+<body>
+    <a href="customers.html" class="back-link">Back to Customers</a>
+    <div class="container">
+        <h1>Create New Customer</h1>
+
+        <form id="create-customer-form">
+            <label>First Name:</label>
+            <input type="text" name="first_name" required />
+
+            <label>Last Name:</label>
+            <input type="text" name="last_name" required />
+
+            <label>Email:</label>
+            <input type="email" name="email" />
+
+            <label>Phone:</label>
+            <input type="text" name="phone" />
+
+            <button type="submit" class="btn btn-primary">Create Customer</button>
+        </form>
+
+        <div id="success-message" class="success" style="display: none;">✅ Customer created successfully!</div>
+        <div id="error-message" class="error" style="display: none;"></div>
+
+
+    </div>
+</body>
+
+</html>
