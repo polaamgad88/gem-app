@@ -1,0 +1,149 @@
+@import url('./base.css');
+
+/* Layout */
+.container {
+    max-width: var(--container-lg);
+    margin: 0 auto;
+    background-color: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow-md);
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.actions-row {
+    text-align: right;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Elegant Table Styling */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+    font-size: var(--font-size-sm);
+}
+
+th,
+td {
+    background-color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+th {
+    background-color: var(--primary-color);
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+tbody tr {
+    transition: transform 0.2s ease;
+}
+
+tbody tr:hover {
+    transform: scale(1.005);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+td:first-child {
+    border-top-left-radius: var(--border-radius-sm);
+    border-bottom-left-radius: var(--border-radius-sm);
+}
+
+td:last-child {
+    border-top-right-radius: var(--border-radius-sm);
+    border-bottom-right-radius: var(--border-radius-sm);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-sm);
+    border: none;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-add {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-add:hover {
+    background-color: var(--secondary-dark);
+}
+
+.view-btn {
+    background-color: var(--primary-light);
+    color: white;
+    margin-right: var(--spacing-xs);
+}
+
+.view-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.delete-btn {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: var(--danger-dark);
+}
+
+/* Navigation */
+.back-link {
+    display: inline-block;
+    margin-top: var(--spacing-md);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Card View (Mobile) */
+@media (max-width: 768px) {
+    table {
+        display: none;
+    }
+
+    .card-view {
+        display: block;
+        margin-top: var(--spacing-md);
+    }
+
+    .user-card {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--border-radius-md);
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-md);
+        background-color: white;
+        box-shadow: var(--box-shadow-sm);
+    }
+
+    .user-card p {
+        margin: var(--spacing-xs) 0;
+    }
+
+    .user-card .card-actions {
+        margin-top: var(--spacing-sm);
+        text-align: right;
+    }
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Users</title>
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/users.css" />
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/users.js" defer></script>
+    <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon">
+</head>
+
+<body>
+    <div class="container">
+        <a href="delegate-landing.html" class="back-link">Back to Dashboard</a>
+        <h1>All Users</h1>
+
+
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Assigned To</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Filled by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-view" style="display: none;">
+            <div id="user-cards"></div>
+        </div>
+        <div class="actions-row">
+            <button id="create-user-btn" class="btn btn-add">➕ Create User</button>
+        </div>
+    </div>
+</body>
+
+</html>
