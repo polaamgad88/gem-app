@@ -136,15 +136,21 @@ th {
     margin-right: var(--spacing-xs);
 }
 
-.admin-user {
-    color: var(--secondary-color);
-    /* Green color */
-    font-weight: bold;
-}
-
 .admin-badge::before {
     content: "🛡️ ";
     /* Shield emoji */
+}
+
+.admin-badge {
+    color: var(--secondary-color);
+    /* Green for admin */
+    font-weight: bold;
+}
+
+.inactive-badge {
+    color: var(--danger-color);
+    /* Red for inactive */
+    font-weight: bold;
 }
 
 
