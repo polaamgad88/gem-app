@@ -1,15 +1,14 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("create-customer-form");
   const successMsg = document.getElementById("success-message");
   const errorMsg = document.getElementById("error-message");
+  const token = await Utils.Auth.requireAuth();
+  if (!token) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     successMsg.style.display = "none";
     errorMsg.style.display = "none";
-
-    const token = localStorage.getItem("access_token");
-    if (!token) return alert("You are not logged in.");
 
     const formData = new FormData(form);
     const payload = new URLSearchParams(formData);

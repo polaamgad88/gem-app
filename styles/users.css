@@ -1,5 +1,6 @@
 @import url('./base.css');
 
+/* Main Container */
 .container {
     max-width: var(--container-lg);
     margin: 0 auto;
@@ -9,17 +10,28 @@
     box-shadow: var(--box-shadow-md);
 }
 
+/* Page Heading */
 h1 {
     text-align: center;
     color: var(--primary-color);
     margin-bottom: var(--spacing-lg);
 }
 
+/* Search and Actions */
+.search-container,
 .actions-row {
     text-align: right;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 
+input[type="search"] {
+    padding: 0.5rem;
+    width: 250px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius-sm);
+}
+
+/* Table Styling */
 .table-responsive {
     overflow-x: auto;
 }
@@ -27,6 +39,7 @@ h1 {
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: var(--spacing-md);
     border: none;
 }
 
@@ -42,10 +55,10 @@ th {
     color: white;
 }
 
-/* General Button Style */
+/* Button Base Style */
 .btn {
     display: inline-block;
-    padding: 0.5rem 1rem;
+    padding: 0.3rem 0.6rem;
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -53,59 +66,74 @@ th {
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: var(--box-shadow-sm);
 }
 
 .btn:hover {
     transform: translateY(-1px);
 }
 
-/* Add Button */
+/* Add Button (Create User - SAME as Create Customer) */
 .btn-add {
     background-color: var(--secondary-color);
     color: white;
+    border: 1px solid var(--secondary-color);
 }
 
 .btn-add:hover {
     background-color: var(--secondary-dark);
+    border-color: var(--secondary-dark);
 }
 
-/* View Button */
+/* View Button (EXACT same as Customers page) */
 .view-btn {
     background-color: var(--primary-light);
     color: white;
-    margin-right: var(--spacing-xs);
+    border: 1px solid var(--primary-light);
 }
 
 .view-btn:hover {
     background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
 }
 
 /* Edit Button */
 .edit-btn {
     background-color: var(--warning-color);
     color: #212529;
-    margin-right: var(--spacing-xs);
+    border: 1px solid var(--warning-color);
 }
 
 .edit-btn:hover {
     background-color: var(--warning-dark);
+    border-color: var(--warning-dark);
 }
 
 /* Delete Button */
 .delete-btn {
     background-color: var(--danger-color);
     color: white;
+    border: 1px solid var(--danger-color);
 }
 
 .delete-btn:hover {
     background-color: var(--danger-dark);
+    border-color: var(--danger-dark);
 }
 
+/* Back Link */
 .back-link {
-    display: inline-block;
-    margin-top: var(--spacing-md);
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
     color: var(--primary-color);
     font-weight: bold;
+    text-decoration: none;
+}
+
+.back-link:before {
+    content: "←";
+    margin-right: var(--spacing-xs);
 }
 
 /* Mobile Responsive Cards */
@@ -139,5 +167,9 @@ th {
 
     .user-card .btn {
         margin-left: var(--spacing-xs);
+    }
+
+    h1 {
+        font-size: var(--font-size-lg);
     }
 }

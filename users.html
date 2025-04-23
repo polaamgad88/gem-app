@@ -14,11 +14,19 @@
 
 <body>
     <div class="container">
+        <!-- Back to Dashboard Link -->
         <a href="delegate-landing.html" class="back-link">Back to Dashboard</a>
+
+        <!-- Page Heading -->
         <h1>All Users</h1>
 
+        <div class="search-container">
+            <label for="user-search">Search by Username:</label>
+            <input type="search" id="user-search" placeholder="Type username...">
+        </div>
 
 
+        <!-- Table View -->
         <div class="table-responsive">
             <table>
                 <thead>
@@ -38,9 +46,11 @@
             </table>
         </div>
 
+        <!-- Card View (for Mobile) -->
         <div class="card-view" style="display: none;">
             <div id="user-cards"></div>
         </div>
+
         <div class="actions-row">
             <button id="create-user-btn" class="btn btn-add">➕ Create User</button>
         </div>

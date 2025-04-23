@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const token = localStorage.getItem("access_token");
-  if (!token) return alert("Not authenticated");
+  const token = await Utils.Auth.requireAuth();
+  if (!token) return;
 
   await loadUsers(token);
 
@@ -8,9 +8,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "create-user.html";
   });
 
+  // Search event listener
+  document.getElementById("user-search").addEventListener("input", (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    filterUsers(searchTerm);
+  });
+
   toggleView();
   window.addEventListener("resize", toggleView);
 });
+
+let allUsers = [];
 
 async function loadUsers(token) {
   try {
@@ -19,55 +27,8 @@ async function loadUsers(token) {
     });
 
     const data = await res.json();
-    const users = data.users || [];
-
-    const tableBody = document.getElementById("users-table-body");
-    const cardContainer = document.getElementById("user-cards");
-
-    tableBody.innerHTML = "";
-    cardContainer.innerHTML = "";
-
-    users.forEach((user, index) => {
-      // Table Row
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${user.username}</td>
-          <td>${user.role}</td>
-          <td>${user.assigned_to || "—"}</td>
-          <td>${user.email || "—"}</td>
-          <td>${user.phone || "—"}</td>
-          <td>
-            <button class="view-btn" onclick="viewUser(${
-              user.user_id
-            })">View</button>
-            <button class="delete-btn" onclick="deleteUser(${
-              user.user_id
-            })">Delete</button>
-          </td>
-        `;
-      tableBody.appendChild(tr);
-
-      // Card View
-      const card = document.createElement("div");
-      card.className = "user-card";
-      card.innerHTML = `
-          <p><strong>Username:</strong> ${user.username}</p>
-          <p><strong>Role:</strong> ${user.role}</p>
-          <p><strong>Assigned To:</strong> ${user.assigned_to || "—"}</p>
-          <p><strong>Email:</strong> ${user.email || "—"}</p>
-          <p><strong>Phone:</strong> ${user.phone || "—"}</p>
-          <div class="card-actions">
-            <button class="view-btn" onclick="viewUser(${
-              user.user_id
-            })">View</button>
-            <button class="delete-btn" onclick="deleteUser(${
-              user.user_id
-            })">Delete</button>
-          </div>
-        `;
-      cardContainer.appendChild(card);
-    });
+    allUsers = data.users || []; // Store globally for filtering
+    renderUsers(allUsers);
   } catch (err) {
     console.error("Failed to load users:", err);
     alert("Could not load users.");
@@ -108,7 +69,7 @@ async function deleteUser(userId) {
 
     if (res.ok) {
       alert("User deleted successfully");
-      window.location.reload();
+      await loadUsers(token); // Refresh the list after deletion
     } else {
       alert(data.message || "Failed to delete user");
     }
@@ -116,4 +77,65 @@ async function deleteUser(userId) {
     console.error("Error deleting user:", err);
     alert("Error deleting user");
   }
+}
+
+function renderUsers(users) {
+  const tableBody = document.getElementById("users-table-body");
+  const cardContainer = document.getElementById("user-cards");
+
+  tableBody.innerHTML = "";
+  cardContainer.innerHTML = "";
+
+  users.forEach((user, index) => {
+    // Table row
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${user.username} - ${user.user_id}</td>
+      <td>${user.role}</td>
+      <td>${user.assigned_to_username || "—"} - ${
+      user.assigned_to_user_id || "—"
+    }</td>
+      <td>${user.email || "—"}</td>
+      <td>${user.phone || "—"}</td>
+      <td>
+        <button class="btn view-btn" onclick="viewUser(${
+          user.user_id
+        })">View</button>
+        <button class="btn delete-btn" onclick="deleteUser(${
+          user.user_id
+        })">Delete</button>
+      </td>
+    `;
+    tableBody.appendChild(tr);
+
+    // Card view
+    const card = document.createElement("div");
+    card.className = "user-card";
+    card.innerHTML = `
+      <p><strong>Username:</strong> ${user.username} - ${user.user_id}</p>
+      <p><strong>Role:</strong> ${user.role}</p>
+      <p><strong>Assigned To:</strong> ${user.assigned_to_username || "—"} - ${
+      user.assigned_to_user_id || "—"
+    }</p>
+      <p><strong>Email:</strong> ${user.email || "—"}</p>
+      <p><strong>Phone:</strong> ${user.phone || "—"}</p>
+      <div class="card-actions">
+        <button class="btn view-btn" onclick="viewUser(${
+          user.user_id
+        })">View</button>
+        <button class="btn delete-btn" onclick="deleteUser(${
+          user.user_id
+        })">Delete</button>
+      </div>
+    `;
+    cardContainer.appendChild(card);
+  });
+}
+
+function filterUsers(searchTerm) {
+  const filteredUsers = allUsers.filter((user) =>
+    user.username.toLowerCase().includes(searchTerm)
+  );
+  renderUsers(filteredUsers);
 }

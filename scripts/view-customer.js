@@ -3,7 +3,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const customerId = new URLSearchParams(window.location.search).get(
     "customer_id"
   );
-  const token = localStorage.getItem("access_token");
+  const token = await Utils.Auth.requireAuth();
+  if (!token) return;
 
   if (!customerId || !token) {
     alert("Missing customer ID or access token.");
