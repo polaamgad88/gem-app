@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create User</title>
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/create-user.css" />
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/create-user.js" defer></script>
+    <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
+</head>
+
+<body>
+    <div class="container">
+        <a href="users.html" class="back-link">Back to Users</a>
+        <h1>Create New User</h1>
+
+        <form id="create-user-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required />
+
+            <label for="phone">Phone:</label>
+            <input type="number" id="phone" name="phone" required />
+
+            <label for="email">email:</label>
+            <input type="email" id="email" name="email" required />
+
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="">Select Role</option>
+                <option value="delegate">Delegate</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="manager">Manager</option>
+                <option value="financial">Financial</option>
+            </select>
+
+            <label for="assigned-to">Assigned To (User):</label>
+            <select id="assigned-to" name="assigned_to">
+                <option value="">None</option>
+            </select>
+
+            <div>
+                <label style="width: 20%;" for="is-admin">
+                    Is Admin
+                </label>
+                <input style="width: 80%;" type="checkbox" id="is-admin" name="admin" />
+            </div>
+            <button type="submit" class="btn btn-add">➕ Create User</button>
+        </form>
+    </div>
+</body>
+
+</html>

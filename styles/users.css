@@ -136,6 +136,18 @@ th {
     margin-right: var(--spacing-xs);
 }
 
+.admin-user {
+    color: var(--secondary-color);
+    /* Green color */
+    font-weight: bold;
+}
+
+.admin-badge::before {
+    content: "🛡️ ";
+    /* Shield emoji */
+}
+
+
 /* Mobile Responsive Cards */
 @media (max-width: 768px) {
     table {

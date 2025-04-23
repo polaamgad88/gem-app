@@ -87,11 +87,16 @@ function renderUsers(users) {
   cardContainer.innerHTML = "";
 
   users.forEach((user, index) => {
-    // Table row
+    const isAdmin = user.admin; // Check admin flag
+    const usernameDisplay = isAdmin
+      ? `<span class="admin-user admin-badge">${user.username} - ${user.user_id}</span>`
+      : `${user.username} - ${user.user_id}`;
+
+    // Table Row
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${index + 1}</td>
-      <td>${user.username} - ${user.user_id}</td>
+      <td>${usernameDisplay}</td>
       <td>${user.role}</td>
       <td>${user.assigned_to_username || "—"} - ${
       user.assigned_to_user_id || "—"
@@ -109,11 +114,11 @@ function renderUsers(users) {
     `;
     tableBody.appendChild(tr);
 
-    // Card view
+    // Card View
     const card = document.createElement("div");
     card.className = "user-card";
     card.innerHTML = `
-      <p><strong>Username:</strong> ${user.username} - ${user.user_id}</p>
+      <p><strong>Username:</strong> ${usernameDisplay}</p>
       <p><strong>Role:</strong> ${user.role}</p>
       <p><strong>Assigned To:</strong> ${user.assigned_to_username || "—"} - ${
       user.assigned_to_user_id || "—"
