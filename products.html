@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products</title>
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/products.css" />
+    <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
+    <script src="./scripts/utils.js" defer></script>
+    <script src="./scripts/products.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <a href="delegate-landing.html" class="back-link">Back to Dashboard</a>
+        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
+        <h1>Products</h1>
+
+        <!-- Filters -->
+        <div class="filters d-flex justify-content-between mb-4">
+            <div class="d-flex gap-3">
+                <div>
+                    <label for="brand-filter">Brand:</label>
+                    <select id="brand-filter"></select>
+                </div>
+                <div>
+                    <label for="category-filter">Category:</label>
+                    <select id="category-filter"></select>
+                </div>
+            </div>
+            <div class="search-barcode">
+                <label for="barcode-search">Search by Barcode:</label>
+                <input id="barcode-search" type="search" placeholder="Enter barcode..." />
+            </div>
+        </div>
+
+
+        <!-- Table View -->
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Brand</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Card View -->
+        <div class="card-view" style="display: none;">
+            <div id="productCards"></div>
+        </div>
+        
+    </div>
+</body>
+
+</html>
