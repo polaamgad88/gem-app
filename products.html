@@ -35,6 +35,10 @@
                 <input id="barcode-search" type="search" placeholder="Enter barcode..." />
             </div>
         </div>
+        <div class="actions-row text-right mb-4">
+            <button class="btn btn-add" onclick="openExportDialog()">📤 Export Products</button>
+            <button class="btn edit-btn" onclick="openImportDialog()">📥 Import Products</button>
+        </div>
 
 
         <!-- Table View -->
@@ -58,8 +62,99 @@
         <div class="card-view" style="display: none;">
             <div id="productCards"></div>
         </div>
-        
+
     </div>
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="modal-title">Edit Product</h2>
+            <form id="product-form">
+                <input type="hidden" id="product-id" />
+                <div>
+                    <label>Product Name:</label>
+                    <input type="text" id="product-name" required />
+                </div>
+                <div>
+                    <label>Barcode:</label>
+                    <input type="text" id="bar-code" required />
+                </div>
+                <div>
+                    <label>Brand:</label>
+                    <input type="text" id="brand" required />
+                </div>
+                <div>
+                    <label>Category:</label>
+                    <input type="text" id="category" required />
+                </div>
+                <div>
+                    <label>Description:</label>
+                    <textarea id="description"></textarea>
+                </div>
+                <div>
+                    <label>Price:</label>
+                    <input type="number" step="0.01" id="price" required />
+                </div>
+                <div>
+                    <label>Image:</label>
+                    <input type="file" id="image" />
+                </div>
+                <div class="note-text" id="image-note"
+                    style="color: var(--gray-600); font-size: var(--font-size-sm); margin-top: var(--spacing-xs);">
+                    If you don’t choose a new image, the existing image will be kept.
+                </div>
+                <div id="modal-error-message"
+                    style="color: var(--danger-color); margin-top: var(--spacing-sm); display: none;"></div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-add">Save</button>
+                    <button type="button" class="btn delete-btn" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="export-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Export Products</h2>
+            <p>Choose what to export:</p>
+            <div class="option-buttons">
+                <button type="button" class="option-btn" data-value="all" onclick="selectExportOption(this)">All
+                    Products</button>
+                <button type="button" class="option-btn" data-value="filtered"
+                    onclick="selectExportOption(this)">Filtered (Viewed) Products</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-add" onclick="handleExport()">Export</button>
+                <button class="btn delete-btn" onclick="closeExportDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="import-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Import Products</h2>
+            <p>Select Import Mode:</p>
+            <div class="option-buttons">
+                <button type="button" class="option-btn" data-value="patch-edit"
+                    onclick="selectImportOption(this)">Patch Edit Existing</button>
+                <button type="button" class="option-btn" data-value="patch-add" onclick="selectImportOption(this)">Patch
+                    Add New</button>
+            </div>
+            <div style="margin-top: var(--spacing-md);">
+                <label>Select File (Excel / CSV):</label>
+                <input type="file" id="import-file" />
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-add" onclick="handleImport()">Upload</button>
+                <button class="btn delete-btn" onclick="closeImportDialog()">Cancel</button>
+            </div>
+            <div id="import-error-message"
+                style="color: var(--danger-color); margin-top: var(--spacing-sm); display: none;"></div>
+        </div>
+    </div>
+
 </body>
 
 </html>

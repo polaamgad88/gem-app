@@ -100,12 +100,13 @@ async function fetchAndRenderProducts(token) {
           <button class="btn btn-view" onclick="location.href='view-product.html?product_id=${
             product.product_id
           }'">View</button>
-          <button class="btn btn-edit" onclick="location.href='edit-product.html?product_id=${
-            product.product_id
-          }'">Edit</button>
-          <button class="btn btn-copy" onclick="location.href='copy-product.html?product_id=${
-            product.product_id
-          }'">Copy</button>
+         <button class="btn btn-edit" onclick="openProductDialog('edit', ${
+           product.product_id
+         })">Edit</button>
+         <button class="btn btn-copy" onclick="openProductDialog('copy', ${
+           product.product_id
+         })">Copy</button>
+
           <button class="btn btn-delete" onclick="deleteProduct(${
             product.product_id
           })">Delete</button>
@@ -168,5 +169,192 @@ async function deleteProduct(id) {
   } catch (error) {
     alert("Something went wrong during deletion.");
     console.error(error);
+  }
+}
+
+let currentAction = "edit"; // or "copy"
+
+function openProductDialog(action, productId) {
+  currentAction = action;
+  const modal = document.getElementById("product-modal");
+  const form = document.getElementById("product-form");
+  const title = document.getElementById("modal-title");
+  const errorMsg = document.getElementById("modal-error-message");
+
+  errorMsg.style.display = "none"; // Clear previous error
+  title.textContent = action === "copy" ? "Copy Product" : "Edit Product";
+
+  fetch(`http://localhost:5000/product/find/${productId}`)
+    .then((res) => res.json())
+    .then(({ data }) => {
+      document.getElementById("product-id").value = productId;
+
+      if (action === "edit") {
+        document.getElementById("product-name").value = data.product_name;
+        document.getElementById("bar-code").value = data.bar_code;
+      } else {
+        // Clear name and barcode for copy
+        document.getElementById("product-name").value = "";
+        document.getElementById("bar-code").value = "";
+      }
+
+      document.getElementById("brand").value = data.brand;
+      document.getElementById("category").value = data.category;
+      document.getElementById("description").value = data.description;
+      document.getElementById("price").value = data.price;
+      modal.style.display = "flex";
+    });
+}
+
+function closeModal() {
+  document.getElementById("product-modal").style.display = "none";
+  document.getElementById("product-form").reset();
+}
+document
+  .getElementById("product-form")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("access_token");
+    const formData = new FormData();
+
+    const id = document.getElementById("product-id").value;
+    formData.append(
+      "product_name",
+      document.getElementById("product-name").value
+    );
+    formData.append("bar_code", document.getElementById("bar-code").value);
+    formData.append("brand", document.getElementById("brand").value);
+    formData.append("category", document.getElementById("category").value);
+    formData.append(
+      "description",
+      document.getElementById("description").value
+    );
+    formData.append("price", document.getElementById("price").value);
+
+    const file = document.getElementById("image").files[0];
+    if (file) formData.append("image", file);
+
+    const url =
+      currentAction === "edit"
+        ? `http://localhost:5000/product/edit/${id}`
+        : `http://localhost:5000/product/copy/${id}`;
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const result = await res.json();
+      const errorMsg = document.getElementById("modal-error-message");
+
+      if (res.ok) {
+        alert(result.message);
+        closeModal();
+        fetchAndRenderProducts(token);
+      } else {
+        errorMsg.textContent = result.message || "Something went wrong.";
+        errorMsg.style.display = "block";
+      }
+    } catch (error) {
+      const errorMsg = document.getElementById("modal-error-message");
+      errorMsg.textContent = "Network error. Please try again.";
+      errorMsg.style.display = "block";
+    }
+  });
+// EXPORT Logic
+function openExportDialog() {
+  document.getElementById("export-modal").style.display = "flex";
+}
+
+function closeExportDialog() {
+  document.getElementById("export-modal").style.display = "none";
+}
+let selectedExportType = "all";
+let selectedImportMode = "patch-edit";
+
+function selectExportOption(button) {
+  document
+    .querySelectorAll("#export-modal .option-btn")
+    .forEach((btn) => btn.classList.remove("selected"));
+  button.classList.add("selected");
+  selectedExportType = button.getAttribute("data-value");
+}
+
+function selectImportOption(button) {
+  document
+    .querySelectorAll("#import-modal .option-btn")
+    .forEach((btn) => btn.classList.remove("selected"));
+  button.classList.add("selected");
+  selectedImportMode = button.getAttribute("data-value");
+}
+
+async function handleExport() {
+  const token = localStorage.getItem("access_token");
+
+  const params = new URLSearchParams();
+  if (selectedExportType === "filtered") {
+    const brand = document.getElementById("brand-filter").value;
+    const category = document.getElementById("category-filter").value;
+    const barcode = document.getElementById("barcode-search").value.trim();
+    if (brand) params.append("brand", brand);
+    if (category) params.append("category", category);
+    if (barcode) params.append("barcode", barcode);
+  }
+
+  const url = `http://localhost:5000/products/export?${params.toString()}`;
+  window.open(url, "_blank");
+  closeExportDialog();
+}
+
+// IMPORT Logic
+function openImportDialog() {
+  document.getElementById("import-modal").style.display = "flex";
+  document.getElementById("import-error-message").style.display = "none";
+}
+
+function closeImportDialog() {
+  document.getElementById("import-modal").style.display = "none";
+  document.getElementById("import-file").value = ""; // Reset file input
+}
+
+async function handleImport() {
+  const token = localStorage.getItem("access_token");
+  const fileInput = document.getElementById("import-file");
+  const errorMsg = document.getElementById("import-error-message");
+
+  errorMsg.style.display = "none";
+
+  if (!fileInput.files.length) {
+    errorMsg.textContent = "Please select a file to upload.";
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+  formData.append("mode", selectedImportMode);
+
+  try {
+    const res = await fetch("http://localhost:5000/products/import", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      alert("Import successful: " + result.message);
+      closeImportDialog();
+      fetchAndRenderProducts(token);
+    } else {
+      errorMsg.textContent = result.message || "Import failed.";
+      errorMsg.style.display = "block";
+    }
+  } catch (error) {
+    errorMsg.textContent = "Network error. Please try again.";
+    errorMsg.style.display = "block";
   }
 }
