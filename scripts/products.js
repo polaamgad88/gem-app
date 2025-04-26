@@ -229,7 +229,6 @@ function openProductDialog(action, productId) {
   const token = localStorage.getItem("access_token");
 
   errorMsg.style.display = "none"; // Clear previous error
-  title.textContent = action === "copy" ? "Copy Product" : "Edit Product";
 
   fetch(`http://localhost:5000/product/find/${productId}`, {
     headers: {

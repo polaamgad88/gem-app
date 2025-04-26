@@ -58,7 +58,7 @@ table {
 
 th,
 td {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     text-align: center;
     border-bottom: 1px solid var(--gray-200);
 }
