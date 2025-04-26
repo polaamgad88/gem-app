@@ -15,13 +15,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Fetch all required data in parallel
     const [brands, categories, products, customers] = await Promise.all([
-      fetchList("http://localhost:5000/products/brands", "brands", token),
       fetchList(
-        "http://localhost:5000/products/categories",
+        "http://localhost:5000/products/brands/orders",
+        "brands",
+        token
+      ),
+      fetchList(
+        "http://localhost:5000/products/categories/orders",
         "categories",
         token
       ),
-      fetchList("http://localhost:5000/products", "data", token),
+      fetchList("http://localhost:5000/products/orders", "data", token),
       fetchList("http://localhost:5000/customers", "customers", token),
     ]);
 
@@ -46,6 +50,9 @@ async function fetchList(url, key, token) {
     });
     if (!res.ok) return [];
     const json = await res.json();
+    if (key === "data") {
+      return json[key] || [];
+    }
     return json[key] || [];
   } catch (err) {
     console.error("Fetch error:", err);
@@ -246,10 +253,10 @@ function addCombinedRow(container, brands) {
 
     // Endpoint changes depending on if brand is selected
     const url = selectedBrand
-      ? `http://localhost:5000/products/categories?brand=${encodeURIComponent(
+      ? `http://localhost:5000/products/categories/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`
-      : `http://localhost:5000/products/categories`;
+      : `http://localhost:5000/products/categories/orders`;
 
     categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
 
@@ -290,9 +297,12 @@ function addCombinedRow(container, brands) {
     const query = queryParts.join("&");
 
     try {
-      const res = await fetch(`http://localhost:5000/products?${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:5000/products/orders?${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (!res.ok) return;
 
@@ -396,13 +406,17 @@ async function updateOrderPreview() {
         .filter(Boolean)
         .join("&");
 
-      const res = await fetch(`http://localhost:5000/products?${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:5000/products/orders?${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (!res.ok) continue;
 
       const data = await res.json();
       (data.data || []).forEach((p) => {
+        if (p.availability === "Unavailable" || p.visability == 0) return;
         const key = String(p.product_id);
         productQuantities.set(key, (productQuantities.get(key) || 0) + qty);
       });
@@ -423,7 +437,7 @@ async function updateOrderPreview() {
     for (const [productId, quantity] of productQuantities.entries()) {
       // Fetch product details with proper authorization
       const res = await fetch(
-        `http://localhost:5000/product/find/${productId}`,
+        `http://localhost:5000/product/order/find/${productId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -475,11 +489,6 @@ async function updateOrderPreview() {
         <td style="text-align:right;">EGP ${total}</td>
       `;
       previewBody.appendChild(row);
-
-      // Log image loading for debugging
-      console.log(
-        `Added product ${productId} with image path: ${data.image_path}, URL: ${photoUrl}`
-      );
     }
   } catch (err) {
     console.error("Error rendering preview:", err);
@@ -530,9 +539,12 @@ async function submitOrder(token) {
       if (category) queryParts.push(`category=${encodeURIComponent(category)}`);
       const query = queryParts.join("&");
 
-      const res = await fetch(`http://localhost:5000/products?${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:5000/products/orders?${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (res.ok) {
         const data = await res.json();
