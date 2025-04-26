@@ -16,17 +16,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Fetch all required data in parallel
     const [brands, categories, products, customers] = await Promise.all([
       fetchList(
-        "http://localhost:5000/products/brands/orders",
+        "http://192.168.158.63:5000/products/brands/orders",
         "brands",
         token
       ),
       fetchList(
-        "http://localhost:5000/products/categories/orders",
+        "http://192.168.158.63:5000/products/categories/orders",
         "categories",
         token
       ),
-      fetchList("http://localhost:5000/products/orders", "data", token),
-      fetchList("http://localhost:5000/customers", "customers", token),
+      fetchList("http://192.168.158.63:5000/products/orders", "data", token),
+      fetchList("http://192.168.158.63:5000/customers", "customers", token),
     ]);
 
     populateCustomerDropdown(customers);
@@ -87,7 +87,7 @@ function setupEventListeners(token) {
       try {
         Utils.UI.showLoader("loader");
         const res = await fetch(
-          `http://localhost:5000/customers/${id}/addresses`,
+          `http://192.168.158.63:5000/customers/${id}/addresses`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -139,7 +139,16 @@ function setupAddRowButtons(brands, categoryOptions, productOptions) {
 // Helper function to add a detailed order row
 function addOrderRow(container, brands, products) {
   const row = document.createElement("div");
+
   row.className = "order-row";
+  const scrollable = document.querySelector(".order-rows-scrollable-detailed");
+  if (scrollable) {
+    scrollable.style.display = "block";
+  }
+  const barcodeInput = document.createElement("input");
+  barcodeInput.className = "barcode-input";
+  barcodeInput.type = "number";
+  barcodeInput.placeholder = "Search by barcode...";
 
   const brandSelect = document.createElement("select");
   brandSelect.className = "brand-select";
@@ -147,6 +156,10 @@ function addOrderRow(container, brands, products) {
   brands.forEach((b) => {
     brandSelect.innerHTML += `<option value="${b}">${b}</option>`;
   });
+
+  const categorySelect = document.createElement("select");
+  categorySelect.className = "category-select";
+  categorySelect.innerHTML = `<option value="">Select Category</option>`;
 
   const productSelect = document.createElement("select");
   productSelect.className = "product-select";
@@ -169,20 +182,120 @@ function addOrderRow(container, brands, products) {
   };
 
   row.appendChild(brandSelect);
+  row.appendChild(barcodeInput);
+  row.appendChild(categorySelect);
   row.appendChild(productSelect);
   row.appendChild(quantityInput);
   row.appendChild(deleteBtn);
 
-  // Preserve scroll position
   const scrollTopBefore = window.scrollY;
   container.appendChild(row);
   window.scrollTo({ top: scrollTopBefore, behavior: "instant" });
 
-  // Brand select change event
-  brandSelect.onchange = () => {
+  // Helper: Lock fields after product selection
+  function lockFields(selectedProduct) {
+    brandSelect.style.display = "none";
+    barcodeInput.style.display = "none";
+    categorySelect.style.display = "none";
+    productSelect.style.display = "none";
+    brandSelect.disabled = true;
+    barcodeInput.disabled = true;
+    categorySelect.disabled = true;
+    productSelect.disabled = true;
+
+    const productInfoWrapper = document.createElement("div");
+    productInfoWrapper.className = "locked-product-wrapper";
+
+    const lockedProductText = document.createElement("div");
+    lockedProductText.className = "locked-product-name";
+    lockedProductText.textContent = selectedProduct.product_name;
+
+    const quantityWrapper = document.createElement("div");
+    quantityWrapper.className = "quantity-wrapper";
+    quantityWrapper.appendChild(quantityInput); // Your existing quantity input
+
+    productInfoWrapper.appendChild(lockedProductText);
+    productInfoWrapper.appendChild(quantityWrapper);
+
+    // Create delete button container inline
+    const deleteWrapper = document.createElement("div");
+    deleteWrapper.className = "delete-wrapper";
+    deleteWrapper.appendChild(deleteBtn);
+
+    productInfoWrapper.appendChild(deleteWrapper);
+    productSelect.replaceWith(productInfoWrapper);
+    productSelect.replaceWith(productInfoWrapper);
+    row.dataset.productId = selectedProduct.product_id;
+    row.dataset.productPrice = selectedProduct.price;
+
+    debouncePreviewUpdate();
+    updateTotals();
+  }
+
+  // Barcode search logic
+  barcodeInput.addEventListener("input", async () => {
+    const barcode = barcodeInput.value.trim();
+    if (!barcode) return;
+
+    const token = localStorage.getItem("access_token");
+
+    try {
+      const res = await fetch(
+        `http://192.168.158.63:5000/product/order/search_by_barcode?barcode=${encodeURIComponent(
+          barcode
+        )}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) return;
+
+      const data = await res.json();
+      const productsFound = data.data || [];
+      console.log(productsFound);
+      if (productsFound.length === 1) {
+        lockFields(productsFound[0]); // ✅ Lock if one match
+      }
+    } catch (err) {
+      console.error("Barcode search failed:", err);
+    }
+  });
+
+  // Brand change — populate categories
+  brandSelect.onchange = async () => {
+    categorySelect.innerHTML = `<option value="">Select Category</option>`;
+    const token = localStorage.getItem("access_token");
+    const selectedBrand = brandSelect.value;
+
+    if (!selectedBrand) return;
+
+    try {
+      const res = await fetch(
+        `http://192.168.158.63:5000/products/categories/orders?brand=${encodeURIComponent(
+          selectedBrand
+        )}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      const categories = data.categories || [];
+      categories.forEach((cat) => {
+        categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+      });
+    } catch (err) {
+      console.error("Category loading failed:", err);
+    }
+  };
+
+  // Category change — populate products
+  categorySelect.onchange = () => {
     productSelect.innerHTML = `<option value="">Select Product</option>`;
+    const selectedBrand = brandSelect.value;
+    const selectedCategory = categorySelect.value;
+
     const filteredProducts = products.filter(
-      (p) => p.brand === brandSelect.value
+      (p) => p.brand === selectedBrand && p.category === selectedCategory
     );
     filteredProducts.forEach((p) => {
       productSelect.innerHTML += `<option value="${p.product_id}" data-price="${p.price}">${p.product_name}</option>`;
@@ -191,13 +304,18 @@ function addOrderRow(container, brands, products) {
     updateTotals();
   };
 
-  // Product select change event
+  // Product manual select logic
   productSelect.onchange = () => {
-    debouncePreviewUpdate();
-    updateTotals();
+    const selectedId = productSelect.value;
+    if (selectedId) {
+      const selectedProduct = products.find((p) => p.product_id == selectedId);
+      if (selectedProduct) {
+        lockFields(selectedProduct); // ✅ Lock after manual selection
+      }
+    }
   };
 
-  // Quantity input event
+  // Quantity event
   quantityInput.oninput = () => {
     debouncePreviewUpdate();
     updateTotals();
@@ -208,7 +326,11 @@ function addOrderRow(container, brands, products) {
 function addCombinedRow(container, brands) {
   const row = document.createElement("div");
   row.classList.add("order-row");
+  const scrollable = document.querySelector(".order-rows-scrollable-combined");
 
+  if (scrollable) {
+    scrollable.style.display = "block";
+  }
   const brandSelect = document.createElement("select");
   brandSelect.className = "brand-select";
   brandSelect.innerHTML = `<option value="">Select Brand</option>`;
@@ -253,10 +375,10 @@ function addCombinedRow(container, brands) {
 
     // Endpoint changes depending on if brand is selected
     const url = selectedBrand
-      ? `http://localhost:5000/products/categories/orders?brand=${encodeURIComponent(
+      ? `http://192.168.158.63:5000/products/categories/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`
-      : `http://localhost:5000/products/categories/orders`;
+      : `http://192.168.158.63:5000/products/categories/orders`;
 
     categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
 
@@ -298,7 +420,7 @@ function addCombinedRow(container, brands) {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/products/orders?${query}`,
+        `http://192.168.158.63:5000/products/orders?${query}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -337,19 +459,19 @@ function updateTotals() {
   let totalPrice = 0;
 
   document.querySelectorAll(".order-row").forEach((row) => {
-    if (row.dataset.totalItems && row.dataset.totalPrice) {
-      totalItems += parseInt(row.dataset.totalItems);
-      totalPrice += parseFloat(row.dataset.totalPrice);
-    } else {
-      const qty = parseInt(row.querySelector(".quantity-input")?.value) || 0;
-      const price =
-        parseFloat(
-          row.querySelector(".product-select")?.selectedOptions[0]?.dataset
-            ?.price || 0
-        ) || 0;
-      totalItems += qty;
-      totalPrice += qty * price;
-    }
+    const qty = parseInt(row.querySelector(".quantity-input")?.value) || 0;
+
+    // ✅ Use the stored product price if locked
+    const price =
+      parseFloat(row.dataset.productPrice) ||
+      parseFloat(
+        row.querySelector(".product-select")?.selectedOptions[0]?.dataset
+          ?.price || 0
+      ) ||
+      0;
+
+    totalItems += qty;
+    totalPrice += qty * price;
   });
 
   document.getElementById("total-items").textContent = totalItems;
@@ -370,17 +492,17 @@ async function updateOrderPreview() {
   const loader = document.getElementById("preview-loader");
   const token = localStorage.getItem("access_token");
 
-  // Show loader and clear table
+  // Show loader and clear the preview area
   loader.style.display = "block";
   previewBody.innerHTML = "";
 
   const productQuantities = new Map();
 
-  // Collect from Detailed Order
+  // Collect from Detailed Order rows
   document
     .querySelectorAll("#detailed-order-rows .order-row")
     .forEach((row) => {
-      const productId = row.querySelector(".product-select")?.value;
+      const productId = row.dataset.productId;
       const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
       if (productId && qty > 0) {
         const key = String(productId);
@@ -388,7 +510,7 @@ async function updateOrderPreview() {
       }
     });
 
-  // Collect from Combined Order
+  // Collect from Combined Order rows
   try {
     const combinedRows = document.querySelectorAll(
       "#combined-order-rows .order-row"
@@ -406,17 +528,20 @@ async function updateOrderPreview() {
         .filter(Boolean)
         .join("&");
 
-      const res = await fetch(
-        `http://localhost:5000/products/orders?${query}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`http://192.168.158.63:5000/products?${query}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       if (!res.ok) continue;
 
       const data = await res.json();
       (data.data || []).forEach((p) => {
-        if (p.availability === "Unavailable" || p.visability == 0) return;
+        if (
+          p.visability == 0 ||
+          p.availability === "Unavailable" ||
+          p.availability <= 0
+        )
+          return;
         const key = String(p.product_id);
         productQuantities.set(key, (productQuantities.get(key) || 0) + qty);
       });
@@ -425,19 +550,18 @@ async function updateOrderPreview() {
     console.error("Error collecting combined order products:", err);
   }
 
-  // Show "no items" if empty
+  // Show "no items" if nothing selected
   if (productQuantities.size === 0) {
-    previewBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:10px;">No items selected</td></tr>`;
+    previewBody.innerHTML = `<div style="text-align:center; padding:10px;">No items selected</div>`;
     loader.style.display = "none";
     return;
   }
 
-  // Render merged preview
+  // Render product cards
   try {
     for (const [productId, quantity] of productQuantities.entries()) {
-      // Fetch product details with proper authorization
       const res = await fetch(
-        `http://localhost:5000/product/order/find/${productId}`,
+        `http://192.168.158.63:5000/product/order/find/${productId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -450,7 +574,6 @@ async function updateOrderPreview() {
 
       const result = await res.json();
       const data = result.data;
-
       if (!data) {
         console.error(`No data returned for product ${productId}`);
         continue;
@@ -459,40 +582,34 @@ async function updateOrderPreview() {
       const name = data.product_name || "Unnamed Product";
       const price = parseFloat(data.price || 0).toFixed(2);
       const total = (price * quantity).toFixed(2);
+      const photoUrl = data.image_path
+        ? `http://192.168.158.63:5000/images/${data.image_path.replace(
+            /^\/+/,
+            ""
+          )}`
+        : "";
 
-      // Fix image path construction
-      let photoUrl = "";
-      if (data.image_path) {
-        // Ensure image_path is properly formatted
-        photoUrl = `http://localhost:5000/images/${data.image_path.replace(
-          /^\/+/,
-          ""
-        )}`;
+      const card = document.createElement("div");
+      card.className = "preview-card";
 
-        // Pre-load image to verify it exists
-        const img = new Image();
-        img.src = photoUrl;
-      }
-
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>
+      card.innerHTML = `
           ${
             photoUrl
-              ? `<img src="${photoUrl}" alt="${name}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;" onerror="this.onerror=null; this.src=''; this.parentNode.innerHTML='<span>No Photo</span>';">`
-              : "<span>No Photo</span>"
+              ? `<img src="${photoUrl}" alt="${name}" />`
+              : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
           }
-        </td>
-        <td style="align-items:center; gap:8px;">${name}</td>
-        <td style="text-align:center;">${quantity}</td>
-        <td style="text-align:right;">EGP ${price}</td>
-        <td style="text-align:right;">EGP ${total}</td>
-      `;
-      previewBody.appendChild(row);
+          <div class="card-content">
+            <div class="product-name">${name}</div>
+            <div class="product-detail"><strong>Qty:</strong> ${quantity}</div>
+            <div class="product-detail"><strong>Unit Price:</strong> EGP ${price}</div>
+            <div class="product-detail"><strong>Total:</strong> EGP ${total}</div>
+          </div>
+        `;
+      previewBody.appendChild(card);
     }
   } catch (err) {
     console.error("Error rendering preview:", err);
-    previewBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:10px;">Error loading preview</td></tr>`;
+    previewBody.innerHTML = `<div style="text-align:center; padding:10px;">Error loading preview</div>`;
   }
 
   // Hide loader when done
@@ -515,7 +632,8 @@ async function submitOrder(token) {
   document
     .querySelectorAll("#detailed-order-rows .order-row")
     .forEach((row) => {
-      const productId = row.querySelector(".product-select")?.value;
+      const productId =
+        row.dataset.productId || row.querySelector(".product-select")?.value;
       const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
       if (productId && qty > 0) {
         products.push({ product_id: parseInt(productId), quantity: qty });
@@ -540,7 +658,7 @@ async function submitOrder(token) {
       const query = queryParts.join("&");
 
       const res = await fetch(
-        `http://localhost:5000/products/orders?${query}`,
+        `http://192.168.158.63:5000/products/orders?${query}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -557,7 +675,7 @@ async function submitOrder(token) {
   } catch (err) {
     console.error("Error collecting combined order products:", err);
   }
-
+  console.log(products);
   if (products.length === 0) {
     alert("Please add at least one product to the order.");
     return;
@@ -572,7 +690,7 @@ async function submitOrder(token) {
   try {
     Utils.UI.showLoader("loader");
 
-    const res = await fetch("http://localhost:5000/orders/create", {
+    const res = await fetch("http://192.168.158.63:5000/orders/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

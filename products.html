@@ -36,9 +36,11 @@
             </div>
         </div>
         <div class="actions-row text-right mb-4">
+            <button class="btn btn-add" onclick="openAddProductDialog()">➕ Add Product</button>
             <button class="btn btn-add" onclick="openExportDialog()">📤 Export Products</button>
             <button class="btn edit-btn" onclick="openImportDialog()">📥 Import Products</button>
         </div>
+
 
 
         <!-- Table View -->
@@ -77,7 +79,7 @@
                 </div>
                 <div>
                     <label>Barcode:</label>
-                    <input type="text" id="bar-code" required />
+                    <input type="number" id="bar-code" required />
                 </div>
                 <div>
                     <label>Brand:</label>

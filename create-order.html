@@ -35,7 +35,8 @@
                 Detailed Order <span class="arrow">▼</span>
             </div>
             <div id="detailed-order-content" class="tab-content" style="display: none;">
-                <div class="order-rows-scrollable" id="detailed-order-rows"></div>
+                <div class="order-rows-scrollable order-rows-scrollable-detailed" id="detailed-order-rows"
+                    style="display: none;"></div>
                 <button class="add-row-btn" data-type="detailed">Add Row</button>
             </div>
 
@@ -44,7 +45,8 @@
                 Combined Order <span class="arrow">▼</span>
             </div>
             <div id="combined-order" class="tab-content" style="display: none;">
-                <div class="order-rows-scrollable" id="combined-order-rows"></div>
+                <div class="order-rows-scrollable order-rows-scrollable-combined" id="combined-order-rows"
+                    style="display: none;"></div>
                 <button class="add-row-btn" data-type="combined">Add Row</button>
             </div>
         </div>
@@ -62,22 +64,8 @@
 
             <h3>Order Preview</h3>
             <div class="order-preview-container">
-                <table class="order-preview-table">
-                    <thead>
-                        <tr>
-                            <th>Product Image</th>
-                            <th>Product Name</th>
-                            <th style="text-align:center;">Quantity</th>
-                            <th style="text-align:right;">Unit Price (EGP)</th>
-                            <th style="text-align:right;">Total (EGP)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="order-preview-body">
-                        <tr>
-                            <td colspan="5" style="text-align:center; padding:10px;">No items selected</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div id="order-preview-body" class="order-preview-cards"></div>
+
             </div>
         </div>
 

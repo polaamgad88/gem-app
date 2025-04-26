@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Helper function to populate users dropdown
   async function populateUsers(token) {
     try {
-      const res = await fetch("http://localhost:5000/users", {
+      const res = await fetch("http://192.168.158.63:5000/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     Utils.UI.showLoader();
 
     const userId = document.getElementById("userFilter").value;
-    let url = "http://localhost:5000/orders";
+    let url = "http://192.168.158.63:5000/orders";
     if (userId !== "all") {
       url += `?user_id=${userId}`;
     }

@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function populateBrands(token) {
-  const res = await fetch("http://localhost:5000/products/brands", {
+  const res = await fetch("http://192.168.158.63:5000/products/brands", {
     headers: { Authorization: `Bearer ${token}` },
   });
   const brands = (await res.json()).brands || [];
@@ -35,10 +35,10 @@ async function populateBrands(token) {
 async function populateCategories(token) {
   const brand = document.getElementById("brand-filter").value;
   const categoryEndpoint = brand
-    ? `http://localhost:5000/products/categories?brand=${encodeURIComponent(
+    ? `http://192.168.158.63:5000/products/categories?brand=${encodeURIComponent(
         brand
       )}`
-    : `http://localhost:5000/products/categories`;
+    : `http://192.168.158.63:5000/products/categories`;
 
   const res = await fetch(categoryEndpoint, {
     headers: { Authorization: `Bearer ${token}` },
@@ -60,7 +60,7 @@ async function fetchAndRenderProducts(token) {
   if (category) params.append("category", category);
 
   const res = await fetch(
-    `http://localhost:5000/products?${params.toString()}`,
+    `http://192.168.158.63:5000/products?${params.toString()}`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -83,7 +83,7 @@ async function fetchAndRenderProducts(token) {
   cardContainer.innerHTML = "";
 
   products.forEach((product) => {
-    const imageUrl = `http://localhost:5000/images/${product.image_path}`;
+    const imageUrl = `http://192.168.158.63:5000/images/${product.image_path}`;
 
     // Table Row
     const row = document.createElement("tr");
@@ -199,7 +199,7 @@ async function deleteProduct(id) {
 
   const token = localStorage.getItem("access_token");
   try {
-    const res = await fetch(`http://localhost:5000/product/delete/${id}`, {
+    const res = await fetch(`http://192.168.158.63:5000/product/delete/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -230,7 +230,7 @@ function openProductDialog(action, productId) {
 
   errorMsg.style.display = "none"; // Clear previous error
 
-  fetch(`http://localhost:5000/product/find/${productId}`, {
+  fetch(`http://192.168.158.63:5000/product/find/${productId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -304,9 +304,16 @@ document
     if (file) formData.append("image", file);
 
     const url =
-      currentAction === "edit"
-        ? `http://localhost:5000/product/edit/${id}`
-        : `http://localhost:5000/product/copy/${id}`;
+      currentAction === "add"
+        ? `http://192.168.158.63:5000/add_product`
+        : currentAction === "edit"
+        ? `http://192.168.158.63:5000/product/edit/${id}`
+        : `http://192.168.158.63:5000/product/copy/${id}`;
+    if (currentAction === "add") {
+      document.getElementById("image-note").style.display = "none";
+    } else {
+      document.getElementById("image-note").style.display = "block";
+    }
 
     try {
       const res = await fetch(url, {
@@ -372,7 +379,7 @@ async function handleExport() {
     if (barcode) params.append("barcode", barcode);
   }
 
-  const url = `http://localhost:5000/products/export?${params.toString()}`;
+  const url = `http://192.168.158.63:5000/products/export?${params.toString()}`;
   window.open(url, "_blank");
   closeExportDialog();
 }
@@ -406,7 +413,7 @@ async function handleImport() {
   formData.append("mode", selectedImportMode);
 
   try {
-    const res = await fetch("http://localhost:5000/products/import", {
+    const res = await fetch("http://192.168.158.63:5000/products/import", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -442,7 +449,7 @@ async function toggleVisability(productId, currentVisability) {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/products/set_visability/${productId}/${newVisability}`,
+      `http://192.168.158.63:5000/products/set_visability/${productId}/${newVisability}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -461,4 +468,24 @@ async function toggleVisability(productId, currentVisability) {
     alert("Network error. Please try again.");
     console.error(error);
   }
+}
+
+function openAddProductDialog() {
+  currentAction = "add";
+  const modal = document.getElementById("product-modal");
+  const errorMsg = document.getElementById("modal-error-message");
+  errorMsg.style.display = "none"; // Clear any previous error
+
+  // Reset form and fields
+  const form = document.getElementById("product-form");
+  form.reset();
+
+  // Set default values for limits
+  document.getElementById("product-order-limit").value = -1;
+  document.getElementById("availability-limit").value = 100;
+
+  document.getElementById("product-id").value = "";
+  document.getElementById("image-note").style.display = "none"; // Only needed for edit/copy
+
+  modal.style.display = "flex";
 }

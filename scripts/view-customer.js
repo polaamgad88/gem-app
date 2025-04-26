@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const last_name = last_name_parts.join(" ");
 
       const res = await fetch(
-        `http://localhost:5000/customers/edit/${customerId}`,
+        `http://192.168.158.63:5000/customers/edit/${customerId}`,
         {
           method: "POST",
           headers: {
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const username =
         document.getElementById("delegate-dropdown").selectedOptions[0].text;
 
-      const res = await fetch("http://localhost:5000/customers/assign", {
+      const res = await fetch("http://192.168.158.63:5000/customers/assign", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -127,11 +127,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (currentEditAddressId) {
       // Edit mode
-      url = `http://localhost:5000/customers/address/edit/${currentEditAddressId}`;
+      url = `http://192.168.158.63:5000/customers/address/edit/${currentEditAddressId}`;
       body.append("address", address);
     } else {
       // Create mode
-      url = `http://localhost:5000/customers/address/create`;
+      url = `http://192.168.158.63:5000/customers/address/create`;
       body.append("customer_id", customerId);
       body.append("address", address);
     }
@@ -171,11 +171,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 async function loadCustomerAddresses(customerId, token) {
   try {
     const res = await fetch(
-      `http://localhost:5000/customers/${customerId}/addresses`,
+      `http://192.168.158.63:5000/customers/${customerId}/addresses`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
@@ -187,6 +185,7 @@ async function loadCustomerAddresses(customerId, token) {
 
     (data.addresses || []).forEach((addr) => {
       const li = document.createElement("li");
+      li.setAttribute("data-address-id", addr.address_id); // ✅ Add this line!
       li.innerHTML = `
         <span>${addr.address}</span>
         <div class="address-actions">
@@ -194,20 +193,20 @@ async function loadCustomerAddresses(customerId, token) {
           <button class="delete-btn" onclick="deleteAddress(${addr.address_id})">Delete</button>
         </div>
       `;
-
       ul.appendChild(li);
     });
   } catch (err) {
     console.error("Error loading addresses:", err);
   }
 }
+
 async function loadCustomerDetails(customerId, token) {
   try {
     const [custRes, ordersRes] = await Promise.all([
-      fetch(`http://localhost:5000/customer/find/${customerId}`, {
+      fetch(`http://192.168.158.63:5000/customer/find/${customerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
-      fetch(`http://localhost:5000/orders?customer_id=${customerId}`, {
+      fetch(`http://192.168.158.63:5000/orders?customer_id=${customerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
     ]);
@@ -309,7 +308,7 @@ function toggleOrderViews() {
 
 async function setupAddDelegateDropdown(token) {
   try {
-    const res = await fetch("http://localhost:5000/users", {
+    const res = await fetch("http://192.168.158.63:5000/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const users = (await res.json()).users;
@@ -346,7 +345,7 @@ async function removeDelegate(userId, username) {
   if (!confirm(`Are you sure you want to remove ${username}?`)) return;
 
   try {
-    const res = await fetch("http://localhost:5000/customers/deassign", {
+    const res = await fetch("http://192.168.158.63:5000/customers/deassign", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -382,12 +381,11 @@ function editAddress(addressId, oldValue) {
   document.getElementById("address-modal").style.display = "block";
 }
 
-// Handle Delete Address
 function deleteAddress(addressId) {
   const token = localStorage.getItem("access_token");
   if (!confirm("Are you sure you want to delete this address?")) return;
 
-  fetch(`http://localhost:5000/customers/address/delete/${addressId}`, {
+  fetch(`http://192.168.158.63:5000/customers/address/delete/${addressId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -396,10 +394,12 @@ function deleteAddress(addressId) {
     .then((res) => res.json())
     .then((data) => {
       if (data.message?.includes("success")) {
-        const customerId = new URLSearchParams(window.location.search).get(
-          "customer_id"
+        const addressElement = document.querySelector(
+          `[data-address-id="${addressId}"]`
         );
-        loadCustomerAddresses(customerId, token);
+        if (addressElement) {
+          addressElement.remove(); // ✅ Remove from the DOM directly
+        }
       } else {
         alert(data.message || "Failed to delete address.");
       }

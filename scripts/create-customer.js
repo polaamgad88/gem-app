@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const payload = new URLSearchParams(formData);
 
     try {
-      const res = await fetch("http://localhost:5000/customers/create", {
+      const res = await fetch("http://192.168.158.63:5000/customers/create", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
