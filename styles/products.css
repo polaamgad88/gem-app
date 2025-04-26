@@ -80,7 +80,7 @@ table img {
 /* Button Base Style */
 .btn {
     display: inline-block;
-    padding: 0.3rem 0.6rem;
+    padding: 0.3rem 0.3rem;
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -230,7 +230,7 @@ table img {
 }
 
 .modal-content form>div {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
 }
 
 .modal-content label {
@@ -242,7 +242,7 @@ table img {
 .modal-content input,
 .modal-content textarea {
     width: 100%;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     border: 1px solid var(--gray-300);
     border-radius: var(--border-radius-sm);
 }
@@ -346,6 +346,74 @@ table img {
     justify-content: flex-end;
     gap: var(--spacing-sm);
 }
+
+.btn-toggle-visability {
+    padding: 0.3rem 0.6rem;
+    font-size: var(--font-size-sm);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid;
+    cursor: pointer;
+    box-shadow: var(--box-shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-visability.btn-show {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.btn-toggle-visability.btn-show:hover {
+    background-color: var(--secondary-dark);
+    border-color: var(--secondary-dark);
+}
+
+.btn-toggle-visability.btn-hide {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+.btn-toggle-visability.btn-hide:hover {
+    background-color: var(--danger-dark);
+    border-color: var(--danger-dark);
+}
+
+.visability-badge {
+    display: inline-block;
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    margin-left: var(--spacing-xs);
+}
+
+.visible-badge {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.hidden-badge {
+    background-color: var(--gray-500);
+    color: white;
+}
+
+.available-badge {
+    /* background-color: var(--secondary-color); */
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+}
+
+.not-available-badge {
+    /* background-color: var(--danger-color); */
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+}
+
 
 
 

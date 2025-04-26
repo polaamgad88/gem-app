@@ -92,10 +92,25 @@ async function fetchAndRenderProducts(token) {
         <td>
           ${product.product_name}
           <div class="barcode-text">${product.bar_code || "-"}</div>
+          <span class="visability-badge ${
+            product.visability === 1 ? "visible-badge" : "hidden-badge"
+          }">
+            ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
+          </span>
         </td>
         <td>${product.brand}</td>
         <td>${product.category}</td>
         <td>${Utils.Format.currency(product.price)}</td>
+        <td>
+          <span class="${
+            product.availability == "Available"
+              ? "available-badge"
+              : "not-available-badge"
+          }">
+            ${product.availability == "Available" ? "🟢" : "🔴"}
+          </span>
+        </td>
+
         <td>
           <button class="btn btn-view" onclick="location.href='view-product.html?product_id=${
             product.product_id
@@ -106,7 +121,11 @@ async function fetchAndRenderProducts(token) {
          <button class="btn btn-copy" onclick="openProductDialog('copy', ${
            product.product_id
          })">Copy</button>
-
+<button class="btn btn-toggle-visability ${
+      product.visability === 1 ? "btn-hide" : "btn-show"
+    }" onclick="toggleVisability(${product.product_id}, ${product.visability})">
+  ${product.visability === 1 ? "Hide" : "Show"}
+</button>
           <button class="btn btn-delete" onclick="deleteProduct(${
             product.product_id
           })">Delete</button>
@@ -118,23 +137,49 @@ async function fetchAndRenderProducts(token) {
     card.className = "product-card";
     card.innerHTML = `
         <img src="${imageUrl}" alt="${product.product_name}" />
-        <div class="product-card-header">${product.product_name}</div>
+        <div class="product-card-header">
+          ${product.product_name}
+          <span class="visability-badge ${
+            product.visability === 1 ? "visible-badge" : "hidden-badge"
+          }">
+            ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
+          </span>
+        </div>
+
         <div class="barcode-text text-center">${product.bar_code || "-"}</div>
         <div class="product-card-body">
           <p><strong>Brand:</strong> ${product.brand}</p>
           <p><strong>Category:</strong> ${product.category}</p>
           <p><strong>Price:</strong> ${Utils.Format.currency(product.price)}</p>
+          <p><strong>Availability:</strong> 
+            <span class="${
+              product.availability == "Available"
+                ? "available-badge"
+                : "not-available-badge"
+            }">
+              ${product.availability == "Available" ? "🟢" : "🔴"}
+            </span>
+          </p>
+
         </div>
         <div class="product-card-footer text-right">
           <button class="btn btn-view" onclick="location.href='view-product.html?product_id=${
             product.product_id
           }'">View</button>
-          <button class="btn btn-edit" onclick="location.href='edit-product.html?product_id=${
+          <button class="btn btn-edit" onclick="openProductDialog('edit', ${
             product.product_id
-          }'">Edit</button>
-          <button class="btn btn-copy" onclick="location.href='copy-product.html?product_id=${
+          })">Edit</button>
+          <button class="btn btn-copy" onclick="openProductDialog('copy', ${
             product.product_id
-          }'">Copy</button>
+          })">Copy</button>
+           <button class="btn btn-toggle-visability ${
+             product.visability === 1 ? "btn-hide" : "btn-show"
+           }" onclick="toggleVisability(${product.product_id}, ${
+      product.visability
+    })">
+          ${product.visability === 1 ? "Hide" : "Show"}
+          </button>
+          
           <button class="btn btn-delete" onclick="deleteProduct(${
             product.product_id
           })">Delete</button>
@@ -181,10 +226,16 @@ function openProductDialog(action, productId) {
   const title = document.getElementById("modal-title");
   const errorMsg = document.getElementById("modal-error-message");
 
+  const token = localStorage.getItem("access_token");
+
   errorMsg.style.display = "none"; // Clear previous error
   title.textContent = action === "copy" ? "Copy Product" : "Edit Product";
 
-  fetch(`http://localhost:5000/product/find/${productId}`)
+  fetch(`http://localhost:5000/product/find/${productId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
     .then((res) => res.json())
     .then(({ data }) => {
       document.getElementById("product-id").value = productId;
@@ -202,7 +253,17 @@ function openProductDialog(action, productId) {
       document.getElementById("category").value = data.category;
       document.getElementById("description").value = data.description;
       document.getElementById("price").value = data.price;
+      document.getElementById("product-order-limit").value =
+        data.product_order_limit || "";
+      document.getElementById("availability-limit").value =
+        data.availability_limit || "";
+
       modal.style.display = "flex";
+    })
+    .catch((error) => {
+      console.error("Error fetching product data:", error);
+      errorMsg.textContent = "Failed to load product data. Please try again.";
+      errorMsg.style.display = "block";
     });
 }
 
@@ -231,6 +292,14 @@ document
       document.getElementById("description").value
     );
     formData.append("price", document.getElementById("price").value);
+    formData.append(
+      "product_order_limit",
+      document.getElementById("product-order-limit").value
+    );
+    formData.append(
+      "availability_limit",
+      document.getElementById("availability-limit").value
+    );
 
     const file = document.getElementById("image").files[0];
     if (file) formData.append("image", file);
@@ -356,5 +425,41 @@ async function handleImport() {
   } catch (error) {
     errorMsg.textContent = "Network error. Please try again.";
     errorMsg.style.display = "block";
+  }
+}
+
+async function toggleVisability(productId, currentVisability) {
+  const token = localStorage.getItem("access_token");
+  const newVisability = currentVisability === 1 ? 0 : 1;
+
+  if (
+    !confirm(
+      `Are you sure you want to ${
+        newVisability === 1 ? "Show" : "Hide"
+      } this product?`
+    )
+  )
+    return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:5000/products/set_visability/${productId}/${newVisability}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert(result.message);
+      fetchAndRenderProducts(token);
+    } else {
+      alert(result.message || "Failed to update visability.");
+    }
+  } catch (error) {
+    alert("Network error. Please try again.");
+    console.error(error);
   }
 }
