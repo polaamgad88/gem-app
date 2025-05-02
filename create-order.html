@@ -21,9 +21,12 @@
 
         <div class="order-header">
             <input type="date" id="order-date" readonly>
-            <select id="customer-select">
-                <option value="">Select Customer</option>
-            </select>
+            <div class="custom-customer-select">
+                <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off" />
+                <ul id="customer-suggestions" class="dropdown-list"></ul>
+            </div>
+            <select id="customer-select" style="display: none;"></select>
+
             <select id="address-select">
                 <option value="">Select Address</option>
             </select>

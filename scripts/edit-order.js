@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 // Helper function to fetch order details
 async function fetchOrderDetails(orderId, token) {
-  const res = await fetch(`http://192.168.158.63:5000/orders/find/${orderId}`, {
+  const res = await fetch(`http://localhost:5000/orders/find/${orderId}`, {
     headers: { Authorization: `Bearer ${token}` },
     mode: "cors",
     credentials: "include",
@@ -56,7 +56,7 @@ async function fetchOrderDetails(orderId, token) {
 async function fetchCustomerAddresses(customerId, token) {
   // Using the endpoint specified by the user
   const res = await fetch(
-    `http://192.168.158.63:5000/customers/${customerId}/addresses`,
+    `http://localhost:5000/customers/${customerId}/addresses`,
     {
       headers: { Authorization: `Bearer ${token}` },
       mode: "cors",
@@ -151,7 +151,7 @@ function populateEditableItems(order, token) {
     total += itemTotal;
 
     const imageUrl = item.image_path
-      ? `http://192.168.158.63:5000/images/${item.image_path}`
+      ? `http://localhost:5000/images/${item.image_path}`
       : "";
 
     // Add table row
@@ -286,7 +286,7 @@ function setupEventListeners(orderId, token) {
       try {
         // Fetch brands first for the dropdown
         const brandsResponse = await fetch(
-          "http://192.168.158.63:5000/products/brands",
+          "http://localhost:5000/products/brands",
           {
             headers: { Authorization: `Bearer ${token}` },
             mode: "cors",
@@ -486,7 +486,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Fetch products for the selected brand
       const res = await fetch(
-        `http://192.168.158.63:5000/products?brand=${encodeURIComponent(
+        `http://localhost:5000/products?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -532,7 +532,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Fetch products for the selected brand
       const res = await fetch(
-        `http://192.168.158.63:5000/products?brand=${encodeURIComponent(
+        `http://localhost:5000/products?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -575,7 +575,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Use the provided backend endpoint for barcode search
       const res = await fetch(
-        `http://192.168.158.63:5000/product/search_by_barcode?barcode=${encodeURIComponent(
+        `http://localhost:5000/product/search_by_barcode?barcode=${encodeURIComponent(
           barcode
         )}`,
         {
@@ -642,7 +642,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Use the provided backend endpoint for barcode search
       const res = await fetch(
-        `http://192.168.158.63:5000/product/search_by_barcode?barcode=${encodeURIComponent(
+        `http://localhost:5000/product/search_by_barcode?barcode=${encodeURIComponent(
           barcode
         )}`,
         {
@@ -786,7 +786,7 @@ function addTemporaryProductRow(brands, token) {
 async function addProductToOrder(productId, price, quantity, token) {
   try {
     // Fetch product details to get image and name
-    const res = await fetch(`http://192.168.158.63:5000/product/find/${productId}`, {
+    const res = await fetch(`http://localhost:5000/product/find/${productId}`, {
       headers: { Authorization: `Bearer ${token}` },
       mode: "cors",
       credentials: "include",
@@ -797,7 +797,7 @@ async function addProductToOrder(productId, price, quantity, token) {
     const product = await res.json();
     const productData = product.data;
     const imageUrl = productData.image_path
-      ? `http://192.168.158.63:5000/images/${productData.image_path}`
+      ? `http://localhost:5000/images/${productData.image_path}`
       : "";
 
     // Remove temporary rows/cards
@@ -951,7 +951,7 @@ async function saveOrder(orderId, token) {
     console.log("Sending order update with data:", requestData);
 
     // Send request as JSON directly
-    const res = await fetch(`http://192.168.158.63:5000/orders/edit/${orderId}`, {
+    const res = await fetch(`http://localhost:5000/orders/edit/${orderId}`, {
       method: "POST", // Using proper PUT method with JSON
       headers: {
         Authorization: `Bearer ${token}`,

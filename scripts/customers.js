@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 async function fetchCustomers(token) {
   try {
-    const res = await fetch("http://192.168.158.63:5000/customers", {
+    const res = await fetch("http://localhost:5000/customers", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();

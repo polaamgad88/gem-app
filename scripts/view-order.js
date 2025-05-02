@@ -29,7 +29,7 @@ async function fetchOrderDetails(orderId, token) {
     throw new Error("No order ID specified.");
   }
 
-  const res = await fetch(`http://192.168.158.63:5000/orders/find/${orderId}`, {
+  const res = await fetch(`http://localhost:5000/orders/find/${orderId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -77,7 +77,7 @@ function populateOrderDetails(order) {
     total += itemTotal;
 
     const imageUrl = item.image_path
-      ? `http://192.168.158.63:5000/images/${item.image_path}`
+      ? `http://localhost:5000/images/${item.image_path}`
       : "";
 
     // Add table row
@@ -136,7 +136,7 @@ function setupActionButtons(orderId, token) {
 
     try {
       const response = await fetch(
-        `http://192.168.158.63:5000/orders/confirm/${orderId}`,
+        `http://localhost:5000/orders/confirm/${orderId}`,
         {
           method: "POST",
           headers: {
@@ -174,7 +174,7 @@ function setupActionButtons(orderId, token) {
 
       try {
         const response = await fetch(
-          `http://192.168.158.63:5000/orders/refund/${orderId}`,
+          `http://localhost:5000/orders/refund/${orderId}`,
           {
             method: "POST",
             headers: {

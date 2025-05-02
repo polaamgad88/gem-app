@@ -16,17 +16,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Fetch all required data in parallel
     const [brands, categories, products, customers] = await Promise.all([
       fetchList(
-        "http://192.168.158.63:5000/products/brands/orders",
+        "http://localhost:5000/products/brands/orders",
         "brands",
         token
       ),
       fetchList(
-        "http://192.168.158.63:5000/products/categories/orders",
+        "http://localhost:5000/products/categories/orders",
         "categories",
         token
       ),
-      fetchList("http://192.168.158.63:5000/products/orders", "data", token),
-      fetchList("http://192.168.158.63:5000/customers", "customers", token),
+      fetchList("http://localhost:5000/products/orders", "data", token),
+      fetchList("http://localhost:5000/customers", "customers", token),
     ]);
 
     populateCustomerDropdown(customers);
@@ -60,15 +60,61 @@ async function fetchList(url, key, token) {
   }
 }
 
-// Helper function to populate customer dropdown
+let allCustomers = [];
+
 function populateCustomerDropdown(customers) {
-  const select = document.getElementById("customer-select");
-  select.innerHTML = `<option value="">Select Customer</option>`;
-  customers.forEach((cust) => {
-    const opt = document.createElement("option");
-    opt.value = cust.customer_id;
-    opt.textContent = `${cust.first_name} ${cust.last_name}`;
-    select.appendChild(opt);
+  allCustomers = customers.sort((a, b) => {
+    const nameA = `${a.first_name} ${a.last_name}`.toLowerCase();
+    const nameB = `${b.first_name} ${b.last_name}`.toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+
+  const searchInput = document.getElementById("customer-search");
+  const suggestions = document.getElementById("customer-suggestions");
+  const hiddenSelect = document.getElementById("customer-select");
+
+  function renderSuggestions(filtered) {
+    suggestions.innerHTML = "";
+    filtered.forEach((cust) => {
+      const li = document.createElement("li");
+      li.textContent = `${cust.first_name} ${cust.last_name}`;
+      li.dataset.customerId = cust.customer_id;
+      suggestions.appendChild(li);
+    });
+    suggestions.style.display = filtered.length ? "block" : "none";
+  }
+
+  searchInput.addEventListener("input", () => {
+    const value = searchInput.value.toLowerCase();
+    const matches = value
+      ? allCustomers.filter((cust) =>
+          `${cust.first_name} ${cust.last_name}`.toLowerCase().includes(value)
+        )
+      : allCustomers;
+
+    renderSuggestions(matches);
+  });
+
+  // Show all on focus
+  searchInput.addEventListener("focus", () => {
+    renderSuggestions(allCustomers);
+  });
+
+  suggestions.addEventListener("click", (e) => {
+    if (e.target.tagName === "LI") {
+      const selectedId = e.target.dataset.customerId;
+      const selectedText = e.target.textContent;
+      searchInput.value = selectedText;
+      hiddenSelect.innerHTML = `<option value="${selectedId}" selected>${selectedText}</option>`;
+      suggestions.style.display = "none";
+      hiddenSelect.dispatchEvent(new Event("change"));
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!document.querySelector(".custom-customer-select").contains(e.target)) {
+      suggestions.style.display = "none";
+    }
   });
 }
 
@@ -87,7 +133,7 @@ function setupEventListeners(token) {
       try {
         Utils.UI.showLoader("loader");
         const res = await fetch(
-          `http://192.168.158.63:5000/customers/${id}/addresses`,
+          `http://localhost:5000/customers/${id}/addresses`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -241,7 +287,7 @@ function addOrderRow(container, brands, products) {
 
     try {
       const res = await fetch(
-        `http://192.168.158.63:5000/product/order/search_by_barcode?barcode=${encodeURIComponent(
+        `http://localhost:5000/product/order/search_by_barcode?barcode=${encodeURIComponent(
           barcode
         )}`,
         {
@@ -271,7 +317,7 @@ function addOrderRow(container, brands, products) {
 
     try {
       const res = await fetch(
-        `http://192.168.158.63:5000/products/categories/orders?brand=${encodeURIComponent(
+        `http://localhost:5000/products/categories/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -375,10 +421,10 @@ function addCombinedRow(container, brands) {
 
     // Endpoint changes depending on if brand is selected
     const url = selectedBrand
-      ? `http://192.168.158.63:5000/products/categories/orders?brand=${encodeURIComponent(
+      ? `http://localhost:5000/products/categories/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`
-      : `http://192.168.158.63:5000/products/categories/orders`;
+      : `http://localhost:5000/products/categories/orders`;
 
     categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
 
@@ -420,7 +466,7 @@ function addCombinedRow(container, brands) {
 
     try {
       const res = await fetch(
-        `http://192.168.158.63:5000/products/orders?${query}`,
+        `http://localhost:5000/products/orders?${query}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -528,7 +574,7 @@ async function updateOrderPreview() {
         .filter(Boolean)
         .join("&");
 
-      const res = await fetch(`http://192.168.158.63:5000/products?${query}`, {
+      const res = await fetch(`http://localhost:5000/products?${query}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -561,7 +607,7 @@ async function updateOrderPreview() {
   try {
     for (const [productId, quantity] of productQuantities.entries()) {
       const res = await fetch(
-        `http://192.168.158.63:5000/product/order/find/${productId}`,
+        `http://localhost:5000/product/order/find/${productId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -583,10 +629,7 @@ async function updateOrderPreview() {
       const price = parseFloat(data.price || 0).toFixed(2);
       const total = (price * quantity).toFixed(2);
       const photoUrl = data.image_path
-        ? `http://192.168.158.63:5000/images/${data.image_path.replace(
-            /^\/+/,
-            ""
-          )}`
+        ? `http://localhost:5000/images/${data.image_path.replace(/^\/+/, "")}`
         : "";
 
       const card = document.createElement("div");
@@ -658,7 +701,7 @@ async function submitOrder(token) {
       const query = queryParts.join("&");
 
       const res = await fetch(
-        `http://192.168.158.63:5000/products/orders?${query}`,
+        `http://localhost:5000/products/orders?${query}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -690,7 +733,7 @@ async function submitOrder(token) {
   try {
     Utils.UI.showLoader("loader");
 
-    const res = await fetch("http://192.168.158.63:5000/orders/create", {
+    const res = await fetch("http://localhost:5000/orders/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

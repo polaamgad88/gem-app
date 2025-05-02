@@ -11,9 +11,9 @@ const Auth = {
   async checkLogin() {
     const token = localStorage.getItem("access_token");
     if (!token) return false;
-    
+
     try {
-      const res = await fetch("http://192.168.158.63:5000/checklogin", {
+      const res = await fetch("http://localhost:5000/checklogin", {
         headers: { Authorization: `Bearer ${token}` },
       });
       return res.ok;
@@ -22,7 +22,7 @@ const Auth = {
       return false;
     }
   },
-  
+
   /**
    * Redirect to login page if not authenticated
    * @returns {Promise<string|null>} Token if authenticated, null if redirected
@@ -35,7 +35,7 @@ const Auth = {
     }
     return token;
   },
-  
+
   /**
    * Log out the current user
    * @returns {Promise<boolean>} True if logout successful
@@ -43,9 +43,9 @@ const Auth = {
   async logout() {
     const token = localStorage.getItem("access_token");
     if (!token) return true;
-    
+
     try {
-      const logoutRes = await fetch("http://192.168.158.63:5000/logout", {
+      const logoutRes = await fetch("http://localhost:5000/logout", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,7 +62,7 @@ const Auth = {
       console.error("Logout error:", err);
       throw err;
     }
-  }
+  },
 };
 
 // UI helpers
@@ -75,7 +75,7 @@ const UI = {
     const loader = document.getElementById(id);
     if (loader) loader.style.display = "block";
   },
-  
+
   /**
    * Hide a loader element
    * @param {string} id - ID of the loader element
@@ -84,7 +84,7 @@ const UI = {
     const loader = document.getElementById(id);
     if (loader) loader.style.display = "none";
   },
-  
+
   /**
    * Show an error message
    * @param {string} message - Error message to display
@@ -99,7 +99,7 @@ const UI = {
       alert(message);
     }
   },
-  
+
   /**
    * Hide an error message
    * @param {string} id - ID of the error element
@@ -110,24 +110,24 @@ const UI = {
       errorDiv.style.display = "none";
     }
   },
-  
+
   /**
    * Check screen size and toggle between table and card views
    */
   checkScreenSize() {
-    const tableView = document.querySelector('.table-responsive');
-    const cardView = document.querySelector('.card-view');
-    
+    const tableView = document.querySelector(".table-responsive");
+    const cardView = document.querySelector(".card-view");
+
     if (!tableView || !cardView) return;
-    
+
     if (window.innerWidth < 768) {
-      tableView.style.display = 'none';
-      cardView.style.display = 'block';
+      tableView.style.display = "none";
+      cardView.style.display = "block";
     } else {
-      tableView.style.display = 'block';
-      cardView.style.display = 'none';
+      tableView.style.display = "block";
+      cardView.style.display = "none";
     }
-  }
+  },
 };
 
 // Date and formatting helpers
@@ -143,7 +143,7 @@ const Format = {
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
   },
-  
+
   /**
    * Format a date string to MM/DD/YYYY
    * @param {string} dateStr - Date string to format
@@ -151,9 +151,14 @@ const Format = {
    */
   dateSlash(dateStr) {
     const d = new Date(dateStr);
-    return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
   },
-  
+
   /**
    * Format a number as currency
    * @param {number} amount - Amount to format
@@ -162,7 +167,7 @@ const Format = {
    */
   currency(amount, currency = "EGP") {
     return `${currency} ${parseFloat(amount).toFixed(2)}`;
-  }
+  },
 };
 
 // URL and parameter helpers
@@ -175,7 +180,7 @@ const URL = {
   getParam(name) {
     const params = new URLSearchParams(window.location.search);
     return params.get(name);
-  }
+  },
 };
 
 // Export the utility objects
@@ -183,5 +188,5 @@ window.Utils = {
   Auth,
   UI,
   Format,
-  URL
+  URL,
 };

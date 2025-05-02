@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function populateBrands(token) {
-  const res = await fetch("http://192.168.158.63:5000/products/brands", {
+  const res = await fetch("http://localhost:5000/products/brands", {
     headers: { Authorization: `Bearer ${token}` },
   });
   const brands = (await res.json()).brands || [];
@@ -35,10 +35,10 @@ async function populateBrands(token) {
 async function populateCategories(token) {
   const brand = document.getElementById("brand-filter").value;
   const categoryEndpoint = brand
-    ? `http://192.168.158.63:5000/products/categories?brand=${encodeURIComponent(
+    ? `http://localhost:5000/products/categories?brand=${encodeURIComponent(
         brand
       )}`
-    : `http://192.168.158.63:5000/products/categories`;
+    : `http://localhost:5000/products/categories`;
 
   const res = await fetch(categoryEndpoint, {
     headers: { Authorization: `Bearer ${token}` },
@@ -60,7 +60,7 @@ async function fetchAndRenderProducts(token) {
   if (category) params.append("category", category);
 
   const res = await fetch(
-    `http://192.168.158.63:5000/products?${params.toString()}`,
+    `http://localhost:5000/products?${params.toString()}`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -83,7 +83,7 @@ async function fetchAndRenderProducts(token) {
   cardContainer.innerHTML = "";
 
   products.forEach((product) => {
-    const imageUrl = `http://192.168.158.63:5000/images/${product.image_path}`;
+    const imageUrl = `http://localhost:5000/images/${product.image_path}`;
 
     // Table Row
     const row = document.createElement("tr");
@@ -199,7 +199,7 @@ async function deleteProduct(id) {
 
   const token = localStorage.getItem("access_token");
   try {
-    const res = await fetch(`http://192.168.158.63:5000/product/delete/${id}`, {
+    const res = await fetch(`http://localhost:5000/product/delete/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -230,7 +230,7 @@ function openProductDialog(action, productId) {
 
   errorMsg.style.display = "none"; // Clear previous error
 
-  fetch(`http://192.168.158.63:5000/product/find/${productId}`, {
+  fetch(`http://localhost:5000/product/find/${productId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -305,10 +305,10 @@ document
 
     const url =
       currentAction === "add"
-        ? `http://192.168.158.63:5000/add_product`
+        ? `http://localhost:5000/add_product`
         : currentAction === "edit"
-        ? `http://192.168.158.63:5000/product/edit/${id}`
-        : `http://192.168.158.63:5000/product/copy/${id}`;
+        ? `http://localhost:5000/product/edit/${id}`
+        : `http://localhost:5000/product/copy/${id}`;
     if (currentAction === "add") {
       document.getElementById("image-note").style.display = "none";
     } else {
@@ -379,7 +379,7 @@ async function handleExport() {
     if (barcode) params.append("barcode", barcode);
   }
 
-  const url = `http://192.168.158.63:5000/products/export?${params.toString()}`;
+  const url = `http://localhost:5000/products/export?${params.toString()}`;
   window.open(url, "_blank");
   closeExportDialog();
 }
@@ -413,7 +413,7 @@ async function handleImport() {
   formData.append("mode", selectedImportMode);
 
   try {
-    const res = await fetch("http://192.168.158.63:5000/products/import", {
+    const res = await fetch("http://localhost:5000/products/import", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -449,7 +449,7 @@ async function toggleVisability(productId, currentVisability) {
 
   try {
     const res = await fetch(
-      `http://192.168.158.63:5000/products/set_visability/${productId}/${newVisability}`,
+      `http://localhost:5000/products/set_visability/${productId}/${newVisability}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },

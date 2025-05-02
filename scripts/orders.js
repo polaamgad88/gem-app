@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  function parseCustomDate(dateStr) {
+    const [datePart, timePart] = dateStr.split(" ");
+    const [day, month, year] = datePart.split("/").map(Number);
+    const [hours, minutes] = timePart.split(":").map(Number);
+    return new Date(year, month - 1, day, hours, minutes);
+  }
+
   // Initialize state
   let sortOrder = {
     date: true,
@@ -50,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Helper function to populate users dropdown
   async function populateUsers(token) {
     try {
-      const res = await fetch("http://192.168.158.63:5000/users", {
+      const res = await fetch("http://localhost:5000/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -80,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     Utils.UI.showLoader();
 
     const userId = document.getElementById("userFilter").value;
-    let url = "http://192.168.158.63:5000/orders";
+    let url = "http://localhost:5000/orders";
     if (userId !== "all") {
       url += `?user_id=${userId}`;
     }
@@ -252,8 +259,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       let valB = rowB.cells[colIndex].innerText.trim();
 
       if (type === "date") {
-        let dateA = new Date(valA);
-        let dateB = new Date(valB);
+        let dateA = parseCustomDate(valA);
+        let dateB = parseCustomDate(valB);
+
         return sortOrder.date ? dateA - dateB : dateB - dateA;
       }
 
@@ -278,12 +286,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     cards.sort((cardA, cardB) => {
       if (type === "date") {
-        const dateA = new Date(
+        const dateA = parseCustomDate(
           cardA.querySelector(".order-card-header").children[1].innerText
         );
-        const dateB = new Date(
+        const dateB = parseCustomDate(
           cardB.querySelector(".order-card-header").children[1].innerText
         );
+
         return sortOrder.date ? dateA - dateB : dateB - dateA;
       }
 
