@@ -6,307 +6,361 @@ document.addEventListener("DOMContentLoaded", async function () {
     return new Date(year, month - 1, day, hours, minutes);
   }
 
-  // Initialize state
-  let sortOrder = {
-    date: true,
-    price: true,
-  };
-
+  let sortOrder = { date: true, price: true };
   let allOrders = [];
+  let allUsers = [];
+  let allCustomers = [];
 
-  // Check authentication
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
 
-  // Show loader while fetching data
   Utils.UI.showLoader();
 
-  // Set up event listeners
   setupEventListeners();
 
-  // Fetch and render orders
   try {
-    await populateUsers(token);
-    await fetchAndRenderOrders(token);
+    await Promise.all([fetchUsers(), fetchCustomers()]);
+    await fetchAndRenderOrders();
   } catch (err) {
-    console.error("Error loading orders:", err);
-    Utils.UI.showError("Failed to load orders. Please try again.");
+    console.error(err);
+    Utils.UI.showError("Failed to load orders.");
   } finally {
     Utils.UI.hideLoader();
   }
 
-  // Check screen size and toggle view if needed
   Utils.UI.checkScreenSize();
   window.addEventListener("resize", Utils.UI.checkScreenSize);
 
-  // Helper function to set up event listeners
+  async function fetchUsers() {
+    const res = await fetch("http://localhost:5000/users", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("users");
+    const data = await res.json();
+    allUsers = data.users || [];
+
+    const sel = document.getElementById("userFilter");
+    sel.innerHTML = '<option value="all">All Users</option>';
+    allUsers.forEach((u) => {
+      const opt = document.createElement("option");
+      opt.value = u.user_id;
+      opt.textContent = u.username;
+      sel.appendChild(opt);
+    });
+
+    const dl = document.getElementById("modalUserList");
+    allUsers.forEach((u) => {
+      const opt = document.createElement("option");
+      opt.value = u.username;
+      dl.appendChild(opt);
+    });
+  }
+
+  async function fetchCustomers() {
+    const res = await fetch("http://localhost:5000/customers", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("customers");
+    const data = await res.json();
+    allCustomers = data.customers || [];
+
+    const dl = document.getElementById("modalCustomerList");
+    allCustomers.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = `${c.first_name} ${c.last_name}`;
+      dl.appendChild(opt);
+    });
+  }
+
+  async function fetchAndRenderOrders() {
+    Utils.UI.showLoader();
+
+    const userId = document.getElementById("userFilter").value;
+    let url = "http://localhost:5000/orders";
+    if (userId !== "all") url += `?user_id=${userId}`;
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const tb = document.getElementById("ordersTable");
+    const cc = document.getElementById("ordersCards");
+    tb.innerHTML = cc.innerHTML = "";
+
+    if (!res.ok) {
+      renderNoOrders();
+      Utils.UI.hideLoader();
+      return;
+    }
+
+    const data = await res.json();
+    allOrders = data.orders || [];
+    if (!allOrders.length) {
+      renderNoOrders();
+      Utils.UI.hideLoader();
+      return;
+    }
+
+    populateCustomerFilter(allOrders);
+    renderOrders(allOrders);
+    Utils.UI.hideLoader();
+  }
+  function populateCustomerFilter(orders) {
+    const sel = document.getElementById("customerFilter");
+    sel.innerHTML = '<option value="all">All Customers</option>';
+    const seen = new Set();
+    orders.forEach((o) => {
+      if (seen.has(o.customer_name)) return;
+      seen.add(o.customer_name);
+      const opt = document.createElement("option");
+      opt.value = o.customer_name;
+      opt.textContent = o.customer_name;
+      sel.appendChild(opt);
+    });
+  }
+
+  function renderOrders(orders) {
+    const tbody = document.getElementById("ordersTable");
+    const cards = document.getElementById("ordersCards");
+    tbody.innerHTML = cards.innerHTML = "";
+    {
+      /* <td>${i + 1}</td> */
+    }
+    orders.forEach((o, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="checkbox" class="order-checkbox" value="${
+          o.order_id
+        }"></td>
+        <td>${o.order_id}</td>
+        <td>${Utils.Format.dateSlash(o.order_date)}</td>
+        <td>${o.customer_name}</td>
+        <td>${o.username}</td>
+        <td>${o.role}</td>
+        <td><span class="status-${o.status.toLowerCase()}">${
+        o.status
+      }</span></td>
+        <td>EGP${o.total_amount}</td>
+        <td><button class="view-btn" data-order-id="${
+          o.order_id
+        }">View</button></td>
+      `;
+      tbody.appendChild(tr);
+
+      const card = document.createElement("div");
+      card.className = "order-card";
+      card.innerHTML = `
+        <div class="order-card-header">
+          <span>
+            <input type="checkbox" class="order-checkbox" value="${o.order_id}">
+            &nbsp;#${o.order_id}
+          </span>
+          <span>${Utils.Format.dateSlash(o.order_date)}</span>
+        </div>
+        <div class="order-card-body">
+          <p><b>Customer:</b> ${o.customer_name}</p>
+          <p><b>Delegate:</b> ${o.username}</p>
+          <p><b>Status:</b> <span class="status-${o.status.toLowerCase()}">${
+        o.status
+      }</span></p>
+          <p><b>Total:</b> EGP${o.total_amount}</p>
+        </div>
+        <div class="order-card-footer">
+          <button class="view-btn" data-order-id="${
+            o.order_id
+          }">View Details</button>
+        </div>
+      `;
+      cards.appendChild(card);
+    });
+
+    document.querySelectorAll(".view-btn").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        () =>
+          (window.location = `view-order.html?order_id=${btn.dataset.orderId}`)
+      );
+    });
+  }
+
+  function renderNoOrders() {
+    document.getElementById(
+      "ordersTable"
+    ).innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">No orders</td></tr>`;
+    document.getElementById(
+      "ordersCards"
+    ).innerHTML = `<div style="text-align:center;padding:20px;">No orders</div>`;
+  }
   function setupEventListeners() {
     document
       .getElementById("userFilter")
       .addEventListener("change", async () => {
         Utils.UI.showLoader();
-        await fetchAndRenderOrders(token);
+        await fetchAndRenderOrders();
         Utils.UI.hideLoader();
       });
 
     document.getElementById("customerFilter").addEventListener("change", () => {
-      filterOrdersByCustomer();
+      const sel = document.getElementById("customerFilter").value;
+      if (sel === "all") renderOrders(allOrders);
+      else renderOrders(allOrders.filter((o) => o.customer_name === sel));
     });
+
+    document.getElementById("checkAll").addEventListener("change", (e) => {
+      document
+        .querySelectorAll(".order-checkbox")
+        .forEach((cb) => (cb.checked = e.target.checked));
+    });
+
+    document
+      .getElementById("exportBtn")
+      .addEventListener("click", handleExport);
+
+    document
+      .querySelector(".close-modal")
+      .addEventListener("click", () => toggleModal(false));
+    window.addEventListener("click", (e) => {
+      if (e.target.id === "exportModal") toggleModal(false);
+    });
+
+    /* modal submit */
+    document
+      .getElementById("exportForm")
+      .addEventListener("submit", handleModalExport);
   }
 
-  // Helper function to populate users dropdown
-  async function populateUsers(token) {
-    try {
-      const res = await fetch("http://localhost:5000/users", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  function getSelectedOrderIds() {
+    return Array.from(document.querySelectorAll(".order-checkbox"))
+      .filter((cb) => cb.checked)
+      .map((cb) => cb.value);
+  }
 
-      if (!res.ok) throw new Error("Failed to fetch users");
-
-      const data = await res.json();
-      const userFilter = document.getElementById("userFilter");
-
-      userFilter.innerHTML = `<option value="all">All Users</option>`;
-
-      data.users.forEach((user) => {
-        const option = document.createElement("option");
-        option.value = user.user_id;
-        option.textContent = user.username;
-        userFilter.appendChild(option);
-      });
-    } catch (err) {
-      console.error("User fetch error:", err);
-      throw err;
+  async function handleExport() {
+    const ids = getSelectedOrderIds();
+    if (ids.length) {
+      const qp = `order_ids=${ids.join(",")}`;
+      await downloadExport(qp);
+    } else {
+      toggleModal(true);
     }
   }
 
-  // Helper function to fetch and render orders
-  async function fetchAndRenderOrders(token) {
-    Utils.UI.showLoader();
+  function toggleModal(show) {
+    document.getElementById("exportModal").classList.toggle("hidden", !show);
+  }
 
-    const userId = document.getElementById("userFilter").value;
-    let url = "http://localhost:5000/orders";
-    if (userId !== "all") {
-      url += `?user_id=${userId}`;
-    }
+  async function handleModalExport(e) {
+    e.preventDefault();
+    const custName = document.getElementById("modalCustomer").value.trim();
+    const userName = document.getElementById("modalUser").value.trim();
 
+    const custId = (
+      allCustomers.find((c) => `${c.first_name} ${c.last_name}` === custName) ||
+      {}
+    ).customer_id;
+    const userId = (allUsers.find((u) => u.username === userName) || {})
+      .user_id;
+
+    const params = new URLSearchParams();
+    if (custId) params.append("customer_id", custId);
+    if (userId) params.append("user_id", userId);
+
+    const aStart = document.getElementById("amountStart").value;
+    const aEnd = document.getElementById("amountEnd").value;
+    if (aStart) params.append("amount_start", aStart);
+    if (aEnd) params.append("amount_end", aEnd);
+
+    const dStart = document.getElementById("dateStart").value;
+    const dEnd = document.getElementById("dateEnd").value;
+    if (dStart) params.append("date_start", dStart);
+    if (dEnd) params.append("date_end", dEnd);
+
+    toggleModal(false);
+    await downloadExport(params.toString());
+  }
+
+  async function downloadExport(query) {
     try {
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      Utils.UI.showLoader("Preparing file…");
+      const api = `http://localhost:5000/orders/export?${query}`;
+      const res = await fetch(api, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      const tableBody = document.getElementById("ordersTable");
-      const cardsContainer = document.getElementById("ordersCards");
-      tableBody.innerHTML = "";
-      cardsContainer.innerHTML = "";
-
       if (!res.ok) {
-        allOrders = [];
-        renderNoOrders();
-        resetCustomerFilter();
-        return;
+        const j = await res.json();
+        throw new Error(j.message || "export failed");
       }
+      const blob = await res.blob();
 
-      const data = await res.json();
-      allOrders = data.orders || [];
+      /* ---------------------------------------------------------------------- */
+      const objectURL = (window.URL || window.webkitURL).createObjectURL(blob);
+      /* ---------------------------------------------------------------------- */
 
-      if (allOrders.length === 0) {
-        renderNoOrders();
-        resetCustomerFilter();
-        return;
-      }
-
-      populateCustomerFilter(allOrders);
-      renderOrders(allOrders);
+      const a = document.createElement("a");
+      a.href = objectURL;
+      a.download = "orders_export.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      (window.URL || window.webkitURL).revokeObjectURL(objectURL);
     } catch (err) {
-      console.error("Order fetch error:", err);
-      renderNoOrders();
-      resetCustomerFilter();
-      throw err;
+      console.error(err);
+      Utils.UI.showError(err.message || "Export failed");
     } finally {
       Utils.UI.hideLoader();
     }
   }
 
-  // Helper function to populate customer filter
-  function populateCustomerFilter(orders) {
-    const customerFilter = document.getElementById("customerFilter");
-    customerFilter.innerHTML = `<option value="all">All Customers</option>`;
-
-    const customerMap = new Map();
-    orders.forEach((order) => {
-      customerMap.set(order.customer_name, order.customer_id);
-    });
-
-    customerMap.forEach((id, name) => {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      customerFilter.appendChild(option);
-    });
-  }
-
-  // Helper function to reset customer filter
-  function resetCustomerFilter() {
-    const customerFilter = document.getElementById("customerFilter");
-    customerFilter.innerHTML = `<option value="all">All Customers</option>`;
-  }
-
-  // Helper function to filter orders by customer
-  function filterOrdersByCustomer() {
-    const selectedCustomer = document.getElementById("customerFilter").value;
-    if (selectedCustomer === "all") {
-      renderOrders(allOrders);
-    } else {
-      const filtered = allOrders.filter(
-        (order) => order.customer_name === selectedCustomer
-      );
-      renderOrders(filtered);
-    }
-  }
-
-  // Helper function to render orders
-  function renderOrders(orders) {
-    // Render table view
-    const tableBody = document.getElementById("ordersTable");
-    tableBody.innerHTML = "";
-
-    // Render card view
-    const cardsContainer = document.getElementById("ordersCards");
-    cardsContainer.innerHTML = "";
-
-    orders.forEach((order, index) => {
-      // Table row
-      const row = document.createElement("tr");
-      row.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${order.order_id}</td>
-          <td>${Utils.Format.dateSlash(order.order_date)}</td>
-          <td>${order.customer_name}</td>
-          <td>${order.username}</td>
-          <td>${order.role}</td>
-          <td><span class="status-${order.status.toLowerCase()}">${
-        order.status
-      }</span></td>
-          <td>EGP${order.total_amount}</td>
-          <td><button class="view-btn" data-order-id="${
-            order.order_id
-          }">View</button></td>
-        `;
-      tableBody.appendChild(row);
-
-      // Card view for mobile
-      const card = document.createElement("div");
-      card.className = "order-card";
-      card.innerHTML = `
-        <div class="order-card-header">
-          <span>Order #${order.order_id}</span>
-          <span>${Utils.Format.dateSlash(order.order_date)}</span>
-        </div>
-        <div class="order-card-body">
-          <p><span class="order-card-label">Customer:</span> ${
-            order.customer_name
-          }</p>
-          <p><span class="order-card-label">Delegate:</span> ${
-            order.username
-          }</p>
-          <p><span class="order-card-label">Status:</span> <span class="status-${order.status.toLowerCase()}">${
-        order.status
-      }</span></p>
-          <p><span class="order-card-label">Total:</span> EGP${
-            order.total_amount
-          }</p>
-        </div>
-        <div class="order-card-footer">
-          <button class="view-btn" data-order-id="${
-            order.order_id
-          }">View Details</button>
-        </div>
-      `;
-      cardsContainer.appendChild(card);
-    });
-
-    document.querySelectorAll(".view-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.orderId;
-        window.location.href = `view-order.html?order_id=${id}`;
-      });
-    });
-  }
-
-  // Helper function to render no orders message
-  function renderNoOrders() {
-    const tableBody = document.getElementById("ordersTable");
-    tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px;">No orders available</td></tr>`;
-
-    const cardsContainer = document.getElementById("ordersCards");
-    cardsContainer.innerHTML = `<div style="text-align: center; padding: 20px;">No orders available</div>`;
-  }
-
-  // Sort table function
   window.sortTable = function (colIndex, type) {
-    let table = document.getElementById("ordersTable");
+    const table = document.getElementById("ordersTable");
     let rows = Array.from(table.rows);
+    if (rows.length === 1 && rows[0].cells[0].colSpan) return;
 
-    if (rows.length === 1 && rows[0].cells[0].colSpan === 9) return;
-
-    rows.sort((rowA, rowB) => {
-      let valA = rowA.cells[colIndex].innerText.trim();
-      let valB = rowB.cells[colIndex].innerText.trim();
-
+    rows.sort((a, b) => {
+      let va = a.cells[colIndex].innerText.trim();
+      let vb = b.cells[colIndex].innerText.trim();
       if (type === "date") {
-        let dateA = parseCustomDate(valA);
-        let dateB = parseCustomDate(valB);
-
-        return sortOrder.date ? dateA - dateB : dateB - dateA;
+        const da = parseCustomDate(va),
+          db = parseCustomDate(vb);
+        return sortOrder.date ? da - db : db - da;
       }
-
       if (type === "price") {
-        let numA = parseFloat(valA.replace("EGP", ""));
-        let numB = parseFloat(valB.replace("EGP", ""));
-        return sortOrder.price ? numA - numB : numB - numA;
+        const na = parseFloat(va.replace("EGP", "")),
+          nb = parseFloat(vb.replace("EGP", ""));
+        return sortOrder.price ? na - nb : nb - na;
       }
     });
-
     sortOrder[type] = !sortOrder[type];
-    rows.forEach((row) => table.appendChild(row));
-
-    // Also sort the card view
+    rows.forEach((r) => table.appendChild(r));
     sortCards(type);
   };
 
-  // Helper function to sort cards
   function sortCards(type) {
-    const cardsContainer = document.getElementById("ordersCards");
-    const cards = Array.from(cardsContainer.children);
-
-    cards.sort((cardA, cardB) => {
+    const cc = document.getElementById("ordersCards");
+    const cards = Array.from(cc.children);
+    cards.sort((a, b) => {
       if (type === "date") {
-        const dateA = parseCustomDate(
-          cardA.querySelector(".order-card-header").children[1].innerText
+        const da = parseCustomDate(
+          a.querySelector(".order-card-header span:last-child").innerText
         );
-        const dateB = parseCustomDate(
-          cardB.querySelector(".order-card-header").children[1].innerText
+        const db = parseCustomDate(
+          b.querySelector(".order-card-header span:last-child").innerText
         );
-
-        return sortOrder.date ? dateA - dateB : dateB - dateA;
+        return sortOrder.date ? da - db : db - da;
       }
-
       if (type === "price") {
-        const priceTextA =
-          cardA.querySelector(".order-card-body").lastElementChild.innerText;
-        const priceTextB =
-          cardB.querySelector(".order-card-body").lastElementChild.innerText;
-        const priceA = parseFloat(priceTextA.replace("Total: EGP", ""));
-        const priceB = parseFloat(priceTextB.replace("Total: EGP", ""));
-        return sortOrder.price ? priceA - priceB : priceB - priceA;
+        const pa = parseFloat(
+          a
+            .querySelector(".order-card-body p:last-child")
+            .innerText.replace("Total: EGP", "")
+        );
+        const pb = parseFloat(
+          b
+            .querySelector(".order-card-body p:last-child")
+            .innerText.replace("Total: EGP", "")
+        );
+        return sortOrder.price ? pa - pb : pb - pa;
       }
     });
-
-    cards.forEach((card) => cardsContainer.appendChild(card));
+    cards.forEach((c) => cc.appendChild(c));
   }
 });
