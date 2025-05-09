@@ -37,7 +37,7 @@
         </div>
         <div class="actions-row text-right mb-4">
             <button class="btn btn-add" onclick="openAddProductDialog()">➕ Add Product</button>
-            <button class="btn btn-add" onclick="openExportDialog()">📤 Export Products</button>
+            <button id="export-open-btn" class="btn btn-add">📤 Export Products</button>
             <button class="btn edit-btn" onclick="openImportDialog()">📥 Import Products</button>
         </div>
 
@@ -137,7 +137,7 @@
                     onclick="selectExportOption(this)">Filtered (Viewed) Products</button>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-add" onclick="handleExport()">Export</button>
+                <button id="export-go-btn" class="btn btn-add">Export</button>
                 <button class="btn delete-btn" onclick="closeExportDialog()">Cancel</button>
             </div>
         </div>
@@ -149,15 +149,20 @@
             <h2>Import Products</h2>
             <p>Select Import Mode:</p>
             <div class="option-buttons">
-                <button type="button" class="option-btn" data-value="patch-edit"
-                    onclick="selectImportOption(this)">Patch Edit Existing</button>
-                <button type="button" class="option-btn" data-value="patch-add" onclick="selectImportOption(this)">Patch
+                <button type="button" class="option-btn" data-value="update" onclick="selectImportOption(this)">Patch
+                    Edit Existing</button>
+                <button type="button" class="option-btn" data-value="add" onclick="selectImportOption(this)">Patch
                     Add New</button>
             </div>
             <div style="margin-top: var(--spacing-md);">
                 <label>Select File (Excel / CSV):</label>
                 <input type="file" id="import-file" />
             </div>
+            <div style="margin-top: var(--spacing-md);">
+                <label>Select Images ZIP:</label>
+                <input type="file" id="images-zip" accept=".zip" />
+            </div>
+
             <div class="modal-actions">
                 <button class="btn btn-add" onclick="handleImport()">Upload</button>
                 <button class="btn delete-btn" onclick="closeImportDialog()">Cancel</button>

@@ -1,6 +1,18 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
+  // expose it to the rest of this module
+  window.__API_TOKEN = token;
+
+  // open the modal
+  document
+    .getElementById("export-open-btn")
+    .addEventListener("click", openExportDialog);
+
+  // wire up the actual export button,
+  document
+    .getElementById("export-go-btn")
+    .addEventListener("click", () => handleExport(window.__API_TOKEN));
 
   Utils.UI.checkScreenSize();
   window.addEventListener("resize", Utils.UI.checkScreenSize);
@@ -348,7 +360,7 @@ function closeExportDialog() {
   document.getElementById("export-modal").style.display = "none";
 }
 let selectedExportType = "all";
-let selectedImportMode = "patch-edit";
+let selectedImportMode = "update";
 
 function selectExportOption(button) {
   document
@@ -366,9 +378,7 @@ function selectImportOption(button) {
   selectedImportMode = button.getAttribute("data-value");
 }
 
-async function handleExport() {
-  const token = localStorage.getItem("access_token");
-
+async function handleExport(token) {
   const params = new URLSearchParams();
   if (selectedExportType === "filtered") {
     const brand = document.getElementById("brand-filter").value;
@@ -376,12 +386,51 @@ async function handleExport() {
     const barcode = document.getElementById("barcode-search").value.trim();
     if (brand) params.append("brand", brand);
     if (category) params.append("category", category);
-    if (barcode) params.append("barcode", barcode);
+    if (barcode) params.append("bar_code", barcode);
   }
 
   const url = `http://localhost:5000/products/export?${params.toString()}`;
-  window.open(url, "_blank");
-  closeExportDialog();
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Export failed");
+
+    const blob = await res.blob();
+    const filename = "products_export.xlsx";
+
+    // 1) try the normal URL API
+    const URLobj = window.URL || window.webkitURL;
+    if (URLobj && typeof URLobj.createObjectURL === "function") {
+      const dlUrl = URLobj.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = dlUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URLobj.revokeObjectURL(dlUrl);
+
+      // 2) fallback: read as data URL
+    } else {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const a = document.createElement("a");
+        a.href = reader.result; // this is a data: URI
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+      reader.readAsDataURL(blob);
+    }
+  } catch (err) {
+    alert("Export failed. Are you logged in as an admin?");
+    console.error(err);
+  } finally {
+    closeExportDialog();
+  }
 }
 
 // IMPORT Logic
@@ -397,38 +446,50 @@ function closeImportDialog() {
 
 async function handleImport() {
   const token = localStorage.getItem("access_token");
-  const fileInput = document.getElementById("import-file");
+  const xlsxInput = document.getElementById("import-file");
+  const zipInput = document.getElementById("images-zip");
   const errorMsg = document.getElementById("import-error-message");
 
   errorMsg.style.display = "none";
 
-  if (!fileInput.files.length) {
-    errorMsg.textContent = "Please select a file to upload.";
+  // Require only the XLSX
+  if (!xlsxInput.files.length) {
+    errorMsg.textContent = "Please select the Excel file to upload.";
     errorMsg.style.display = "block";
     return;
   }
 
   const formData = new FormData();
-  formData.append("file", fileInput.files[0]);
+  formData.append("file", xlsxInput.files[0]);
   formData.append("mode", selectedImportMode);
 
+  // Append images_zip only if the user picked one
+  if (zipInput.files.length) {
+    formData.append("images_zip", zipInput.files[0]);
+  }
+
   try {
-    const res = await fetch("http://localhost:5000/products/import", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
+    const res = await fetch(
+      `http://localhost:5000/products/import?mode=${selectedImportMode}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      }
+    );
     const result = await res.json();
 
     if (res.ok) {
-      alert("Import successful: " + result.message);
+      alert(
+        "Import successful: Added " + result.added + " Updated:" + result.updated
+      );
       closeImportDialog();
       fetchAndRenderProducts(token);
     } else {
       errorMsg.textContent = result.message || "Import failed.";
       errorMsg.style.display = "block";
     }
-  } catch (error) {
+  } catch (err) {
     errorMsg.textContent = "Network error. Please try again.";
     errorMsg.style.display = "block";
   }
