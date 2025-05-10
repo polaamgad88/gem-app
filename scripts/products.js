@@ -481,7 +481,10 @@ async function handleImport() {
 
     if (res.ok) {
       alert(
-        "Import successful: Added " + result.added + " Updated:" + result.updated
+        "Import successful: Added " +
+          result.added +
+          " Updated:" +
+          result.updated
       );
       closeImportDialog();
       fetchAndRenderProducts(token);

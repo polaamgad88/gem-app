@@ -30,7 +30,7 @@ const Auth = {
   async requireAuth() {
     const token = localStorage.getItem("access_token");
     if (!token || !(await this.checkLogin())) {
-      window.location.href = "login.html";
+      // window.location.href = "login.html";
       return null;
     }
     return token;

@@ -81,14 +81,15 @@ h1 {
 .manage-customers,
 .manage-user,
 .manage-products {
-  background-color: var(--warning-color);
-  color: var(--gray-900);
+  background-color: var(--main-btn-color);
+  /* color: var(--gray-900); */
+  color: white;
 }
 
 .manage-customers:hover,
 .manage-user:hover,
 .manage-products:hover {
-  background-color: var(--warning-dark);
+  background-color: var(--main-btn-color-dark);
 }
 
 .logout {
@@ -106,21 +107,21 @@ h1 {
     padding: var(--spacing-lg);
     max-width: 90%;
   }
-  
+
   .logo {
     max-height: 80px;
   }
-  
+
   h1 {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-lg);
   }
-  
+
   .btn {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-md);
   }
-  
+
   .logout {
     margin-top: var(--spacing-lg);
   }

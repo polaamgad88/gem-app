@@ -39,7 +39,7 @@ h2 {
   font-size: var(--font-size-lg);
 }
 
-.order-info, 
+.order-info,
 .customer-info {
   margin-bottom: var(--spacing-lg);
   padding: var(--spacing-md);
@@ -98,7 +98,8 @@ table {
   margin-bottom: var(--spacing-md);
 }
 
-th, td {
+th,
+td {
   border: 1px solid var(--gray-300);
   padding: var(--spacing-sm);
   text-align: left;
@@ -153,7 +154,8 @@ th {
 
 .edit-btn {
   background-color: var(--warning-color);
-  color: var(--gray-900);
+  /* color: var(--gray-900); */
+  color: white;
 }
 
 .edit-btn:hover {
@@ -186,7 +188,8 @@ th {
 
 /* Card view for mobile */
 .card-view {
-  display: none; /* Hidden by default, shown via JS on small screens */
+  display: none;
+  /* Hidden by default, shown via JS on small screens */
 }
 
 .card-view .item-card {
@@ -231,12 +234,12 @@ th {
   .container {
     padding: var(--spacing-md);
   }
-  
+
   .row {
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-  
+
   .row p {
     width: 100%;
   }
@@ -246,28 +249,28 @@ th {
   h1 {
     font-size: var(--font-size-lg);
   }
-  
+
   h2 {
     font-size: var(--font-size-md);
   }
-  
+
   .table-responsive {
     display: none;
   }
-  
+
   .card-view {
     display: block;
   }
-  
+
   .total {
     text-align: center;
   }
-  
+
   .order-actions {
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-  
+
   .refund-btn,
   .edit-btn,
   .confirm-btn {
