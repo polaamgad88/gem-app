@@ -62,6 +62,9 @@ async function populateCategories(token) {
     categories.map((c) => `<option value="${c}">${c}</option>`).join("");
 }
 
+let currentPage = 1;
+const pageLimit = 20;
+
 async function fetchAndRenderProducts(token) {
   const brand = document.getElementById("brand-filter").value;
   const category = document.getElementById("category-filter").value;
@@ -70,6 +73,9 @@ async function fetchAndRenderProducts(token) {
   const params = new URLSearchParams();
   if (brand) params.append("brand", brand);
   if (category) params.append("category", category);
+  if (barcodeSearch) params.append("barcode", barcodeSearch);
+  params.append("page", currentPage);
+  params.append("limit", pageLimit);
 
   const res = await fetch(
     `http://localhost:5000/products?${params.toString()}`,
@@ -79,14 +85,7 @@ async function fetchAndRenderProducts(token) {
   );
 
   const data = await res.json();
-  let products = data.data || [];
-
-  // Filter by barcode text
-  if (barcodeSearch) {
-    products = products.filter((p) =>
-      p.bar_code?.toString().includes(barcodeSearch)
-    );
-  }
+  const products = data.data || [];
 
   const tableBody = document.getElementById("productsTable");
   const cardContainer = document.getElementById("productCards");
@@ -100,20 +99,67 @@ async function fetchAndRenderProducts(token) {
     // Table Row
     const row = document.createElement("tr");
     row.innerHTML = `
-        <td><img src="${imageUrl}" alt="${product.product_name}" /></td>
-        <td>
-          ${product.product_name}
-          <div class="barcode-text">${product.bar_code || "-"}</div>
-          <span class="visability-badge ${
-            product.visability === 1 ? "visible-badge" : "hidden-badge"
-          }">
-            ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
-          </span>
-        </td>
-        <td>${product.brand}</td>
-        <td>${product.category}</td>
-        <td>${Utils.Format.currency(product.price)}</td>
-        <td>
+      <td><img src="${imageUrl}" alt="${product.product_name}" /></td>
+      <td>
+        ${product.product_name}
+        <div class="barcode-text">${product.bar_code || "-"}</div>
+        <span class="visability-badge ${
+          product.visability === 1 ? "visible-badge" : "hidden-badge"
+        }">
+          ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
+        </span>
+      </td>
+      <td>${product.Item_number || "-"}</td>
+      <td>${product.brand}</td>
+      <td>${product.category}</td>
+      <td>${Utils.Format.currency(product.price)}</td>
+      <td>
+        <span class="${
+          product.availability == "Available"
+            ? "available-badge"
+            : "not-available-badge"
+        }">
+          ${product.availability == "Available" ? "🟢" : "🔴"}
+        </span>
+      </td>
+      <td>
+        <button class="btn btn-edit" onclick="openProductDialog('edit', ${
+          product.product_id
+        })">Edit</button>
+        <button class="btn btn-copy" onclick="openProductDialog('copy', ${
+          product.product_id
+        })">Copy</button>
+        <button class="btn btn-toggle-visability ${
+          product.visability === 1 ? "btn-hide" : "btn-show"
+        }" onclick="toggleVisability(${product.product_id}, ${
+      product.visability
+    })">
+          ${product.visability === 1 ? "Hide" : "Show"}
+        </button>
+        <button class="btn btn-delete" onclick="deleteProduct(${
+          product.product_id
+        })">Delete</button>
+      </td>`;
+    tableBody.appendChild(row);
+
+    // Card View
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <img src="${imageUrl}" alt="${product.product_name}" />
+      <div class="product-card-header">
+        ${product.product_name}
+        <span class="visability-badge ${
+          product.visability === 1 ? "visible-badge" : "hidden-badge"
+        }">${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}</span>
+      </div>
+      <div class="barcode-text text-center">${product.bar_code || "-"}</div>
+      <div class="product-card-body">
+        <p><strong>Item No.:</strong> ${product.Item_number || "-"}</p>
+        <p><strong>Brand:</strong> ${product.brand}</p>
+        <p><strong>Category:</strong> ${product.category}</p>
+        <p><strong>Price:</strong> ${Utils.Format.currency(product.price)}</p>
+        <p><strong>Availability:</strong>
           <span class="${
             product.availability == "Available"
               ? "available-badge"
@@ -121,87 +167,34 @@ async function fetchAndRenderProducts(token) {
           }">
             ${product.availability == "Available" ? "🟢" : "🔴"}
           </span>
-        </td>
-
-        <td>
-          <button class="btn btn-view" onclick="location.href='view-product.html?product_id=${
-            product.product_id
-          }'">View</button>
-         <button class="btn btn-edit" onclick="openProductDialog('edit', ${
-           product.product_id
-         })">Edit</button>
-         <button class="btn btn-copy" onclick="openProductDialog('copy', ${
-           product.product_id
-         })">Copy</button>
-<button class="btn btn-toggle-visability ${
-      product.visability === 1 ? "btn-hide" : "btn-show"
-    }" onclick="toggleVisability(${product.product_id}, ${product.visability})">
-  ${product.visability === 1 ? "Hide" : "Show"}
-</button>
-          <button class="btn btn-delete" onclick="deleteProduct(${
-            product.product_id
-          })">Delete</button>
-        </td>`;
-    tableBody.appendChild(row);
-
-    // Card View
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-        <img src="${imageUrl}" alt="${product.product_name}" />
-        <div class="product-card-header">
-          ${product.product_name}
-          <span class="visability-badge ${
-            product.visability === 1 ? "visible-badge" : "hidden-badge"
-          }">
-            ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
-          </span>
-        </div>
-
-        <div class="barcode-text text-center">${product.bar_code || "-"}</div>
-        <div class="product-card-body">
-          <p><strong>Brand:</strong> ${product.brand}</p>
-          <p><strong>Category:</strong> ${product.category}</p>
-          <p><strong>Price:</strong> ${Utils.Format.currency(product.price)}</p>
-          <p><strong>Availability:</strong> 
-            <span class="${
-              product.availability == "Available"
-                ? "available-badge"
-                : "not-available-badge"
-            }">
-              ${product.availability == "Available" ? "🟢" : "🔴"}
-            </span>
-          </p>
-
-        </div>
-        <div class="product-card-footer text-right">
-          <button class="btn btn-view" onclick="location.href='view-product.html?product_id=${
-            product.product_id
-          }'">View</button>
-          <button class="btn btn-edit" onclick="openProductDialog('edit', ${
-            product.product_id
-          })">Edit</button>
-          <button class="btn btn-copy" onclick="openProductDialog('copy', ${
-            product.product_id
-          })">Copy</button>
-           <button class="btn btn-toggle-visability ${
-             product.visability === 1 ? "btn-hide" : "btn-show"
-           }" onclick="toggleVisability(${product.product_id}, ${
+        </p>
+      </div>
+      <div class="product-card-footer text-right">
+        <button class="btn btn-edit" onclick="openProductDialog('edit', ${
+          product.product_id
+        })">Edit</button>
+        <button class="btn btn-copy" onclick="openProductDialog('copy', ${
+          product.product_id
+        })">Copy</button>
+        <button class="btn btn-toggle-visability ${
+          product.visability === 1 ? "btn-hide" : "btn-show"
+        }" onclick="toggleVisability(${product.product_id}, ${
       product.visability
     })">
           ${product.visability === 1 ? "Hide" : "Show"}
-          </button>
-          
-          <button class="btn btn-delete" onclick="deleteProduct(${
-            product.product_id
-          })">Delete</button>
-        </div>`;
+        </button>
+        <button class="btn btn-delete" onclick="deleteProduct(${
+          product.product_id
+        })">Delete</button>
+      </div>`;
     cardContainer.appendChild(card);
   });
+
+  renderPagination(data.page, data.pages);
 }
 
-// Add barcode search event listener
 document.getElementById("barcode-search").addEventListener("input", () => {
+  currentPage = 1;
   const token = localStorage.getItem("access_token");
   fetchAndRenderProducts(token);
 });
@@ -229,7 +222,7 @@ async function deleteProduct(id) {
   }
 }
 
-let currentAction = "edit"; // or "copy"
+let currentAction = "edit";
 
 function openProductDialog(action, productId) {
   currentAction = action;
@@ -254,10 +247,12 @@ function openProductDialog(action, productId) {
       if (action === "edit") {
         document.getElementById("product-name").value = data.product_name;
         document.getElementById("bar-code").value = data.bar_code;
+        document.getElementById("item-number").value = data.Item_number || "";
       } else {
         // Clear name and barcode for copy
         document.getElementById("product-name").value = "";
         document.getElementById("bar-code").value = "";
+        document.getElementById("item-number").value = "";
       }
 
       document.getElementById("brand").value = data.brand;
@@ -296,6 +291,10 @@ document
       document.getElementById("product-name").value
     );
     formData.append("bar_code", document.getElementById("bar-code").value);
+    formData.append(
+      "item_number",
+      document.getElementById("item-number").value
+    );
     formData.append("brand", document.getElementById("brand").value);
     formData.append("category", document.getElementById("category").value);
     formData.append(
@@ -549,7 +548,61 @@ function openAddProductDialog() {
   document.getElementById("availability-limit").value = 100;
 
   document.getElementById("product-id").value = "";
-  document.getElementById("image-note").style.display = "none"; // Only needed for edit/copy
+  document.getElementById("image-note").style.display = "none";
 
   modal.style.display = "flex";
+}
+
+function renderPagination(current, totalPages) {
+  const container = document.getElementById("pagination");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const maxPagesToShow = 10;
+  let startPage = Math.max(current - Math.floor(maxPagesToShow / 2), 1);
+  let endPage = startPage + maxPagesToShow - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+  }
+
+  // Previous Button
+  const prevBtn = document.createElement("button");
+  prevBtn.textContent = "◀";
+  prevBtn.disabled = current === 1;
+  prevBtn.className = "btn";
+  prevBtn.onclick = () => {
+    if (current > 1) {
+      currentPage = current - 1;
+      fetchAndRenderProducts(window.__API_TOKEN);
+    }
+  };
+  container.appendChild(prevBtn);
+
+  // Page Numbers
+  for (let i = startPage; i <= endPage; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = i === current ? "btn selected" : "btn";
+    btn.onclick = () => {
+      currentPage = i;
+      fetchAndRenderProducts(window.__API_TOKEN);
+    };
+    container.appendChild(btn);
+  }
+
+  // Next Button
+  const nextBtn = document.createElement("button");
+  nextBtn.textContent = "▶";
+  nextBtn.disabled = current === totalPages;
+  nextBtn.className = "btn";
+  nextBtn.onclick = () => {
+    if (current < totalPages) {
+      currentPage = current + 1;
+      fetchAndRenderProducts(window.__API_TOKEN);
+    }
+  };
+  container.appendChild(nextBtn);
 }

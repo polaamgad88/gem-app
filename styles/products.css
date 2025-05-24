@@ -72,6 +72,7 @@ th {
 table img {
     height: 100px;
     width: 100px;
+    max-width: 100px;
     object-fit: cover;
     border-radius: var(--border-radius-sm);
     box-shadow: var(--box-shadow-sm);
@@ -415,6 +416,27 @@ table img {
 }
 
 
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.pagination .btn {
+    padding: 0.4em 0.8em;
+    border: 1px solid var(--gray-300);
+    background-color: white;
+    cursor: pointer;
+}
+
+.pagination .btn.selected {
+    font-weight: bold;
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
 
 
 /* Responsive adjustments */
