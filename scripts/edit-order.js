@@ -136,7 +136,6 @@ async function populateOrderInfo(order, token) {
   }
 }
 
-// Helper function to populate editable items
 function populateEditableItems(order, token) {
   const tableBody = document.getElementById("editable-items-body");
   const cardsContainer = document.getElementById("editable-items-cards");
@@ -147,17 +146,20 @@ function populateEditableItems(order, token) {
   let total = 0;
 
   order.items.forEach((item) => {
-    const itemTotal = parseFloat(item.price) * item.quantity;
+    const productId = item.product_id;
+    const price = parseFloat(item.price);
+    const quantity = parseInt(item.quantity);
+    const itemTotal = price * quantity;
     total += itemTotal;
 
     const imageUrl = item.image_path
       ? `http://localhost:5000/images/${item.image_path}`
       : "";
 
-    // Add table row
+    // === Table Row ===
     const row = document.createElement("tr");
-    row.dataset.productId = item.product_id;
-    row.dataset.price = item.price;
+    row.dataset.productId = productId;
+    row.dataset.price = price;
     row.innerHTML = `
       <td>
         ${
@@ -167,22 +169,18 @@ function populateEditableItems(order, token) {
         }
       </td>
       <td>${item.product_name}</td>
-      <td>EGP ${parseFloat(item.price).toFixed(2)}</td>
-      <td>
-        <input type="number" class="qty" value="${item.quantity}" min="1">
-      </td>
+      <td>EGP ${price.toFixed(2)}</td>
+      <td><input type="number" class="qty" value="${quantity}" min="1"></td>
       <td>EGP ${itemTotal.toFixed(2)}</td>
-      <td>
-        <button class="remove-btn">Remove</button>
-      </td>
+      <td><button class="remove-btn">Remove</button></td>
     `;
     tableBody.appendChild(row);
 
-    // Add card for mobile view
+    // === Card View ===
     const card = document.createElement("div");
     card.className = "item-card";
-    card.dataset.productId = item.product_id;
-    card.dataset.price = item.price;
+    card.dataset.productId = productId;
+    card.dataset.price = price;
     card.innerHTML = `
       <div class="item-card-header">
         ${
@@ -193,13 +191,10 @@ function populateEditableItems(order, token) {
         <h3>${item.product_name}</h3>
       </div>
       <div class="item-card-body">
-        <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
-          item.price
-        ).toFixed(2)}</p>
-        <p>
-          <span class="item-card-label">Quantity:</span>
-          <input type="number" class="qty" value="${item.quantity}" min="1">
-        </p>
+        <p><span class="item-card-label">Price:</span> EGP ${price.toFixed(
+          2
+        )}</p>
+        <p><span class="item-card-label">Quantity:</span> <input type="number" class="qty" value="${quantity}" min="1"></p>
         <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toFixed(
           2
         )}</p>
@@ -209,29 +204,35 @@ function populateEditableItems(order, token) {
       </div>
     `;
     cardsContainer.appendChild(card);
+
+    // === Sync logic ===
+    const rowQty = row.querySelector(".qty");
+    const cardQty = card.querySelector(".qty");
+
+    // Sync quantity between row and card
+    const syncQty = (sourceInput, targetInput) => {
+      targetInput.value = sourceInput.value;
+      updateTotals();
+    };
+
+    rowQty.addEventListener("input", () => syncQty(rowQty, cardQty));
+    cardQty.addEventListener("input", () => syncQty(cardQty, rowQty));
+
+    // Sync removal from either view
+    const removeBoth = () => {
+      row.remove();
+      card.remove();
+      updateTotals();
+    };
+
+    row.querySelector(".remove-btn").addEventListener("click", removeBoth);
+    card.querySelector(".remove-btn").addEventListener("click", removeBoth);
   });
 
-  // Set total price
+  // Set initial total
   document.getElementById("total-price").textContent = `EGP ${total.toFixed(
     2
   )}`;
-
-  // Add event listeners to quantity inputs
-  document.querySelectorAll(".qty").forEach((input) => {
-    input.addEventListener("change", updateTotals);
-  });
-
-  // Add event listeners to remove buttons
-  document.querySelectorAll(".remove-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      // FIX: Only remove the specific row/card that was clicked, not all with same product ID
-      const element = this.closest("tr") || this.closest(".item-card");
-      if (element) {
-        element.remove();
-        updateTotals();
-      }
-    });
-  });
 }
 
 // Helper function to update totals
@@ -286,7 +287,7 @@ function setupEventListeners(orderId, token) {
       try {
         // Fetch brands first for the dropdown
         const brandsResponse = await fetch(
-          "http://localhost:5000/products/brands",
+          "http://localhost:5000/products/brands/orders",
           {
             headers: { Authorization: `Bearer ${token}` },
             mode: "cors",
@@ -486,7 +487,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Fetch products for the selected brand
       const res = await fetch(
-        `http://localhost:5000/products?brand=${encodeURIComponent(
+        `http://localhost:5000/products/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -532,7 +533,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Fetch products for the selected brand
       const res = await fetch(
-        `http://localhost:5000/products?brand=${encodeURIComponent(
+        `http://localhost:5000/products/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -575,7 +576,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Use the provided backend endpoint for barcode search
       const res = await fetch(
-        `http://localhost:5000/product/search_by_barcode?barcode=${encodeURIComponent(
+        `http://localhost:5000/product/order/search_by_barcode?barcode=${encodeURIComponent(
           barcode
         )}`,
         {
@@ -642,7 +643,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Use the provided backend endpoint for barcode search
       const res = await fetch(
-        `http://localhost:5000/product/search_by_barcode?barcode=${encodeURIComponent(
+        `http://localhost:5000/product/order/search_by_barcode?barcode=${encodeURIComponent(
           barcode
         )}`,
         {
@@ -782,15 +783,16 @@ function addTemporaryProductRow(brands, token) {
     });
 }
 
-// Helper function to add a product to the order
 async function addProductToOrder(productId, price, quantity, token) {
   try {
-    // Fetch product details to get image and name
-    const res = await fetch(`http://localhost:5000/product/find/${productId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      mode: "cors",
-      credentials: "include",
-    });
+    const res = await fetch(
+      `http://localhost:5000/product/order/find/${productId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        mode: "cors",
+        credentials: "include",
+      }
+    );
 
     if (!res.ok) throw new Error("Failed to fetch product details");
 
@@ -800,12 +802,12 @@ async function addProductToOrder(productId, price, quantity, token) {
       ? `http://localhost:5000/images/${productData.image_path}`
       : "";
 
-    // Remove temporary rows/cards
+    // Remove any temp UI
     document
       .querySelectorAll(".temp-product-row, .temp-product-card")
       .forEach((el) => el.remove());
 
-    // Add actual product row to table
+    // === Table Row ===
     const tableBody = document.getElementById("editable-items-body");
     const row = document.createElement("tr");
     row.dataset.productId = productId;
@@ -820,17 +822,13 @@ async function addProductToOrder(productId, price, quantity, token) {
       </td>
       <td>${productData.product_name}</td>
       <td>EGP ${parseFloat(price).toFixed(2)}</td>
-      <td>
-        <input type="number" class="qty" value="${quantity}" min="1">
-      </td>
+      <td><input type="number" class="qty" value="${quantity}" min="1"></td>
       <td>EGP ${(parseFloat(price) * quantity).toFixed(2)}</td>
-      <td>
-        <button class="remove-btn">Remove</button>
-      </td>
+      <td><button class="remove-btn">Remove</button></td>
     `;
     tableBody.appendChild(row);
 
-    // Add card for mobile view
+    // === Card View ===
     const cardsContainer = document.getElementById("editable-items-cards");
     const card = document.createElement("div");
     card.className = "item-card";
@@ -849,10 +847,7 @@ async function addProductToOrder(productId, price, quantity, token) {
         <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
           price
         ).toFixed(2)}</p>
-        <p>
-          <span class="item-card-label">Quantity:</span>
-          <input type="number" class="qty" value="${quantity}" min="1">
-        </p>
+        <p><span class="item-card-label">Quantity:</span> <input type="number" class="qty" value="${quantity}" min="1"></p>
         <p><span class="item-card-label">Total:</span> EGP ${(
           parseFloat(price) * quantity
         ).toFixed(2)}</p>
@@ -863,38 +858,28 @@ async function addProductToOrder(productId, price, quantity, token) {
     `;
     cardsContainer.appendChild(card);
 
-    // Add event listeners to quantity inputs
-    const qtyInputs = [row.querySelector(".qty"), card.querySelector(".qty")];
+    // === Quantity Sync ===
+    const rowQty = row.querySelector(".qty");
+    const cardQty = card.querySelector(".qty");
 
-    qtyInputs.forEach((input) => {
-      input.addEventListener("change", function () {
-        // Sync quantity between table and card views
-        const value = this.value;
-        qtyInputs.forEach((inp) => {
-          if (inp !== this) inp.value = value;
-        });
-        updateTotals();
-      });
-    });
+    const syncQty = (sourceInput, targetInput) => {
+      targetInput.value = sourceInput.value;
+      updateTotals();
+    };
 
-    // Add event listeners to remove buttons
-    const removeButtons = [
-      row.querySelector(".remove-btn"),
-      card.querySelector(".remove-btn"),
-    ];
+    rowQty.addEventListener("input", () => syncQty(rowQty, cardQty));
+    cardQty.addEventListener("input", () => syncQty(cardQty, rowQty));
 
-    removeButtons.forEach((btn) => {
-      btn.addEventListener("click", function () {
-        // Only remove the specific element that was clicked
-        const element = this.closest("tr") || this.closest(".item-card");
-        if (element) {
-          element.remove();
-          updateTotals();
-        }
-      });
-    });
+    // === Remove Sync ===
+    const removeBoth = () => {
+      row.remove();
+      card.remove();
+      updateTotals();
+    };
 
-    // Update totals after adding the product
+    row.querySelector(".remove-btn").addEventListener("click", removeBoth);
+    card.querySelector(".remove-btn").addEventListener("click", removeBoth);
+
     updateTotals();
   } catch (err) {
     console.error("Error adding product:", err);
@@ -918,22 +903,28 @@ async function saveOrder(orderId, token) {
       return;
     }
 
-    // Collect all products from the table
     const products = [];
-    document.querySelectorAll("#editable-items-body tr").forEach((row) => {
-      // Skip temporary rows
-      if (row.classList.contains("temp-product-row")) return;
 
-      const productId = row.dataset.productId;
-      const quantity = parseInt(row.querySelector(".qty").value) || 0;
-
-      if (productId && quantity > 0) {
-        products.push({
-          product_id: parseInt(productId),
-          quantity: quantity,
-        });
-      }
-    });
+    const rows = document.querySelectorAll("#editable-items-body tr");
+    if (rows.length > 0) {
+      rows.forEach((row) => {
+        if (row.classList.contains("temp-product-row")) return;
+        const productId = row.dataset.productId;
+        const quantity = parseInt(row.querySelector(".qty")?.value || 0);
+        if (productId && quantity > 0) {
+          products.push({ product_id: parseInt(productId), quantity });
+        }
+      });
+    } else {
+      document.querySelectorAll(".item-card").forEach((card) => {
+        if (card.classList.contains("temp-product-card")) return;
+        const productId = card.dataset.productId;
+        const quantity = parseInt(card.querySelector(".qty")?.value || 0);
+        if (productId && quantity > 0) {
+          products.push({ product_id: parseInt(productId), quantity });
+        }
+      });
+    }
 
     if (products.length === 0) {
       Utils.UI.hideLoader("loader");

@@ -297,7 +297,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       const a = document.createElement("a");
       a.href = objectURL;
-      a.download = "orders_export.xlsx";
+      const now = new Date();
+      const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      a.download = `orders_export_${timestamp}.zip`;
+
       document.body.appendChild(a);
       a.click();
       a.remove();

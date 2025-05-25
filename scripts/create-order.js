@@ -442,9 +442,11 @@ function addCombinedRow(container, brands) {
 
     // After categories update, reset totals and preview
     onChange();
+    brandSelect.addEventListener("change", updateCategories);
+    categorySelect.addEventListener("change", onChange);
+    quantityInput.addEventListener("input", onChange);
   };
 
-  // Update totals and preview
   const onChange = async () => {
     const brand = brandSelect.value;
     const category = categorySelect.value;
@@ -454,8 +456,8 @@ function addCombinedRow(container, brands) {
     if ((!brand && !category) || qty < 1) {
       delete row.dataset.totalItems;
       delete row.dataset.totalPrice;
-      debouncePreviewUpdate();
       updateTotals();
+      debouncePreviewUpdate();
       return;
     }
 
@@ -477,11 +479,14 @@ function addCombinedRow(container, brands) {
       const json = await res.json();
       const selectedProducts = json.data || [];
 
-      row.dataset.totalItems = qty * selectedProducts.length;
-      row.dataset.totalPrice = selectedProducts.reduce(
+      const totalItems = qty * selectedProducts.length;
+      const totalPrice = selectedProducts.reduce(
         (acc, p) => acc + qty * parseFloat(p.price || 0),
         0
       );
+
+      row.dataset.totalItems = totalItems;
+      row.dataset.totalPrice = totalPrice;
 
       updateTotals();
       debouncePreviewUpdate();
@@ -499,26 +504,40 @@ function addCombinedRow(container, brands) {
   updateCategories();
 }
 
-// Helper function to update order totals
 function updateTotals() {
   let totalItems = 0;
   let totalPrice = 0;
 
-  document.querySelectorAll(".order-row").forEach((row) => {
-    const qty = parseInt(row.querySelector(".quantity-input")?.value) || 0;
+  // 1. Detailed rows
+  document
+    .querySelectorAll("#detailed-order-rows .order-row")
+    .forEach((row) => {
+      const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
+      const price =
+        parseFloat(row.dataset.productPrice) ||
+        parseFloat(
+          row.querySelector(".product-select")?.selectedOptions[0]?.dataset
+            ?.price || 0
+        ) ||
+        0;
 
-    // ✅ Use the stored product price if locked
-    const price =
-      parseFloat(row.dataset.productPrice) ||
-      parseFloat(
-        row.querySelector(".product-select")?.selectedOptions[0]?.dataset
-          ?.price || 0
-      ) ||
-      0;
+      totalItems += qty;
+      totalPrice += qty * price;
+    });
 
-    totalItems += qty;
-    totalPrice += qty * price;
-  });
+  // 2. Combined rows
+  document
+    .querySelectorAll("#combined-order-rows .order-row")
+    .forEach((row) => {
+      const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
+      const price = parseFloat(row.dataset.price || "0");
+      const items = parseInt(row.dataset.totalItems || "0");
+
+      if (items && price) {
+        totalItems += items;
+        totalPrice += price;
+      }
+    });
 
   document.getElementById("total-items").textContent = totalItems;
   document.getElementById("total-price").textContent = totalPrice.toFixed(2);
@@ -532,7 +551,6 @@ function debouncePreviewUpdate(delay = 1000) {
   previewTimeout = setTimeout(updateOrderPreview, delay);
 }
 
-// Helper function to update order preview
 async function updateOrderPreview() {
   const previewBody = document.getElementById("order-preview-body");
   const loader = document.getElementById("preview-loader");
@@ -556,20 +574,32 @@ async function updateOrderPreview() {
       }
     });
 
-  // Collect from Combined Order rows
+  // Collect from Combined Order rows and render summary
   try {
     const combinedRows = document.querySelectorAll(
       "#combined-order-rows .order-row"
     );
     for (const row of combinedRows) {
-      const brand = row.querySelector(".brand-select")?.value;
-      const category = row.querySelector(".category-select")?.value;
+      const brand = row.querySelector(".brand-select")?.value || "-";
+      const category = row.querySelector(".category-select")?.value || "-";
       const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
       if ((!brand && !category) || qty <= 0) continue;
 
+      // Add summary card
+      const summaryCard = document.createElement("div");
+      summaryCard.className = "preview-card preview-summary";
+      summaryCard.innerHTML = `
+        <div class="card-content">
+          <div><strong>Brand:</strong> ${brand}</div>
+          <div><strong>Category:</strong> ${category}</div>
+          <div><strong>Quantity per Product:</strong> ${qty}</div>
+        </div>
+      `;
+      previewBody.appendChild(summaryCard);
+
       const query = [
-        brand ? `brand=${encodeURIComponent(brand)}` : "",
-        category ? `category=${encodeURIComponent(category)}` : "",
+        brand !== "-" ? `brand=${encodeURIComponent(brand)}` : "",
+        category !== "-" ? `category=${encodeURIComponent(category)}` : "",
       ]
         .filter(Boolean)
         .join("&");
@@ -598,7 +628,7 @@ async function updateOrderPreview() {
 
   // Show "no items" if nothing selected
   if (productQuantities.size === 0) {
-    previewBody.innerHTML = `<div style="text-align:center; padding:10px;">No items selected</div>`;
+    previewBody.innerHTML += `<div style="text-align:center; padding:10px;">No items selected</div>`;
     loader.style.display = "none";
     return;
   }
@@ -655,7 +685,6 @@ async function updateOrderPreview() {
     previewBody.innerHTML = `<div style="text-align:center; padding:10px;">Error loading preview</div>`;
   }
 
-  // Hide loader when done
   loader.style.display = "none";
 }
 
@@ -683,7 +712,6 @@ async function submitOrder(token) {
       }
     });
 
-  // Collect products from Combined Order
   try {
     const combinedRows = document.querySelectorAll(
       "#combined-order-rows .order-row"
@@ -718,6 +746,7 @@ async function submitOrder(token) {
   } catch (err) {
     console.error("Error collecting combined order products:", err);
   }
+
   console.log(products);
   if (products.length === 0) {
     alert("Please add at least one product to the order.");
@@ -747,7 +776,7 @@ async function submitOrder(token) {
     if (res.ok) {
       const result = await res.json();
       alert("✅ Order created successfully!");
-      window.location.href = `view-order.html?order_id=${result.created_order}`;
+      window.location.href = `view-order.html?order_id=${result.order_id}`;
     } else {
       const data = await res.json();
       alert(`❌ Failed to create order: ${data.message || "Unknown error"}`);

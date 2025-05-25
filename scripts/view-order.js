@@ -41,37 +41,27 @@ async function fetchOrderDetails(orderId, token) {
   return await res.json();
 }
 
-// Helper function to populate order details
 function populateOrderDetails(order) {
-  // Header
-  console.log(order);
   document.getElementById("orderId").textContent = `#${order.order_id}`;
   document.getElementById("order-id").textContent = `#${order.order_id}`;
   document.getElementById("order-date").textContent = Utils.Format.date(
     order.order_date
   );
 
-  // Status
   const orderState = document.getElementById("order-state");
   orderState.textContent = order.status;
   orderState.className = `state ${order.status.toLowerCase()}`;
 
-  // Delegate
   document.getElementById("delegate-name").textContent = order.username;
-
-  // Customer Info
   document.getElementById("customer-name").textContent = order.customer_name;
   document.getElementById(
     "customer-id"
   ).textContent = `CUST-${order.customer_id}`;
   document.getElementById("customer-address").textContent = order.address;
 
-  // Items - Table View
   const itemsTableBody = document.getElementById("items-table-body");
-  itemsTableBody.innerHTML = "";
-
-  // Items - Card View
   const itemsCardView = document.getElementById("items-card-view");
+  itemsTableBody.innerHTML = "";
   itemsCardView.innerHTML = "";
 
   let total = 0;
@@ -84,7 +74,11 @@ function populateOrderDetails(order) {
       ? `http://localhost:5000/images/${item.image_path}`
       : "";
 
-    // Add table row
+    const barCodeLine = `<div style="font-size: 0.8em; color: gray;">${
+      item.bar_code || "-"
+    }</div>`;
+
+    // Table view row
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>
@@ -94,14 +88,17 @@ function populateOrderDetails(order) {
             : "No image"
         }
       </td>
-      <td>${item.product_name}</td>
+      <td>
+        ${item.product_name}
+        ${barCodeLine}
+      </td>
       <td>EGP ${parseFloat(item.price).toFixed(2)}</td>
       <td>${item.quantity}</td>
       <td>EGP ${itemTotal.toFixed(2)}</td>
     `;
     itemsTableBody.appendChild(row);
 
-    // Add card for mobile view
+    // Card view
     const card = document.createElement("div");
     card.className = "item-card";
     card.innerHTML = `
@@ -111,7 +108,10 @@ function populateOrderDetails(order) {
             ? `<img src="${imageUrl}" alt="${item.product_name}">`
             : "<div style='width:50px;height:50px;background:#eee;display:flex;align-items:center;justify-content:center;border-radius:4px;'>No img</div>"
         }
-        <h3>${item.product_name}</h3>
+        <div>
+          <h3 style="margin:0">${item.product_name}</h3>
+          ${barCodeLine}
+        </div>
       </div>
       <div class="item-card-body">
         <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
@@ -126,7 +126,6 @@ function populateOrderDetails(order) {
     itemsCardView.appendChild(card);
   });
 
-  // Total
   document.getElementById("total-price").textContent = `EGP ${total.toFixed(
     2
   )}`;
