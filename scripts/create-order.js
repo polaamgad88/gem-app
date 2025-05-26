@@ -391,7 +391,9 @@ function addCombinedRow(container, brands) {
   const quantityInput = document.createElement("input");
   quantityInput.className = "quantity-input";
   quantityInput.type = "number";
-  quantityInput.value = 1;
+  quantityInput.required = true;
+  quantityInput.placeholder = "";
+
   quantityInput.min = 1;
 
   const deleteBtn = document.createElement("i");
@@ -503,7 +505,6 @@ function addCombinedRow(container, brands) {
   // Initially populate categories
   updateCategories();
 }
-
 function updateTotals() {
   let totalItems = 0;
   let totalPrice = 0;
@@ -521,24 +522,26 @@ function updateTotals() {
         ) ||
         0;
 
-      totalItems += qty;
-      totalPrice += qty * price;
+      if (qty > 0 && price > 0) {
+        totalItems += qty;
+        totalPrice += qty * price;
+      }
     });
 
   // 2. Combined rows
   document
     .querySelectorAll("#combined-order-rows .order-row")
     .forEach((row) => {
-      const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
-      const price = parseFloat(row.dataset.price || "0");
       const items = parseInt(row.dataset.totalItems || "0");
+      const price = parseFloat(row.dataset.totalPrice || "0");
 
-      if (items && price) {
+      if (items > 0 && price > 0) {
         totalItems += items;
         totalPrice += price;
       }
     });
 
+  // Display totals
   document.getElementById("total-items").textContent = totalItems;
   document.getElementById("total-price").textContent = totalPrice.toFixed(2);
 }
@@ -556,13 +559,12 @@ async function updateOrderPreview() {
   const loader = document.getElementById("preview-loader");
   const token = localStorage.getItem("access_token");
 
-  // Show loader and clear the preview area
   loader.style.display = "block";
   previewBody.innerHTML = "";
 
   const productQuantities = new Map();
 
-  // Collect from Detailed Order rows
+  // Detailed Order rows — show individual product cards
   document
     .querySelectorAll("#detailed-order-rows .order-row")
     .forEach((row) => {
@@ -574,18 +576,19 @@ async function updateOrderPreview() {
       }
     });
 
-  // Collect from Combined Order rows and render summary
-  try {
-    const combinedRows = document.querySelectorAll(
-      "#combined-order-rows .order-row"
-    );
-    for (const row of combinedRows) {
+  // Combined Order rows — create summary card only
+  document
+    .querySelectorAll("#combined-order-rows .order-row")
+    .forEach((row) => {
       const brand = row.querySelector(".brand-select")?.value || "-";
       const category = row.querySelector(".category-select")?.value || "-";
       const qty = parseInt(row.querySelector(".quantity-input")?.value || "0");
-      if ((!brand && !category) || qty <= 0) continue;
 
-      // Add summary card
+      if ((!brand && !category) || qty <= 0) return;
+
+      const totalItems = parseInt(row.dataset.totalItems || "0");
+      const totalPrice = parseFloat(row.dataset.totalPrice || "0");
+
       const summaryCard = document.createElement("div");
       summaryCard.className = "preview-card preview-summary";
       summaryCard.innerHTML = `
@@ -593,47 +596,24 @@ async function updateOrderPreview() {
           <div><strong>Brand:</strong> ${brand}</div>
           <div><strong>Category:</strong> ${category}</div>
           <div><strong>Quantity per Product:</strong> ${qty}</div>
+          <div><strong>Total Products:</strong> ${totalItems}</div>
+          <div><strong>Total Price:</strong> EGP ${totalPrice.toFixed(2)}</div>
         </div>
       `;
       previewBody.appendChild(summaryCard);
+    });
 
-      const query = [
-        brand !== "-" ? `brand=${encodeURIComponent(brand)}` : "",
-        category !== "-" ? `category=${encodeURIComponent(category)}` : "",
-      ]
-        .filter(Boolean)
-        .join("&");
-
-      const res = await fetch(`http://localhost:5000/products?${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) continue;
-
-      const data = await res.json();
-      (data.data || []).forEach((p) => {
-        if (
-          p.visability == 0 ||
-          p.availability === "Unavailable" ||
-          p.availability <= 0
-        )
-          return;
-        const key = String(p.product_id);
-        productQuantities.set(key, (productQuantities.get(key) || 0) + qty);
-      });
-    }
-  } catch (err) {
-    console.error("Error collecting combined order products:", err);
-  }
-
-  // Show "no items" if nothing selected
-  if (productQuantities.size === 0) {
+  // If no detailed products, show message
+  if (
+    productQuantities.size === 0 &&
+    !document.querySelector("#combined-order-rows .order-row")
+  ) {
     previewBody.innerHTML += `<div style="text-align:center; padding:10px;">No items selected</div>`;
     loader.style.display = "none";
     return;
   }
 
-  // Render product cards
+  // Render product preview cards for detailed rows only
   try {
     for (const [productId, quantity] of productQuantities.entries()) {
       const res = await fetch(
@@ -643,17 +623,11 @@ async function updateOrderPreview() {
         }
       );
 
-      if (!res.ok) {
-        console.error(`Failed to fetch product ${productId}: ${res.status}`);
-        continue;
-      }
+      if (!res.ok) continue;
 
       const result = await res.json();
       const data = result.data;
-      if (!data) {
-        console.error(`No data returned for product ${productId}`);
-        continue;
-      }
+      if (!data) continue;
 
       const name = data.product_name || "Unnamed Product";
       const price = parseFloat(data.price || 0).toFixed(2);
@@ -664,24 +638,23 @@ async function updateOrderPreview() {
 
       const card = document.createElement("div");
       card.className = "preview-card";
-
       card.innerHTML = `
-          ${
-            photoUrl
-              ? `<img src="${photoUrl}" alt="${name}" />`
-              : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
-          }
-          <div class="card-content">
-            <div class="product-name">${name}</div>
-            <div class="product-detail"><strong>Qty:</strong> ${quantity}</div>
-            <div class="product-detail"><strong>Unit Price:</strong> EGP ${price}</div>
-            <div class="product-detail"><strong>Total:</strong> EGP ${total}</div>
-          </div>
-        `;
+        ${
+          photoUrl
+            ? `<img src="${photoUrl}" alt="${name}" />`
+            : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
+        }
+        <div class="card-content">
+          <div class="product-name">${name}</div>
+          <div class="product-detail"><strong>Qty:</strong> ${quantity}</div>
+          <div class="product-detail"><strong>Unit Price:</strong> EGP ${price}</div>
+          <div class="product-detail"><strong>Total:</strong> EGP ${total}</div>
+        </div>
+      `;
       previewBody.appendChild(card);
     }
   } catch (err) {
-    console.error("Error rendering preview:", err);
+    console.error("Error rendering product preview:", err);
     previewBody.innerHTML = `<div style="text-align:center; padding:10px;">Error loading preview</div>`;
   }
 
