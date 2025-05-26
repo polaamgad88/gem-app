@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function populateBrands(token) {
-  const res = await fetch("http://localhost:5000/products/brands", {
+  const res = await fetch("https://order-app.gemegypt.net/api/products/brands", {
     headers: { Authorization: `Bearer ${token}` },
   });
   const brands = (await res.json()).brands || [];
@@ -47,10 +47,10 @@ async function populateBrands(token) {
 async function populateCategories(token) {
   const brand = document.getElementById("brand-filter").value;
   const categoryEndpoint = brand
-    ? `http://localhost:5000/products/categories?brand=${encodeURIComponent(
+    ? `https://order-app.gemegypt.net/api/products/categories?brand=${encodeURIComponent(
         brand
       )}`
-    : `http://localhost:5000/products/categories`;
+    : `https://order-app.gemegypt.net/api/products/categories`;
 
   const res = await fetch(categoryEndpoint, {
     headers: { Authorization: `Bearer ${token}` },
@@ -78,7 +78,7 @@ async function fetchAndRenderProducts(token) {
   params.append("limit", pageLimit);
 
   const res = await fetch(
-    `http://localhost:5000/products?${params.toString()}`,
+    `https://order-app.gemegypt.net/api/products?${params.toString()}`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -94,7 +94,7 @@ async function fetchAndRenderProducts(token) {
   cardContainer.innerHTML = "";
 
   products.forEach((product) => {
-    const imageUrl = `http://localhost:5000/images/${product.image_path}`;
+    const imageUrl = `https://order-app.gemegypt.net/api/images/${product.image_path}`;
 
     // Table Row
     const row = document.createElement("tr");
@@ -204,7 +204,7 @@ async function deleteProduct(id) {
 
   const token = localStorage.getItem("access_token");
   try {
-    const res = await fetch(`http://localhost:5000/product/delete/${id}`, {
+    const res = await fetch(`https://order-app.gemegypt.net/api/product/delete/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -235,7 +235,7 @@ function openProductDialog(action, productId) {
 
   errorMsg.style.display = "none"; // Clear previous error
 
-  fetch(`http://localhost:5000/product/find/${productId}`, {
+  fetch(`https://order-app.gemegypt.net/api/product/find/${productId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -316,10 +316,10 @@ document
 
     const url =
       currentAction === "add"
-        ? `http://localhost:5000/add_product`
+        ? `https://order-app.gemegypt.net/api/add_product`
         : currentAction === "edit"
-        ? `http://localhost:5000/product/edit/${id}`
-        : `http://localhost:5000/product/copy/${id}`;
+        ? `https://order-app.gemegypt.net/api/product/edit/${id}`
+        : `https://order-app.gemegypt.net/api/product/copy/${id}`;
     if (currentAction === "add") {
       document.getElementById("image-note").style.display = "none";
     } else {
@@ -388,7 +388,7 @@ async function handleExport(token) {
     if (barcode) params.append("bar_code", barcode);
   }
 
-  const url = `http://localhost:5000/products/export?${params.toString()}`;
+  const url = `https://order-app.gemegypt.net/api/products/export?${params.toString()}`;
   try {
     const res = await fetch(url, {
       method: "GET",
@@ -469,7 +469,7 @@ async function handleImport() {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/products/import?mode=${selectedImportMode}`,
+      `https://order-app.gemegypt.net/api/products/import?mode=${selectedImportMode}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -512,7 +512,7 @@ async function toggleVisability(productId, currentVisability) {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/products/set_visability/${productId}/${newVisability}`,
+      `https://order-app.gemegypt.net/api/products/set_visability/${productId}/${newVisability}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },

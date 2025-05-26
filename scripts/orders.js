@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   window.addEventListener("resize", Utils.UI.checkScreenSize);
 
   async function fetchUsers() {
-    const res = await fetch("http://localhost:5000/users", {
+    const res = await fetch("https://order-app.gemegypt.net/api/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error("users");
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   async function fetchCustomers() {
-    const res = await fetch("http://localhost:5000/customers", {
+    const res = await fetch("https://order-app.gemegypt.net/api/customers", {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error("customers");
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     Utils.UI.showLoader();
 
     const userId = document.getElementById("userFilter").value;
-    let url = "http://localhost:5000/orders";
+    let url = "https://order-app.gemegypt.net/api/orders";
     if (userId !== "all") url += `?user_id=${userId}`;
 
     const res = await fetch(url, {
@@ -281,7 +281,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   async function downloadExport(query) {
     try {
       Utils.UI.showLoader("Preparing file…");
-      const api = `http://localhost:5000/orders/export?${query}`;
+      const api = `https://order-app.gemegypt.net/api/orders/export?${query}`;
       const res = await fetch(api, {
         headers: { Authorization: `Bearer ${token}` },
       });

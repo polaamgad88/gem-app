@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 // Helper function to fetch order details
 async function fetchOrderDetails(orderId, token) {
-  const res = await fetch(`http://localhost:5000/orders/find/${orderId}`, {
+  const res = await fetch(`https://order-app.gemegypt.net/api/orders/find/${orderId}`, {
     headers: { Authorization: `Bearer ${token}` },
     mode: "cors",
     credentials: "include",
@@ -56,7 +56,7 @@ async function fetchOrderDetails(orderId, token) {
 async function fetchCustomerAddresses(customerId, token) {
   // Using the endpoint specified by the user
   const res = await fetch(
-    `http://localhost:5000/customers/${customerId}/addresses`,
+    `https://order-app.gemegypt.net/api/customers/${customerId}/addresses`,
     {
       headers: { Authorization: `Bearer ${token}` },
       mode: "cors",
@@ -153,7 +153,7 @@ function populateEditableItems(order, token) {
     total += itemTotal;
 
     const imageUrl = item.image_path
-      ? `http://localhost:5000/images/${item.image_path}`
+      ? `https://order-app.gemegypt.net/api/images/${item.image_path}`
       : "";
 
     // === Table Row ===
@@ -287,7 +287,7 @@ function setupEventListeners(orderId, token) {
       try {
         // Fetch brands first for the dropdown
         const brandsResponse = await fetch(
-          "http://localhost:5000/products/brands/orders",
+          "https://order-app.gemegypt.net/api/products/brands/orders",
           {
             headers: { Authorization: `Bearer ${token}` },
             mode: "cors",
@@ -487,7 +487,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Fetch products for the selected brand
       const res = await fetch(
-        `http://localhost:5000/products/orders?brand=${encodeURIComponent(
+        `https://order-app.gemegypt.net/api/products/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -533,7 +533,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Fetch products for the selected brand
       const res = await fetch(
-        `http://localhost:5000/products/orders?brand=${encodeURIComponent(
+        `https://order-app.gemegypt.net/api/products/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -576,7 +576,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Use the provided backend endpoint for barcode search
       const res = await fetch(
-        `http://localhost:5000/product/order/search_by_barcode?barcode=${encodeURIComponent(
+        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?barcode=${encodeURIComponent(
           barcode
         )}`,
         {
@@ -643,7 +643,7 @@ function addTemporaryProductRow(brands, token) {
     try {
       // Use the provided backend endpoint for barcode search
       const res = await fetch(
-        `http://localhost:5000/product/order/search_by_barcode?barcode=${encodeURIComponent(
+        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?barcode=${encodeURIComponent(
           barcode
         )}`,
         {
@@ -786,7 +786,7 @@ function addTemporaryProductRow(brands, token) {
 async function addProductToOrder(productId, price, quantity, token) {
   try {
     const res = await fetch(
-      `http://localhost:5000/product/order/find/${productId}`,
+      `https://order-app.gemegypt.net/api/product/order/find/${productId}`,
       {
         headers: { Authorization: `Bearer ${token}` },
         mode: "cors",
@@ -799,7 +799,7 @@ async function addProductToOrder(productId, price, quantity, token) {
     const product = await res.json();
     const productData = product.data;
     const imageUrl = productData.image_path
-      ? `http://localhost:5000/images/${productData.image_path}`
+      ? `https://order-app.gemegypt.net/api/images/${productData.image_path}`
       : "";
 
     // Remove any temp UI
@@ -942,7 +942,7 @@ async function saveOrder(orderId, token) {
     console.log("Sending order update with data:", requestData);
 
     // Send request as JSON directly
-    const res = await fetch(`http://localhost:5000/orders/edit/${orderId}`, {
+    const res = await fetch(`https://order-app.gemegypt.net/api/orders/edit/${orderId}`, {
       method: "POST", // Using proper PUT method with JSON
       headers: {
         Authorization: `Bearer ${token}`,

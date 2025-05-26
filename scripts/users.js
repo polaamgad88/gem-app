@@ -28,7 +28,7 @@ let allUsers = [];
 
 async function loadUsers(token) {
   try {
-    const res = await fetch("http://localhost:5000/users", {
+    const res = await fetch("https://order-app.gemegypt.net/api/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -64,7 +64,7 @@ async function deleteUser(userId) {
   const token = localStorage.getItem("access_token");
 
   try {
-    const res = await fetch(`http://localhost:5000/users/delete/${userId}`, {
+    const res = await fetch(`https://order-app.gemegypt.net/api/users/delete/${userId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -89,7 +89,7 @@ async function toggleUserStatus(userId, newStatus) {
   const token = localStorage.getItem("access_token");
   try {
     const res = await fetch(
-      `http://localhost:5000/users/set_active/${userId}/${newStatus}`,
+      `https://order-app.gemegypt.net/api/users/set_active/${userId}/${newStatus}`,
       {
         method: "POST",
         headers: {

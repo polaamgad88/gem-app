@@ -29,7 +29,7 @@ async function fetchOrderDetails(orderId, token) {
     throw new Error("No order ID specified.");
   }
 
-  const res = await fetch(`http://localhost:5000/orders/find/${orderId}`, {
+  const res = await fetch(`https://order-app.gemegypt.net/api/orders/find/${orderId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -71,7 +71,7 @@ function populateOrderDetails(order) {
     total += itemTotal;
 
     const imageUrl = item.image_path
-      ? `http://localhost:5000/images/${item.image_path}`
+      ? `https://order-app.gemegypt.net/api/images/${item.image_path}`
       : "";
 
     const barCodeLine = `<div style="font-size: 0.8em; color: gray;">${
@@ -147,7 +147,7 @@ function setupActionButtons(orderId, token) {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/orders/confirm/${orderId}`,
+          `https://order-app.gemegypt.net/api/orders/confirm/${orderId}`,
           {
             method: "POST",
             headers: {
@@ -185,7 +185,7 @@ function setupActionButtons(orderId, token) {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/orders/refund/${orderId}`,
+          `https://order-app.gemegypt.net/api/orders/refund/${orderId}`,
           {
             method: "POST",
             headers: {

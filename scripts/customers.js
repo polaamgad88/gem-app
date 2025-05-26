@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 async function fetchCustomers(token) {
   try {
-    const res = await fetch("http://localhost:5000/customers", {
+    const res = await fetch("https://order-app.gemegypt.net/api/customers", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();

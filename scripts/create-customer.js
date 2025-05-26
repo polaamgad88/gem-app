@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const payload = new URLSearchParams(formData);
 
     try {
-      const res = await fetch("http://localhost:5000/customers/create", {
+      const res = await fetch("https://order-app.gemegypt.net/api/customers/create", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

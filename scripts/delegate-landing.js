@@ -46,7 +46,7 @@ function setupAdminButtons(admin, role) {
 
 // Helper function to verify token
 async function verifyToken(token) {
-  const response = await fetch("http://localhost:5000/checklogin", {
+  const response = await fetch("https://order-app.gemegypt.net/api/checklogin", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ function setupLogoutButton() {
           return;
         }
 
-        const logoutRes = await fetch("http://localhost:5000/logout", {
+        const logoutRes = await fetch("https://order-app.gemegypt.net/api/logout", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

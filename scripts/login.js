@@ -102,7 +102,7 @@ function validateInputs(usernameInput, passwordInput) {
 async function performLogin(username, password) {
   try {
     // Make the request to the Flask backend
-    const response = await fetch("http://localhost:5000/login", {
+    const response = await fetch("https://order-app.gemegypt.net/api/login", {
       method: "POST",
       body: new URLSearchParams({
         username: username,

@@ -13,7 +13,7 @@ const Auth = {
     if (!token) return false;
 
     try {
-      const res = await fetch("http://localhost:5000/checklogin", {
+      const res = await fetch("https://order-app.gemegypt.net/api/checklogin", {
         headers: { Authorization: `Bearer ${token}` },
       });
       return res.ok;
@@ -45,7 +45,7 @@ const Auth = {
     if (!token) return true;
 
     try {
-      const logoutRes = await fetch("http://localhost:5000/logout", {
+      const logoutRes = await fetch("https://order-app.gemegypt.net/api/logout", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
