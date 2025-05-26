@@ -123,7 +123,7 @@ async function performLogin(username, password) {
       localStorage.setItem("is_admin", data.admin);
 
       // Redirect to dashboard
-      window.location.href = "delegate-landing.html";
+      window.location.href = "index.html";
     } else {
       showError("Invalid username or password. Please try again.");
     }
