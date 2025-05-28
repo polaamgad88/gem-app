@@ -168,7 +168,11 @@ function populateEditableItems(order, token) {
             : "No image"
         }
       </td>
-      <td>${item.product_name}</td>
+      <td>
+        <div>${item.product_name}</div>
+        <div style="font-size: 12px; color: #666;">${item.bar_code}</div>
+      </td>
+
       <td>EGP ${price.toFixed(2)}</td>
       <td><input type="number" class="qty" value="${quantity}" min="1"></td>
       <td>EGP ${itemTotal.toFixed(2)}</td>
@@ -191,6 +195,7 @@ function populateEditableItems(order, token) {
         <h3>${item.product_name}</h3>
       </div>
       <div class="item-card-body">
+      <p><span class="item-card-label">Barcode:</span>  ${item.bar_code}</p>
         <p><span class="item-card-label">Price:</span> EGP ${price.toFixed(
           2
         )}</p>
@@ -302,7 +307,6 @@ function setupEventListeners(orderId, token) {
         const brandsData = await brandsResponse.json();
         const brands = brandsData.brands || [];
 
-        // Add temporary product row to both table and card views
         addTemporaryProductRow(brands, token);
       } catch (err) {
         console.error("Error fetching brands:", err);
@@ -315,472 +319,261 @@ function setupEventListeners(orderId, token) {
     await saveOrder(orderId, token);
   });
 }
-
-// Helper function to add a temporary product row to both table and card views
 function addTemporaryProductRow(brands, token) {
-  // Remove any existing temporary rows first to prevent multiple search interfaces
   document
     .querySelectorAll(".temp-product-row, .temp-product-card")
     .forEach((el) => el.remove());
 
-  // Create a temporary row in the table
   const tableBody = document.getElementById("editable-items-body");
+  const cardsContainer = document.getElementById("editable-items-cards");
+
+  // Utility function to create synced select/input groups
+  function createElements() {
+    const brandSelect = document.createElement("select");
+    brandSelect.innerHTML = `<option value="">Select Brand</option>`;
+    brands.forEach((b) => {
+      brandSelect.innerHTML += `<option value="${b}">${b}</option>`;
+    });
+
+    const categorySelect = document.createElement("select");
+    categorySelect.innerHTML = `<option value="">Select Category</option>`;
+
+    const productSelect = document.createElement("select");
+    productSelect.innerHTML = `<option value="">Select Product</option>`;
+
+    const barcodeInput = document.createElement("input");
+    barcodeInput.placeholder = "Type barcode...";
+
+    const barcodeSuggestions = document.createElement("ul");
+    barcodeSuggestions.className = "barcode-suggestions dropdown-list";
+    barcodeSuggestions.style.display = "none";
+
+    const quantityInput = document.createElement("input");
+    quantityInput.type = "number";
+    quantityInput.value = 1;
+    quantityInput.min = 1;
+
+    return {
+      brandSelect,
+      categorySelect,
+      productSelect,
+      barcodeInput,
+      barcodeSuggestions,
+      quantityInput,
+    };
+  }
+
+  // Create buttons
+  const addBtn = document.createElement("button");
+  addBtn.textContent = "Add";
+  addBtn.className = "confirm-btn";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.className = "cancel-btn";
+
+  // Shared logic to sync two elements
+  const sync = (el1, el2, event = "input") => {
+    let syncing = false;
+    const handler = (source, target) => () => {
+      if (syncing || source.value === target.value) return;
+      syncing = true;
+      target.value = source.value;
+
+      if (source.tagName === "SELECT") {
+        const selected = source.options[source.selectedIndex];
+        const match = Array.from(target.options).find(
+          (opt) => opt.value === selected.value
+        );
+        if (match)
+          target.selectedIndex = Array.from(target.options).indexOf(match);
+      }
+
+      target.dispatchEvent(new Event(event));
+      syncing = false;
+    };
+
+    el1.addEventListener(event, handler(el1, el2));
+    el2.addEventListener(event, handler(el2, el1));
+  };
+
+  const row = createElements();
+  const card = createElements();
+
+  // Sync all shared fields
+  sync(row.brandSelect, card.brandSelect, "change");
+  sync(row.categorySelect, card.categorySelect, "change");
+  sync(row.productSelect, card.productSelect, "change");
+  sync(row.barcodeInput, card.barcodeInput, "input");
+  sync(row.quantityInput, card.quantityInput, "input");
+
+  // Create add logic
+  const handleAddClick = () => {
+    const productId = row.productSelect.value;
+    const price = row.productSelect.selectedOptions[0]?.dataset.price;
+    const quantity = parseInt(row.quantityInput.value);
+    if (!productId || !price || quantity < 1) {
+      alert("Please select a product and valid quantity.");
+      return;
+    }
+    addProductToOrder(productId, price, quantity, token);
+    tempRow.remove();
+    tempCard.remove();
+  };
+
+  addBtn.addEventListener("click", handleAddClick);
+  const addBtnCard = addBtn.cloneNode(true);
+  addBtnCard.addEventListener("click", handleAddClick);
+
+  cancelBtn.addEventListener("click", () => {
+    tempRow.remove();
+    tempCard.remove();
+  });
+  const cancelBtnCard = cancelBtn.cloneNode(true);
+  cancelBtnCard.addEventListener("click", () => {
+    tempRow.remove();
+    tempCard.remove();
+  });
+
+  // === TABLE UI
   const tempRow = document.createElement("tr");
   tempRow.className = "temp-product-row";
-  tempRow.innerHTML = `
-    <td colspan="6">
-      <div class="search-container">
-        <div class="search-options">
-          <label>
-            <input type="radio" name="search-type" value="brand-product" checked> 
-            Search by Brand/Product
-          </label>
-          <label>
-            <input type="radio" name="search-type" value="barcode"> 
-            Search by Barcode
-          </label>
-        </div>
-        
-        <div class="search-inputs">
-          <div class="brand-product-search">
-            <div class="brand-select-container">
-              <select id="brand-select" class="search-input">
-                <option value="">Select Brand</option>
-                ${brands
-                  .map((brand) => `<option value="${brand}">${brand}</option>`)
-                  .join("")}
-              </select>
-            </div>
-            <div class="product-select-container" style="display:none; margin-top:10px;">
-              <select id="product-select" class="search-input">
-                <option value="">Select Product</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="barcode-search" style="display:none;">
-            <input type="text" id="barcode-search" placeholder="Scan or enter barcode" class="search-input">
-            <button id="search-barcode-btn" class="search-btn">Search</button>
-          </div>
-        </div>
-        
-        <div class="quantity-wrapper">
-          <label for="product-quantity">Quantity:</label>
-          <input type="number" id="product-quantity" value="1" min="1">
-        </div>
-        
-        <div class="action-buttons">
-          <button id="confirm-add-product" class="confirm-btn">Add</button>
-          <button id="cancel-add-product" class="cancel-btn">Cancel</button>
-        </div>
-      </div>
-    </td>
-  `;
-
+  const td = document.createElement("td");
+  td.colSpan = 6;
+  const rowWrapper = document.createElement("div");
+  rowWrapper.className = "order-row";
+  [
+    row.brandSelect,
+    row.categorySelect,
+    row.barcodeInput,
+    row.barcodeSuggestions,
+    row.productSelect,
+    row.quantityInput,
+    addBtn,
+    cancelBtn,
+  ].forEach((el) => rowWrapper.appendChild(el));
+  td.appendChild(rowWrapper);
+  tempRow.appendChild(td);
   tableBody.appendChild(tempRow);
 
-  // Create a temporary card for mobile view
-  const cardsContainer = document.getElementById("editable-items-cards");
+  // === CARD UI
   const tempCard = document.createElement("div");
   tempCard.className = "item-card temp-product-card";
-  tempCard.innerHTML = `
-    <div class="search-container">
-      <div class="search-options">
-        <label>
-          <input type="radio" name="search-type-mobile" value="brand-product" checked> 
-          Search by Brand/Product
-        </label>
-        <label>
-          <input type="radio" name="search-type-mobile" value="barcode"> 
-          Search by Barcode
-        </label>
-      </div>
-      
-      <div class="search-inputs">
-        <div class="brand-product-search-mobile">
-          <div class="brand-select-container-mobile">
-            <select id="brand-select-mobile" class="search-input">
-              <option value="">Select Brand</option>
-              ${brands
-                .map((brand) => `<option value="${brand}">${brand}</option>`)
-                .join("")}
-            </select>
-          </div>
-          <div class="product-select-container-mobile" style="display:none; margin-top:10px;">
-            <select id="product-select-mobile" class="search-input">
-              <option value="">Select Product</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="barcode-search-mobile" style="display:none;">
-          <input type="text" id="barcode-search-mobile" placeholder="Scan or enter barcode" class="search-input">
-          <button id="search-barcode-btn-mobile" class="search-btn">Search</button>
-        </div>
-      </div>
-      
-      <div class="quantity-wrapper">
-        <label for="product-quantity-mobile">Quantity:</label>
-        <input type="number" id="product-quantity-mobile" value="1" min="1">
-      </div>
-      
-      <div class="action-buttons">
-        <button id="confirm-add-product-mobile" class="confirm-btn">Add</button>
-        <button id="cancel-add-product-mobile" class="cancel-btn">Cancel</button>
-      </div>
-    </div>
-  `;
-
+  const cardContent = document.createElement("div");
+  cardContent.className = "card-content";
+  [
+    card.brandSelect,
+    card.categorySelect,
+    card.barcodeInput,
+    card.barcodeSuggestions,
+    card.productSelect,
+    card.quantityInput,
+    addBtnCard,
+    cancelBtnCard,
+  ].forEach((el) => cardContent.appendChild(el));
+  tempCard.appendChild(cardContent);
   cardsContainer.appendChild(tempCard);
 
-  // Set up search type toggle for desktop
-  document.querySelectorAll('input[name="search-type"]').forEach((radio) => {
-    radio.addEventListener("change", function () {
-      const brandProductSearch = document.querySelector(
-        ".brand-product-search"
-      );
-      const barcodeSearch = document.querySelector(".barcode-search");
-
-      if (this.value === "barcode") {
-        barcodeSearch.style.display = "flex";
-        brandProductSearch.style.display = "none";
-      } else {
-        barcodeSearch.style.display = "none";
-        brandProductSearch.style.display = "flex";
+  // Load categories
+  async function loadCategories(brand) {
+    const res = await fetch(
+      `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
+        brand
+      )}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
-    });
-  });
+    );
+    const data = await res.json();
+    const categories = data.categories || [];
 
-  // Set up search type toggle for mobile
-  document
-    .querySelectorAll('input[name="search-type-mobile"]')
-    .forEach((radio) => {
-      radio.addEventListener("change", function () {
-        const brandProductSearch = document.querySelector(
-          ".brand-product-search-mobile"
-        );
-        const barcodeSearch = document.querySelector(".barcode-search-mobile");
-
-        if (this.value === "barcode") {
-          barcodeSearch.style.display = "flex";
-          brandProductSearch.style.display = "none";
-        } else {
-          barcodeSearch.style.display = "none";
-          brandProductSearch.style.display = "flex";
-        }
+    [row.categorySelect, card.categorySelect].forEach((select) => {
+      select.innerHTML = `<option value="">Select Category</option>`;
+      categories.forEach((cat) => {
+        select.innerHTML += `<option value="${cat}">${cat}</option>`;
       });
     });
+  }
 
-  // Set up brand select change event for desktop
-  const brandSelect = document.getElementById("brand-select");
-  const productSelect = document.getElementById("product-select");
-  const productContainer = document.querySelector(".product-select-container");
+  // Load products
+  async function loadProducts(brand, category = "") {
+    const url = new window.URL("https://order-app.gemegypt.net/api/products/orders");
+    url.searchParams.append("brand", brand);
+    if (category) url.searchParams.append("category", category);
 
-  brandSelect.addEventListener("change", async function () {
-    const selectedBrand = this.value;
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    const products = data.data || [];
 
-    if (!selectedBrand) {
-      productContainer.style.display = "none";
-      return;
-    }
-
-    try {
-      // Fetch products for the selected brand
-      const res = await fetch(
-        `https://order-app.gemegypt.net/api/products/orders?brand=${encodeURIComponent(
-          selectedBrand
-        )}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          mode: "cors",
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to fetch products");
-
-      const data = await res.json();
-      const products = data.data || [];
-
-      // Populate product dropdown
-      productSelect.innerHTML = '<option value="">Select Product</option>';
+    [row.productSelect, card.productSelect].forEach((select) => {
+      select.innerHTML = `<option value="">Select Product</option>`;
       products.forEach((product) => {
-        productSelect.innerHTML += `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
+        select.innerHTML += `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
+      });
+    });
+  }
+
+  // Barcode search setup
+  const setupBarcodeSearch = (input, suggestions) => {
+    input.addEventListener("input", async () => {
+      const query = input.value.trim();
+      if (!query) {
+        suggestions.style.display = "none";
+        return;
+      }
+
+      const brand = row.brandSelect.value;
+      const category = row.categorySelect.value;
+
+      const params = new URLSearchParams({ barcode: query });
+      if (brand) params.append("brand", brand);
+      if (category) params.append("category", category);
+
+      const res = await fetch(
+        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?${params}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      const matches = data.data || [];
+
+      suggestions.innerHTML = "";
+      matches.forEach((product) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<div><strong>${product.product_name}</strong><br><small>Barcode: ${product.bar_code}, Price: ${product.price}</small></div>`;
+        li.style.cursor = "pointer";
+        li.onclick = () => {
+          [row.productSelect, card.productSelect].forEach((select) => {
+            select.innerHTML = `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
+            select.value = product.product_id;
+          });
+          suggestions.style.display = "none";
+        };
+        suggestions.appendChild(li);
       });
 
-      productContainer.style.display = "block";
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      alert("Failed to load products for this brand. Please try again.");
-    }
+      suggestions.style.display = matches.length ? "block" : "none";
+    });
+  };
+
+  setupBarcodeSearch(row.barcodeInput, row.barcodeSuggestions);
+  setupBarcodeSearch(card.barcodeInput, card.barcodeSuggestions);
+
+  // Event listeners for dropdowns
+  row.brandSelect.addEventListener("change", async () => {
+    const brand = row.brandSelect.value;
+    await loadCategories(brand);
+    await loadProducts(brand);
   });
 
-  // Set up brand select change event for mobile
-  const brandSelectMobile = document.getElementById("brand-select-mobile");
-  const productSelectMobile = document.getElementById("product-select-mobile");
-  const productContainerMobile = document.querySelector(
-    ".product-select-container-mobile"
-  );
-
-  brandSelectMobile.addEventListener("change", async function () {
-    const selectedBrand = this.value;
-
-    if (!selectedBrand) {
-      productContainerMobile.style.display = "none";
-      return;
-    }
-
-    try {
-      // Fetch products for the selected brand
-      const res = await fetch(
-        `https://order-app.gemegypt.net/api/products/orders?brand=${encodeURIComponent(
-          selectedBrand
-        )}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          mode: "cors",
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to fetch products");
-
-      const data = await res.json();
-      const products = data.data || [];
-
-      // Populate product dropdown
-      productSelectMobile.innerHTML =
-        '<option value="">Select Product</option>';
-      products.forEach((product) => {
-        productSelectMobile.innerHTML += `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
-      });
-
-      productContainerMobile.style.display = "block";
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      alert("Failed to load products for this brand. Please try again.");
-    }
+  row.categorySelect.addEventListener("change", async () => {
+    const brand = row.brandSelect.value;
+    const category = row.categorySelect.value;
+    await loadProducts(brand, category);
   });
-
-  // Set up barcode search for desktop
-  const barcodeInput = document.getElementById("barcode-search");
-  const searchBarcodeBtn = document.getElementById("search-barcode-btn");
-
-  searchBarcodeBtn.addEventListener("click", async function () {
-    const barcode = barcodeInput.value.trim();
-    if (!barcode) {
-      alert("Please enter a barcode");
-      return;
-    }
-
-    try {
-      // Use the provided backend endpoint for barcode search
-      const res = await fetch(
-        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?barcode=${encodeURIComponent(
-          barcode
-        )}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          mode: "cors",
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) {
-        if (res.status === 404) {
-          alert("No product found with this barcode");
-          return;
-        }
-        throw new Error("Failed to search by barcode");
-      }
-
-      const data = await res.json();
-      const matchedProducts = data.data || [];
-
-      // If exactly one product is found, automatically select it
-      if (matchedProducts.length === 1) {
-        const product = matchedProducts[0];
-        barcodeInput.dataset.selectedId = product.product_id;
-        barcodeInput.dataset.selectedPrice = product.price;
-        barcodeInput.value = `${product.product_name} (${barcode})`;
-
-        // Automatically add the product
-        const quantity =
-          parseInt(document.getElementById("product-quantity").value) || 1;
-        addProductToOrder(product.product_id, product.price, quantity, token);
-      } else if (matchedProducts.length > 1) {
-        // If multiple products found, do nothing as per requirements
-        alert(
-          "Multiple products found with this barcode. Please refine your search."
-        );
-        barcodeInput.dataset.selectedId = "";
-        barcodeInput.dataset.selectedPrice = "";
-      } else {
-        // No products found (this shouldn't happen due to 404 handling above)
-        alert("No product found with this barcode");
-        barcodeInput.dataset.selectedId = "";
-        barcodeInput.dataset.selectedPrice = "";
-      }
-    } catch (err) {
-      console.error("Error searching by barcode:", err);
-      alert("Failed to search by barcode. Please try again.");
-    }
-  });
-
-  // Set up barcode search for mobile
-  const barcodeInputMobile = document.getElementById("barcode-search-mobile");
-  const searchBarcodeBtnMobile = document.getElementById(
-    "search-barcode-btn-mobile"
-  );
-
-  searchBarcodeBtnMobile.addEventListener("click", async function () {
-    const barcode = barcodeInputMobile.value.trim();
-    if (!barcode) {
-      alert("Please enter a barcode");
-      return;
-    }
-
-    try {
-      // Use the provided backend endpoint for barcode search
-      const res = await fetch(
-        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?barcode=${encodeURIComponent(
-          barcode
-        )}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          mode: "cors",
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) {
-        if (res.status === 404) {
-          alert("No product found with this barcode");
-          return;
-        }
-        throw new Error("Failed to search by barcode");
-      }
-
-      const data = await res.json();
-      const matchedProducts = data.data || [];
-
-      // If exactly one product is found, automatically select it
-      if (matchedProducts.length === 1) {
-        const product = matchedProducts[0];
-        barcodeInputMobile.dataset.selectedId = product.product_id;
-        barcodeInputMobile.dataset.selectedPrice = product.price;
-        barcodeInputMobile.value = `${product.product_name} (${barcode})`;
-
-        // Automatically add the product
-        const quantity =
-          parseInt(document.getElementById("product-quantity-mobile").value) ||
-          1;
-        addProductToOrder(product.product_id, product.price, quantity, token);
-      } else if (matchedProducts.length > 1) {
-        // If multiple products found, do nothing as per requirements
-        alert(
-          "Multiple products found with this barcode. Please refine your search."
-        );
-        barcodeInputMobile.dataset.selectedId = "";
-        barcodeInputMobile.dataset.selectedPrice = "";
-      } else {
-        // No products found (this shouldn't happen due to 404 handling above)
-        alert("No product found with this barcode");
-        barcodeInputMobile.dataset.selectedId = "";
-        barcodeInputMobile.dataset.selectedPrice = "";
-      }
-    } catch (err) {
-      console.error("Error searching by barcode:", err);
-      alert("Failed to search by barcode. Please try again.");
-    }
-  });
-
-  // Set up cancel button for desktop
-  document
-    .getElementById("cancel-add-product")
-    .addEventListener("click", function () {
-      document
-        .querySelectorAll(".temp-product-row, .temp-product-card")
-        .forEach((el) => el.remove());
-    });
-
-  // Set up cancel button for mobile
-  document
-    .getElementById("cancel-add-product-mobile")
-    .addEventListener("click", function () {
-      document
-        .querySelectorAll(".temp-product-row, .temp-product-card")
-        .forEach((el) => el.remove());
-    });
-
-  // Set up confirm button for desktop
-  document
-    .getElementById("confirm-add-product")
-    .addEventListener("click", async function () {
-      const searchType = document.querySelector(
-        'input[name="search-type"]:checked'
-      ).value;
-      let productId, price;
-
-      if (searchType === "brand-product") {
-        productId = productSelect.value;
-        price =
-          productSelect.options[productSelect.selectedIndex]?.dataset.price;
-
-        if (!productId) {
-          alert("Please select a product");
-          return;
-        }
-      } else {
-        // barcode search
-        productId = barcodeInput.dataset.selectedId;
-        price = barcodeInput.dataset.selectedPrice;
-
-        if (!productId) {
-          alert("Please search for a valid barcode");
-          return;
-        }
-      }
-
-      const quantity =
-        parseInt(document.getElementById("product-quantity").value) || 1;
-      addProductToOrder(productId, price, quantity, token);
-    });
-
-  // Set up confirm button for mobile
-  document
-    .getElementById("confirm-add-product-mobile")
-    .addEventListener("click", async function () {
-      const searchType = document.querySelector(
-        'input[name="search-type-mobile"]:checked'
-      ).value;
-      let productId, price;
-
-      if (searchType === "brand-product") {
-        productId = productSelectMobile.value;
-        price =
-          productSelectMobile.options[productSelectMobile.selectedIndex]
-            ?.dataset.price;
-
-        if (!productId) {
-          alert("Please select a product");
-          return;
-        }
-      } else {
-        // barcode search
-        productId = barcodeInputMobile.dataset.selectedId;
-        price = barcodeInputMobile.dataset.selectedPrice;
-
-        if (!productId) {
-          alert("Please search for a valid barcode");
-          return;
-        }
-      }
-
-      const quantity =
-        parseInt(document.getElementById("product-quantity-mobile").value) || 1;
-      addProductToOrder(productId, price, quantity, token);
-    });
 }
 
 async function addProductToOrder(productId, price, quantity, token) {
@@ -820,7 +613,11 @@ async function addProductToOrder(productId, price, quantity, token) {
             : "No image"
         }
       </td>
-      <td>${productData.product_name}</td>
+      <td>
+        <div>${productData.product_name}</div>
+        <div style="font-size: 12px; color: #666;">${productData.bar_code}</div>
+      </td>
+
       <td>EGP ${parseFloat(price).toFixed(2)}</td>
       <td><input type="number" class="qty" value="${quantity}" min="1"></td>
       <td>EGP ${(parseFloat(price) * quantity).toFixed(2)}</td>
@@ -844,9 +641,12 @@ async function addProductToOrder(productId, price, quantity, token) {
         <h3>${productData.product_name}</h3>
       </div>
       <div class="item-card-body">
-        <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
-          price
-        ).toFixed(2)}</p>
+      <p><span class="item-card-label">Barcode:</span>${parseFloat(
+        price
+      ).toFixed(2)}</p>
+        <p><span class="item-card-label">Price:</span> EGP ${
+          productData.bar_code
+        }</p>
         <p><span class="item-card-label">Quantity:</span> <input type="number" class="qty" value="${quantity}" min="1"></p>
         <p><span class="item-card-label">Total:</span> EGP ${(
           parseFloat(price) * quantity

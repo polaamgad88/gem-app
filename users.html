@@ -53,6 +53,44 @@
             <button id="create-user-btn" class="btn btn-add">➕ Create User</button>
         </div>
     </div>
+
+
+    <div id="change-password-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Change Password</h2>
+            <form id="change-password-form">
+                <input type="hidden" id="password-user-id" />
+                <label>New Password: <input type="password" id="new-password" required /></label>
+                <div class="modal-actions">
+                    <button type="submit" class="btn">Change</button>
+                    <button type="button" class="btn cancel-btn" onclick="closePasswordModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Edit User</h2>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id" />
+                <label>Username: <input type="text" id="edit-username" /></label>
+                <label>Email: <input type="email" id="edit-email" /></label>
+                <label>Phone: <input type="text" id="edit-phone" /></label>
+                <label>Role: <input type="text" id="edit-role" /></label>
+                <label>Assigned To (User ID): <input type="number" id="edit-assigned-to" /></label>
+                <label><input type="checkbox" id="edit-admin" /> Admin</label>
+                <label><input type="checkbox" id="edit-driver" /> Driver</label>
+                <label><input type="checkbox" id="edit-storage" /> Storage</label>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn">Save</button>
+                    <button type="button" class="btn cancel-btn" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 
 </html>

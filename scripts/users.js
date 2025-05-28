@@ -64,12 +64,15 @@ async function deleteUser(userId) {
   const token = localStorage.getItem("access_token");
 
   try {
-    const res = await fetch(`https://order-app.gemegypt.net/api/users/delete/${userId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await fetch(
+      `https://order-app.gemegypt.net/api/users/delete/${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     const data = await res.json();
 
@@ -84,6 +87,99 @@ async function deleteUser(userId) {
     alert("Error deleting user");
   }
 }
+async function openEditModal(userId) {
+  const user = allUsers.find((u) => u.user_id === userId);
+  if (!user) return;
+
+  document.getElementById("edit-user-id").value = user.user_id;
+  document.getElementById("edit-username").value = user.username;
+  document.getElementById("edit-email").value = user.email;
+  document.getElementById("edit-phone").value = user.phone;
+  document.getElementById("edit-role").value = user.role;
+  document.getElementById("edit-assigned-to").value =
+    user.assigned_to_user_id || "";
+  document.getElementById("edit-admin").checked = user.admin;
+  document.getElementById("edit-driver").checked = user.driver === 1;
+  document.getElementById("edit-storage").checked = user.storage === 1;
+
+  document.getElementById("edit-user-modal").classList.remove("hidden");
+}
+function closeEditModal() {
+  document.getElementById("edit-user-modal").classList.add("hidden");
+}
+function openPasswordModal(userId) {
+  document.getElementById("password-user-id").value = userId;
+  document.getElementById("change-password-modal").classList.remove("hidden");
+}
+function closePasswordModal() {
+  document.getElementById("change-password-modal").classList.add("hidden");
+}
+document
+  .getElementById("edit-user-form")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("access_token");
+    const userId = document.getElementById("edit-user-id").value;
+
+    const infoRes = await fetch(
+      `https://order-app.gemegypt.net/api/users/edit_info/${userId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: new URLSearchParams({
+          username: document.getElementById("edit-username").value,
+          email: document.getElementById("edit-email").value,
+          phone: document.getElementById("edit-phone").value,
+          driver: document.getElementById("edit-driver").checked ? "1" : "0",
+          storage: document.getElementById("edit-storage").checked ? "1" : "0",
+        }),
+      }
+    );
+
+    const roleRes = await fetch(
+      `https://order-app.gemegypt.net/api/users/edit_role/${userId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: new URLSearchParams({
+          role: document.getElementById("edit-role").value,
+          admin: document.getElementById("edit-admin").checked ? "1" : "0",
+        }),
+      }
+    );
+
+    const infoData = await infoRes.json();
+    const roleData = await roleRes.json();
+
+    alert(infoData.message || roleData.message);
+    closeEditModal();
+    await loadUsers(token);
+  });
+document
+  .getElementById("change-password-form")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("access_token");
+    const userId = document.getElementById("password-user-id").value;
+    const newPassword = document.getElementById("new-password").value;
+
+    const res = await fetch(
+      `https://order-app.gemegypt.net/api/users/change_password/${userId}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: new URLSearchParams({ password: newPassword }),
+      }
+    );
+
+    const data = await res.json();
+    alert(data.message || "Password updated");
+    closePasswordModal();
+  });
 
 async function toggleUserStatus(userId, newStatus) {
   const token = localStorage.getItem("access_token");
@@ -121,7 +217,7 @@ function renderUsers(users) {
   tableBody.innerHTML = "";
   cardContainer.innerHTML = "";
 
-  users.forEach((user, index) => {
+  users.forEach((user) => {
     const isUserAdmin = user.admin;
     const isActive = user.status == "1";
 
@@ -138,7 +234,7 @@ function renderUsers(users) {
 
     const usernameDisplay = `<span class="${userClass}">${user.username} - ${user.user_id}${badgeLabel}</span>`;
 
-    // Table view
+    // === Table view row ===
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${usernameDisplay}</td>
@@ -148,9 +244,12 @@ function renderUsers(users) {
     }</td>
       <td>${user.phone || "—"}</td>
       <td>
-        <button class="btn view-btn" onclick="viewUser(${
+        <button class="btn view-btn" onclick="openEditModal(${
           user.user_id
-        })">View</button>
+        })">Edit</button>
+        <button class="btn" onclick="openPasswordModal(${
+          user.user_id
+        })">Change Password</button>
         <button class="btn toggle-btn" onclick="toggleUserStatus(${
           user.user_id
         }, ${isActive ? 0 : 1})">
@@ -165,7 +264,7 @@ function renderUsers(users) {
     `;
     tableBody.appendChild(tr);
 
-    // Card view
+    // === Card view ===
     const card = document.createElement("div");
     card.className = "user-card";
     card.innerHTML = `
@@ -176,9 +275,12 @@ function renderUsers(users) {
     }</p>
       <p><strong>Phone:</strong> ${user.phone || "—"}</p>
       <div class="card-actions">
-        <button class="btn view-btn" onclick="viewUser(${
+        <button class="btn view-btn" onclick="openEditModal(${
           user.user_id
-        })">View</button>
+        })">Edit</button>
+        <button class="btn" onclick="openPasswordModal(${
+          user.user_id
+        })">Change Password</button>
         <button class="btn toggle-btn" onclick="toggleUserStatus(${
           user.user_id
         }, ${isActive ? 0 : 1})">
