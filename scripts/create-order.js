@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         token
       ),
       fetchList(
-        "https://order-app.gemegypt.net/api/customers",
+        "https://order-app.gemegypt.net/api/customers?all=true",
         "customers",
         token
       ),

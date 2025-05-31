@@ -59,9 +59,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   async function fetchCustomers() {
-    const res = await fetch("https://order-app.gemegypt.net/api/customers", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      "https://order-app.gemegypt.net/api/customers?all=true",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     if (!res.ok) throw new Error("customers");
     const data = await res.json();
     allCustomers = data.customers || [];
