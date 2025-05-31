@@ -140,6 +140,32 @@ th {
     color: var(--gray-700);
 }
 
+.pagination-controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination-controls button {
+    margin: 2px;
+    padding: 6px 10px;
+    cursor: pointer;
+    border: none;
+    background: #f0f0f0;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.pagination-controls button.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.pagination-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
 /* Responsive */
 @media (max-width: 768px) {
     .table-responsive {

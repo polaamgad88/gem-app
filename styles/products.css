@@ -467,3 +467,31 @@ table img {
         font-size: var(--font-size-lg);
     }
 }
+
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .filters>.d-flex {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        width: 100%;
+    }
+
+    .filters select,
+    .search-barcode input {
+        width: 100%;
+    }
+
+    .search-barcode {
+        width: 100%;
+    }
+
+    .search-barcode label {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
+}

@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   let allOrders = [];
   let allUsers = [];
   let allCustomers = [];
+  let currentPage = 1;
+  let totalPages = 1;
 
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
@@ -72,16 +74,31 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  async function fetchAndRenderOrders() {
+  async function fetchAndRenderOrders(page = 1) {
     Utils.UI.showLoader();
 
     const userId = document.getElementById("userFilter").value;
-    let url = "https://order-app.gemegypt.net/api/orders";
-    if (userId !== "all") url += `?user_id=${userId}`;
+    const customerName = document.getElementById("customerFilter").value;
+
+    let params = new URLSearchParams();
+    if (userId !== "all") params.append("user_id", userId);
+    if (customerName !== "all") {
+      const matchedCustomer = allOrders.find(
+        (o) => o.customer_name === customerName
+      );
+      if (matchedCustomer)
+        params.append("customer_id", matchedCustomer.customer_id);
+    }
+
+    params.append("page", page);
+    params.append("limit", 10);
+
+    const url = `https://order-app.gemegypt.net/api/orders?${params.toString()}`;
 
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     const tb = document.getElementById("ordersTable");
     const cc = document.getElementById("ordersCards");
     tb.innerHTML = cc.innerHTML = "";
@@ -94,6 +111,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const data = await res.json();
     allOrders = data.orders || [];
+    currentPage = data.page || 1;
+    totalPages = data.pages || 1;
+
     if (!allOrders.length) {
       renderNoOrders();
       Utils.UI.hideLoader();
@@ -102,8 +122,47 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     populateCustomerFilter(allOrders);
     renderOrders(allOrders);
+    renderPagination();
     Utils.UI.hideLoader();
   }
+  function renderPagination() {
+    const container = document.getElementById("pagination");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const maxButtons = 10;
+    const half = Math.floor(maxButtons / 2);
+
+    let startPage = Math.max(1, currentPage - half);
+    let endPage = startPage + maxButtons - 1;
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    const createBtn = (label, page, disabled = false, isActive = false) => {
+      const btn = document.createElement("button");
+      btn.textContent = label;
+      btn.disabled = disabled;
+      btn.className = isActive ? "active" : "";
+      btn.onclick = () => fetchAndRenderOrders(page);
+      return btn;
+    };
+
+    // « Prev page
+    container.appendChild(createBtn("◀", currentPage - 1, currentPage === 1));
+
+    for (let i = startPage; i <= endPage; i++) {
+      container.appendChild(createBtn(i, i, false, i === currentPage));
+    }
+
+    // » Next page
+    container.appendChild(
+      createBtn("▶", currentPage + 1, currentPage === totalPages)
+    );
+  }
+
   function populateCustomerFilter(orders) {
     const sel = document.getElementById("customerFilter");
     sel.innerHTML = '<option value="all">All Customers</option>';
