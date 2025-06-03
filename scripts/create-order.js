@@ -25,16 +25,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         "categories",
         token
       ),
-      fetchList(
-        "https://order-app.gemegypt.net/api/products/orders",
-        "data",
-        token
-      ),
-      fetchList(
-        "https://order-app.gemegypt.net/api/customers?all=true",
-        "customers",
-        token
-      ),
+      fetchList("https://order-app.gemegypt.net/api/products/orders", "data", token),
+      fetchList("https://order-app.gemegypt.net/api/customers?all=true", "customers", token),
     ]);
 
     populateCustomerDropdown(customers);
@@ -199,15 +191,6 @@ function addOrderRow(container, brands, products) {
     scrollable.style.display = "block";
   }
 
-  const barcodeInput = document.createElement("input");
-  barcodeInput.className = "barcode-input";
-  barcodeInput.type = "text";
-  barcodeInput.placeholder = "Search by barcode...";
-
-  const barcodeSuggestions = document.createElement("ul");
-  barcodeSuggestions.className = "barcode-suggestions dropdown-list";
-  barcodeSuggestions.style.display = "none";
-
   const brandSelect = document.createElement("select");
   brandSelect.className = "brand-select";
   brandSelect.innerHTML = `<option value="">Select Brand</option>`;
@@ -219,9 +202,23 @@ function addOrderRow(container, brands, products) {
   categorySelect.className = "category-select";
   categorySelect.innerHTML = `<option value="">Select Category</option>`;
 
-  const productSelect = document.createElement("select");
-  productSelect.className = "product-select";
-  productSelect.innerHTML = `<option value="">Select Product</option>`;
+  const barcodeInput = document.createElement("input");
+  barcodeInput.className = "barcode-input";
+  barcodeInput.type = "text";
+  barcodeInput.placeholder = "Search by barcode...";
+
+  const barcodeSuggestions = document.createElement("ul");
+  barcodeSuggestions.className = "barcode-suggestions dropdown-list";
+  barcodeSuggestions.style.display = "none";
+
+  const nameInput = document.createElement("input");
+  nameInput.className = "barcode-input";
+  nameInput.type = "text";
+  nameInput.placeholder = "Search by name...";
+
+  const nameSuggestions = document.createElement("ul");
+  nameSuggestions.className = "barcode-suggestions dropdown-list";
+  nameSuggestions.style.display = "none";
 
   const quantityInput = document.createElement("input");
   quantityInput.className = "quantity-input";
@@ -243,22 +240,37 @@ function addOrderRow(container, brands, products) {
   row.appendChild(categorySelect);
   row.appendChild(barcodeInput);
   row.appendChild(barcodeSuggestions);
-  row.appendChild(productSelect);
+  row.appendChild(nameInput);
+  row.appendChild(nameSuggestions);
   row.appendChild(quantityInput);
   row.appendChild(deleteBtn);
-
   container.appendChild(row);
 
   function lockFields(selectedProduct) {
-    brandSelect.style.display = "none";
-    barcodeInput.style.display = "none";
-    barcodeSuggestions.style.display = "none";
-    categorySelect.style.display = "none";
-    productSelect.style.display = "none";
-    brandSelect.disabled = true;
-    barcodeInput.disabled = true;
-    categorySelect.disabled = true;
-    productSelect.disabled = true;
+    const lockedRow = document.createElement("div");
+    lockedRow.className = "order-row";
+
+    const quantityInputLocked = document.createElement("input");
+    quantityInputLocked.className = "quantity-input";
+    quantityInputLocked.type = "number";
+    quantityInputLocked.min = 1;
+    quantityInputLocked.value = quantityInput.value;
+
+    // 🔧 FIX: trigger preview and totals when qty changes
+    quantityInputLocked.addEventListener("input", () => {
+      debouncePreviewUpdate();
+      updateTotals();
+    });
+
+    const deleteBtnLocked = document.createElement("i");
+    deleteBtnLocked.className = "material-icons";
+    deleteBtnLocked.style = "font-size:33px;color:red;cursor:pointer;";
+    deleteBtnLocked.textContent = "cancel";
+    deleteBtnLocked.onclick = () => {
+      lockedRow.remove();
+      debouncePreviewUpdate();
+      updateTotals();
+    };
 
     const productInfoWrapper = document.createElement("div");
     productInfoWrapper.className = "locked-product-wrapper";
@@ -269,25 +281,26 @@ function addOrderRow(container, brands, products) {
 
     const quantityWrapper = document.createElement("div");
     quantityWrapper.className = "quantity-wrapper";
-    quantityWrapper.appendChild(quantityInput);
+    quantityWrapper.appendChild(quantityInputLocked);
 
     const deleteWrapper = document.createElement("div");
     deleteWrapper.className = "delete-wrapper";
-    deleteWrapper.appendChild(deleteBtn);
+    deleteWrapper.appendChild(deleteBtnLocked);
 
     productInfoWrapper.appendChild(lockedProductText);
     productInfoWrapper.appendChild(quantityWrapper);
     productInfoWrapper.appendChild(deleteWrapper);
 
-    productSelect.replaceWith(productInfoWrapper);
-    row.dataset.productId = selectedProduct.product_id;
-    row.dataset.productPrice = selectedProduct.price;
+    lockedRow.appendChild(productInfoWrapper);
+    lockedRow.dataset.productId = selectedProduct.product_id;
+    lockedRow.dataset.productPrice = selectedProduct.price;
+
+    container.insertBefore(lockedRow, row);
 
     debouncePreviewUpdate();
     updateTotals();
   }
 
-  // Barcode dynamic search with suggestions
   barcodeInput.addEventListener("input", async () => {
     const query = barcodeInput.value.trim();
     barcodeSuggestions.innerHTML = "";
@@ -328,6 +341,7 @@ function addOrderRow(container, brands, products) {
     }
   });
 
+  // Barcode selection
   barcodeSuggestions.addEventListener("click", (e) => {
     if (e.target.tagName === "LI") {
       const productId = e.target.dataset.productId;
@@ -339,28 +353,72 @@ function addOrderRow(container, brands, products) {
     }
   });
 
+  // Name search
+  nameInput.addEventListener("input", () => {
+    const value = nameInput.value.trim().toLowerCase();
+    nameSuggestions.innerHTML = "";
+
+    const brand = brandSelect.value;
+    const category = categorySelect.value;
+
+    const filtered = products.filter((p) => {
+      return (
+        (!brand || p.brand === brand) &&
+        (!category || p.category === category) &&
+        p.product_name.toLowerCase().includes(value)
+      );
+    });
+
+    filtered.forEach((p) => {
+      const li = document.createElement("li");
+      li.textContent = `${p.product_name} (${p.bar_code})`;
+      li.dataset.productId = p.product_id;
+      nameSuggestions.appendChild(li);
+    });
+
+    nameSuggestions.style.display = filtered.length ? "block" : "none";
+  });
+
+  nameInput.addEventListener("focus", () => {
+    const brand = brandSelect.value;
+    const category = categorySelect.value;
+
+    const filtered = products.filter((p) => {
+      return (
+        (!brand || p.brand === brand) && (!category || p.category === category)
+      );
+    });
+
+    nameSuggestions.innerHTML = "";
+    filtered.forEach((p) => {
+      const li = document.createElement("li");
+      li.textContent = `${p.product_name} (${p.bar_code})`;
+      li.dataset.productId = p.product_id;
+      nameSuggestions.appendChild(li);
+    });
+
+    nameSuggestions.style.display = filtered.length ? "block" : "none";
+  });
+
+  nameSuggestions.addEventListener("click", (e) => {
+    if (e.target.tagName === "LI") {
+      const productId = e.target.dataset.productId;
+      const selectedProduct = products.find((p) => p.product_id == productId);
+      if (selectedProduct) {
+        lockFields(selectedProduct);
+      }
+      nameSuggestions.style.display = "none";
+    }
+  });
+
   document.addEventListener("click", (e) => {
     if (!row.contains(e.target)) {
       barcodeSuggestions.style.display = "none";
+      nameSuggestions.style.display = "none";
     }
   });
-  function loadProductOptions(brand, category) {
-    productSelect.innerHTML = `<option value="">Select Product</option>`;
 
-    const filteredProducts = products.filter((p) => {
-      return p.brand === brand && (category ? p.category === category : true);
-    });
-
-    filteredProducts.forEach((p) => {
-      productSelect.innerHTML += `<option value="${p.product_id}" data-price="${p.price}">
-      ${p.product_name} (${p.bar_code})
-    </option>`;
-    });
-
-    debouncePreviewUpdate();
-    updateTotals();
-  }
-
+  // Load categories when brand changes
   brandSelect.onchange = async () => {
     categorySelect.innerHTML = `<option value="">Select Category</option>`;
     const token = localStorage.getItem("access_token");
@@ -368,7 +426,6 @@ function addOrderRow(container, brands, products) {
 
     if (!selectedBrand) return;
 
-    // Load categories for selected brand
     try {
       const res = await fetch(
         `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
@@ -385,26 +442,6 @@ function addOrderRow(container, brands, products) {
       });
     } catch (err) {
       console.error("Category loading failed:", err);
-    }
-
-    // 👉 Load all products for this brand (initial full load)
-    loadProductOptions(selectedBrand, ""); // category is empty
-  };
-
-  categorySelect.onchange = () => {
-    const selectedBrand = brandSelect.value;
-    const selectedCategory = categorySelect.value;
-
-    loadProductOptions(selectedBrand, selectedCategory);
-  };
-
-  productSelect.onchange = () => {
-    const selectedId = productSelect.value;
-    if (selectedId) {
-      const selectedProduct = products.find((p) => p.product_id == selectedId);
-      if (selectedProduct) {
-        lockFields(selectedProduct);
-      }
     }
   };
 
@@ -663,10 +700,7 @@ async function updateOrderPreview() {
       const price = parseFloat(data.price || 0).toFixed(2);
       const total = (price * quantity).toFixed(2);
       const photoUrl = data.image_path
-        ? `https://order-app.gemegypt.net/api/images/${data.image_path.replace(
-            /^\/+/,
-            ""
-          )}`
+        ? `https://order-app.gemegypt.net/api/images/${data.image_path.replace(/^\/+/, "")}`
         : "";
       const bar_code = data.bar_code;
       const card = document.createElement("div");
@@ -766,17 +800,14 @@ async function submitOrder(token) {
   try {
     Utils.UI.showLoader("loader");
 
-    const res = await fetch(
-      "https://order-app.gemegypt.net/api/orders/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    const res = await fetch("https://order-app.gemegypt.net/api/orders/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
     Utils.UI.hideLoader("loader");
 

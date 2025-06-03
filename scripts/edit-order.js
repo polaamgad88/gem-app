@@ -327,7 +327,6 @@ function addTemporaryProductRow(brands, token) {
   const tableBody = document.getElementById("editable-items-body");
   const cardsContainer = document.getElementById("editable-items-cards");
 
-  // Utility function to create synced select/input groups
   function createElements() {
     const brandSelect = document.createElement("select");
     brandSelect.innerHTML = `<option value="">Select Brand</option>`;
@@ -338,15 +337,23 @@ function addTemporaryProductRow(brands, token) {
     const categorySelect = document.createElement("select");
     categorySelect.innerHTML = `<option value="">Select Category</option>`;
 
-    const productSelect = document.createElement("select");
-    productSelect.innerHTML = `<option value="">Select Product</option>`;
-
     const barcodeInput = document.createElement("input");
-    barcodeInput.placeholder = "Type barcode...";
+    barcodeInput.placeholder = "Search by barcode...";
+
+    const nameInput = document.createElement("input");
+    nameInput.placeholder = "Search by name...";
 
     const barcodeSuggestions = document.createElement("ul");
     barcodeSuggestions.className = "barcode-suggestions dropdown-list";
     barcodeSuggestions.style.display = "none";
+    barcodeSuggestions.style.maxHeight = "200px";
+    barcodeSuggestions.style.overflowY = "auto";
+
+    const nameSuggestions = document.createElement("ul");
+    nameSuggestions.className = "barcode-suggestions dropdown-list";
+    nameSuggestions.style.display = "none";
+    nameSuggestions.style.maxHeight = "200px";
+    nameSuggestions.style.overflowY = "auto";
 
     const quantityInput = document.createElement("input");
     quantityInput.type = "number";
@@ -356,126 +363,135 @@ function addTemporaryProductRow(brands, token) {
     return {
       brandSelect,
       categorySelect,
-      productSelect,
       barcodeInput,
+      nameInput,
       barcodeSuggestions,
+      nameSuggestions,
       quantityInput,
     };
   }
 
-  // Create buttons
-  const addBtn = document.createElement("button");
-  addBtn.textContent = "Add";
-  addBtn.className = "confirm-btn";
+  const row = createElements();
+  const card = createElements();
 
-  const cancelBtn = document.createElement("button");
-  cancelBtn.textContent = "Cancel";
-  cancelBtn.className = "cancel-btn";
-
-  // Shared logic to sync two elements
   const sync = (el1, el2, event = "input") => {
     let syncing = false;
     const handler = (source, target) => () => {
       if (syncing || source.value === target.value) return;
       syncing = true;
       target.value = source.value;
-
-      if (source.tagName === "SELECT") {
-        const selected = source.options[source.selectedIndex];
-        const match = Array.from(target.options).find(
-          (opt) => opt.value === selected.value
-        );
-        if (match)
-          target.selectedIndex = Array.from(target.options).indexOf(match);
-      }
-
       target.dispatchEvent(new Event(event));
       syncing = false;
     };
-
     el1.addEventListener(event, handler(el1, el2));
     el2.addEventListener(event, handler(el2, el1));
   };
 
-  const row = createElements();
-  const card = createElements();
-
-  // Sync all shared fields
   sync(row.brandSelect, card.brandSelect, "change");
   sync(row.categorySelect, card.categorySelect, "change");
-  sync(row.productSelect, card.productSelect, "change");
   sync(row.barcodeInput, card.barcodeInput, "input");
+  sync(row.nameInput, card.nameInput, "input");
   sync(row.quantityInput, card.quantityInput, "input");
 
-  // Create add logic
-  const handleAddClick = () => {
-    const productId = row.productSelect.value;
-    const price = row.productSelect.selectedOptions[0]?.dataset.price;
-    const quantity = parseInt(row.quantityInput.value);
-    if (!productId || !price || quantity < 1) {
-      alert("Please select a product and valid quantity.");
-      return;
-    }
-    addProductToOrder(productId, price, quantity, token);
+  const selectProduct = (product) => {
+    addProductToOrder(product.product_id, product.price, 1, token);
     tempRow.remove();
     tempCard.remove();
   };
 
-  addBtn.addEventListener("click", handleAddClick);
-  const addBtnCard = addBtn.cloneNode(true);
-  addBtnCard.addEventListener("click", handleAddClick);
+  const searchAndPopulate = async (
+    query,
+    suggestionsEl,
+    searchBy,
+    brandEl,
+    categoryEl
+  ) => {
+    const brand = brandEl.value;
+    const category = categoryEl.value;
 
-  cancelBtn.addEventListener("click", () => {
-    tempRow.remove();
-    tempCard.remove();
-  });
-  const cancelBtnCard = cancelBtn.cloneNode(true);
-  cancelBtnCard.addEventListener("click", () => {
-    tempRow.remove();
-    tempCard.remove();
-  });
+    const params = new URLSearchParams();
+    if (query.length > 0) {
+      params.append(searchBy, query);
+    }
+    if (brand) params.append("brand", brand);
+    if (category) params.append("category", category);
 
-  // === TABLE UI
-  const tempRow = document.createElement("tr");
-  tempRow.className = "temp-product-row";
-  const td = document.createElement("td");
-  td.colSpan = 6;
-  const rowWrapper = document.createElement("div");
-  rowWrapper.className = "order-row";
-  [
-    row.brandSelect,
-    row.categorySelect,
+    const url = `https://order-app.gemegypt.net/api/products/orders?${params.toString()}`;
+
+    try {
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      const matches = data.data || [];
+
+      suggestionsEl.innerHTML = "";
+      matches.forEach((product) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<div><strong>${product.product_name}</strong><br><small>Barcode: ${product.bar_code}, Price: ${product.price}</small></div>`;
+        li.style.cursor = "pointer";
+        li.onclick = () => selectProduct(product);
+        suggestionsEl.appendChild(li);
+      });
+
+      suggestionsEl.style.display = matches.length ? "block" : "none";
+    } catch (err) {
+      console.error("Search failed:", err);
+      suggestionsEl.style.display = "none";
+    }
+  };
+
+  const setupLiveSearch = (
+    input,
+    suggestions,
+    searchBy,
+    brandEl,
+    categoryEl
+  ) => {
+    const handleSearch = () => {
+      const val = input.value.trim();
+      searchAndPopulate(val, suggestions, searchBy, brandEl, categoryEl);
+    };
+
+    input.addEventListener("input", handleSearch);
+    input.addEventListener("focus", handleSearch);
+    input.addEventListener("blur", () => {
+      setTimeout(() => {
+        suggestions.style.display = "none";
+      }, 200);
+    });
+  };
+
+  setupLiveSearch(
     row.barcodeInput,
     row.barcodeSuggestions,
-    row.productSelect,
-    row.quantityInput,
-    addBtn,
-    cancelBtn,
-  ].forEach((el) => rowWrapper.appendChild(el));
-  td.appendChild(rowWrapper);
-  tempRow.appendChild(td);
-  tableBody.appendChild(tempRow);
-
-  // === CARD UI
-  const tempCard = document.createElement("div");
-  tempCard.className = "item-card temp-product-card";
-  const cardContent = document.createElement("div");
-  cardContent.className = "card-content";
-  [
-    card.brandSelect,
-    card.categorySelect,
+    "barcode",
+    row.brandSelect,
+    row.categorySelect
+  );
+  setupLiveSearch(
     card.barcodeInput,
     card.barcodeSuggestions,
-    card.productSelect,
-    card.quantityInput,
-    addBtnCard,
-    cancelBtnCard,
-  ].forEach((el) => cardContent.appendChild(el));
-  tempCard.appendChild(cardContent);
-  cardsContainer.appendChild(tempCard);
+    "barcode",
+    card.brandSelect,
+    card.categorySelect
+  );
+  setupLiveSearch(
+    row.nameInput,
+    row.nameSuggestions,
+    "name",
+    row.brandSelect,
+    row.categorySelect
+  );
+  setupLiveSearch(
+    card.nameInput,
+    card.nameSuggestions,
+    "name",
+    card.brandSelect,
+    card.categorySelect
+  );
 
-  // Load categories
-  async function loadCategories(brand) {
+  const loadCategories = async (brand) => {
     const res = await fetch(
       `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
         brand
@@ -493,87 +509,47 @@ function addTemporaryProductRow(brands, token) {
         select.innerHTML += `<option value="${cat}">${cat}</option>`;
       });
     });
-  }
-
-  // Load products
-  async function loadProducts(brand, category = "") {
-    const url = new window.URL("https://order-app.gemegypt.net/api/products/orders");
-    url.searchParams.append("brand", brand);
-    if (category) url.searchParams.append("category", category);
-
-    const res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    const products = data.data || [];
-
-    [row.productSelect, card.productSelect].forEach((select) => {
-      select.innerHTML = `<option value="">Select Product</option>`;
-      products.forEach((product) => {
-        select.innerHTML += `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
-      });
-    });
-  }
-
-  // Barcode search setup
-  const setupBarcodeSearch = (input, suggestions) => {
-    input.addEventListener("input", async () => {
-      const query = input.value.trim();
-      if (!query) {
-        suggestions.style.display = "none";
-        return;
-      }
-
-      const brand = row.brandSelect.value;
-      const category = row.categorySelect.value;
-
-      const params = new URLSearchParams({ barcode: query });
-      if (brand) params.append("brand", brand);
-      if (category) params.append("category", category);
-
-      const res = await fetch(
-        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await res.json();
-      const matches = data.data || [];
-
-      suggestions.innerHTML = "";
-      matches.forEach((product) => {
-        const li = document.createElement("li");
-        li.innerHTML = `<div><strong>${product.product_name}</strong><br><small>Barcode: ${product.bar_code}, Price: ${product.price}</small></div>`;
-        li.style.cursor = "pointer";
-        li.onclick = () => {
-          [row.productSelect, card.productSelect].forEach((select) => {
-            select.innerHTML = `<option value="${product.product_id}" data-price="${product.price}">${product.product_name}</option>`;
-            select.value = product.product_id;
-          });
-          suggestions.style.display = "none";
-        };
-        suggestions.appendChild(li);
-      });
-
-      suggestions.style.display = matches.length ? "block" : "none";
-    });
   };
 
-  setupBarcodeSearch(row.barcodeInput, row.barcodeSuggestions);
-  setupBarcodeSearch(card.barcodeInput, card.barcodeSuggestions);
-
-  // Event listeners for dropdowns
   row.brandSelect.addEventListener("change", async () => {
     const brand = row.brandSelect.value;
     await loadCategories(brand);
-    await loadProducts(brand);
   });
 
-  row.categorySelect.addEventListener("change", async () => {
-    const brand = row.brandSelect.value;
-    const category = row.categorySelect.value;
-    await loadProducts(brand, category);
-  });
+  const tempRow = document.createElement("tr");
+  tempRow.className = "temp-product-row";
+  const td = document.createElement("td");
+  td.colSpan = 6;
+  const rowWrapper = document.createElement("div");
+  rowWrapper.className = "order-row";
+  [
+    row.brandSelect,
+    row.categorySelect,
+    row.barcodeInput,
+    row.barcodeSuggestions,
+    row.nameInput,
+    row.nameSuggestions,
+    row.quantityInput,
+  ].forEach((el) => rowWrapper.appendChild(el));
+  td.appendChild(rowWrapper);
+  tempRow.appendChild(td);
+  tableBody.appendChild(tempRow);
+
+  const tempCard = document.createElement("div");
+  tempCard.className = "item-card temp-product-card";
+  const cardContent = document.createElement("div");
+  cardContent.className = "card-content";
+  [
+    card.brandSelect,
+    card.categorySelect,
+    card.barcodeInput,
+    card.barcodeSuggestions,
+    card.nameInput,
+    card.nameSuggestions,
+    card.quantityInput,
+  ].forEach((el) => cardContent.appendChild(el));
+  tempCard.appendChild(cardContent);
+  cardsContainer.appendChild(tempCard);
 }
 
 async function addProductToOrder(productId, price, quantity, token) {

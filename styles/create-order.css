@@ -330,6 +330,7 @@ h3 {
   box-shadow: var(--box-shadow-sm);
 }
 
+
 /* Image stays small and aligned left */
 .preview-card img {
   width: 60px;
@@ -356,11 +357,8 @@ h3 {
   margin-bottom: var(--spacing-xs);
 }
 
-/* Optional: Slight hover effect for better UX */
-.preview-card:hover {
-  background-color: var(--gray-100);
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+.preview-summary {
+  background-color: springgreen;
 }
 
 .custom-customer-select {
