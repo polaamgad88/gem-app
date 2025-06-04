@@ -59,12 +59,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   async function fetchCustomers() {
-    const res = await fetch(
-      "https://order-app.gemegypt.net/api/customers?all=true",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const res = await fetch("https://order-app.gemegypt.net/api/customers?all=true", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     if (!res.ok) throw new Error("customers");
     const data = await res.json();
     allCustomers = data.customers || [];
@@ -114,6 +111,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const data = await res.json();
     allOrders = data.orders || [];
+    console.log("SUMMARY", data.summary);
+    renderOrderSummary(data.summary || {});
+
     currentPage = data.page || 1;
     totalPages = data.pages || 1;
 
@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderPagination();
     Utils.UI.hideLoader();
   }
+
   function renderPagination() {
     const container = document.getElementById("pagination");
     if (!container) return;
@@ -242,6 +243,37 @@ document.addEventListener("DOMContentLoaded", async function () {
           (window.location = `view-order.html?order_id=${btn.dataset.orderId}`)
       );
     });
+  }
+
+  function renderOrderSummary(summary) {
+    const tableRow = document.getElementById("orderSummaryRow");
+    const cardSummary = document.getElementById("cardSummary");
+
+    const html = `
+    Total: <b>EGP${(summary.overall_total || 0).toFixed(2)}</b> <br>
+    Confirmed: <b style="color:green;">EGP${(
+      summary.confirmed_total || 0
+    ).toFixed(2)}</b> |
+    Refunded/Canceled: <b style="color:red;">EGP${(
+      summary.refunded_or_canceled_total || 0
+    ).toFixed(2)}</b>
+  `;
+
+    if (tableRow) {
+      // Grab the only <td> inside <tr id="orderSummaryRow">
+      const summaryCell = tableRow.querySelector("td");
+      if (summaryCell) {
+        summaryCell.innerHTML = html;
+        summaryCell.style.textAlign = "left";
+        summaryCell.style.fontWeight = "bold";
+      }
+    }
+
+    if (cardSummary) {
+      cardSummary.innerHTML = html;
+      cardSummary.style.textAlign = "left";
+      cardSummary.style.fontWeight = "bold";
+    }
   }
 
   function renderNoOrders() {

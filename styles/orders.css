@@ -216,6 +216,20 @@ table th:first-child {
   width: 40px;
 }
 
+#cardSummary {
+  font-size: 16px;
+  background-color: #f8f8f8;
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+tfoot td {
+  background-color: #f8f8f8;
+  padding: 10px;
+  font-size: 16px;
+  border-top: 2px solid #ccc;
+}
+
 #pagination {
   text-align: center;
   margin-top: 20px;

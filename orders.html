@@ -63,7 +63,14 @@
                 <tbody id="ordersTable">
                     <!-- Table content will be populated by JavaScript -->
                 </tbody>
+                <tfoot>
+                    <tr id="orderSummaryRow">
+                        <td colspan="9" style="text-align:right; font-weight:bold;"></td>
+                    </tr>
+                </tfoot>
             </table>
+
+
         </div>
 
         <!-- Card view (for mobile, toggled by JS) -->
@@ -71,6 +78,7 @@
             <div id="ordersCards">
                 <!-- Card content will be populated by JavaScript -->
             </div>
+            <div id="cardSummary" style="text-align:right; padding: 10px; font-weight: bold;"></div>
         </div>
     </div>
     <div id="pagination" class="pagination-controls" style="text-align: center; margin-top: 20px;"></div>
