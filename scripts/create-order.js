@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   try {
     Utils.UI.showLoader("loader");
 
-    // Fetch all required data in parallel
     const [brands, categories, products, customers] = await Promise.all([
       fetchList(
         "https://order-app.gemegypt.net/api/products/brands/orders",
@@ -29,10 +28,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       fetchList("https://order-app.gemegypt.net/api/customers?all=true", "customers", token),
     ]);
 
-    populateCustomerDropdown(customers);
+    // ✅ Make products globally accessible
+    window.allProducts = products;
 
-    // Set up add row buttons
+    populateCustomerDropdown(customers);
     setupAddRowButtons(brands, categories, products);
+
+    loadOrderFromSession();
 
     Utils.UI.hideLoader("loader");
   } catch (err) {
@@ -40,7 +42,250 @@ document.addEventListener("DOMContentLoaded", async function () {
     Utils.UI.hideLoader("loader");
     Utils.UI.showError("Failed to load initial data. Please refresh the page.");
   }
+
+  // ✅ ADDED Clear Order Button Listener
+  const clearBtn = document.createElement("button");
+  clearBtn.textContent = "🗑️ Clear Order";
+  clearBtn.className = "btn btn-danger";
+  clearBtn.style.marginTop = "10px";
+  clearBtn.id = "clear-order-btn";
+  document.querySelector(".container").appendChild(clearBtn);
+
+  clearBtn.addEventListener("click", () => {
+    if (confirm("Are you sure you want to clear this order?")) {
+      sessionStorage.removeItem("orderDraft");
+      location.reload();
+    }
+  });
 });
+
+function saveOrderToSession() {
+  const customerId = document.getElementById("customer-select").value;
+  const addressId = document.getElementById("address-select").value;
+  const orderDate = document.getElementById("order-date").value;
+
+  const detailedRows = Array.from(
+    document.querySelectorAll("#detailed-order-rows .order-row")
+  )
+    .map((row) => {
+      const productId =
+        row.dataset.productId || row.querySelector(".product-select")?.value;
+      const quantity = row.querySelector(".quantity-input")?.value || "0";
+      if (!productId || productId === "undefined") return null;
+      return { productId, quantity };
+    })
+    .filter(Boolean); // ⛔ removes nulls
+
+  const combinedRows = Array.from(
+    document.querySelectorAll("#combined-order-rows .order-row")
+  ).map((row) => {
+    return {
+      brand: row.querySelector(".brand-select")?.value || "",
+      category: row.querySelector(".category-select")?.value || "",
+      quantity: row.querySelector(".quantity-input")?.value || "0",
+    };
+  });
+
+  const sessionData = {
+    customerId,
+    addressId,
+    orderDate,
+    detailedRows,
+    combinedRows,
+  };
+
+  sessionStorage.setItem("orderDraft", JSON.stringify(sessionData));
+}
+
+function loadOrderFromSession() {
+  const draft = sessionStorage.getItem("orderDraft");
+  if (!draft) return;
+
+  try {
+    const { customerId, addressId, orderDate, detailedRows, combinedRows } =
+      JSON.parse(draft);
+
+    if (orderDate) {
+      document.getElementById("order-date").value = orderDate;
+    }
+
+    // ✅ Load customer
+    if (customerId && allCustomers.length > 0) {
+      const customer = allCustomers.find(
+        (c) => String(c.customer_id) === String(customerId)
+      );
+      if (customer) {
+        const fullName = `${customer.first_name} ${customer.last_name}`;
+        document.getElementById("customer-search").value = fullName;
+        const hiddenSelect = document.getElementById("customer-select");
+        hiddenSelect.innerHTML = `<option value="${customerId}" selected>${fullName}</option>`;
+        hiddenSelect.dispatchEvent(new Event("change"));
+      }
+    }
+
+    // ✅ Wait for address list and select saved one
+    if (addressId) {
+      const addressSelect = document.getElementById("address-select");
+      const interval = setInterval(() => {
+        const found = Array.from(addressSelect.options).find(
+          (opt) => String(opt.value) === String(addressId)
+        );
+        if (found) {
+          addressSelect.value = addressId;
+          clearInterval(interval);
+        }
+      }, 300);
+    }
+
+    // ✅ Restore detailed product rows
+    if (Array.isArray(detailedRows)) {
+      const container = document.getElementById("detailed-order-rows");
+      const scrollable = document.querySelector(
+        ".order-rows-scrollable-detailed"
+      );
+      if (scrollable) scrollable.style.display = "block";
+
+      detailedRows.forEach(({ productId, quantity }) => {
+        const product = allProducts.find(
+          (p) => String(p.product_id) === String(productId)
+        );
+        if (!product) return;
+
+        const row = document.createElement("div");
+        row.className = "order-row";
+        row.dataset.productId = productId;
+        row.dataset.productPrice = product.price;
+
+        const productInfo = document.createElement("div");
+        productInfo.className = "locked-product-wrapper";
+
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "locked-product-name";
+        nameDiv.textContent = product.product_name;
+
+        const qtyInput = document.createElement("input");
+        qtyInput.type = "number";
+        qtyInput.className = "quantity-input";
+        qtyInput.min = 1;
+        qtyInput.value = quantity || 1;
+        qtyInput.addEventListener("input", () => {
+          debouncePreviewUpdate();
+          updateTotals();
+        });
+
+        const qtyWrap = document.createElement("div");
+        qtyWrap.className = "quantity-wrapper";
+        qtyWrap.appendChild(qtyInput);
+
+        const delBtn = document.createElement("i");
+        delBtn.className = "material-icons";
+        delBtn.textContent = "cancel";
+        delBtn.style = "font-size:33px;color:red;cursor:pointer;";
+        delBtn.onclick = () => {
+          row.remove();
+          debouncePreviewUpdate();
+          updateTotals();
+        };
+
+        const delWrap = document.createElement("div");
+        delWrap.className = "delete-wrapper";
+        delWrap.appendChild(delBtn);
+
+        productInfo.appendChild(nameDiv);
+        productInfo.appendChild(qtyWrap);
+        productInfo.appendChild(delWrap);
+
+        row.appendChild(productInfo);
+        container.appendChild(row);
+      });
+    }
+
+    // ✅ Restore combined rows with data fetching
+    if (Array.isArray(combinedRows)) {
+      const container = document.getElementById("combined-order-rows");
+      const scrollable = document.querySelector(
+        ".order-rows-scrollable-combined"
+      );
+      if (scrollable) scrollable.style.display = "block";
+
+      combinedRows.forEach(async ({ brand, category, quantity }) => {
+        const row = document.createElement("div");
+        row.className = "order-row";
+
+        const brandSelect = document.createElement("select");
+        brandSelect.className = "brand-select";
+        brandSelect.innerHTML = `<option value="${brand}" selected>${brand}</option>`;
+
+        const categorySelect = document.createElement("select");
+        categorySelect.className = "category-select";
+        categorySelect.innerHTML = `<option value="${category}" selected>${
+          category || "All"
+        }</option>`;
+
+        const qtyInput = document.createElement("input");
+        qtyInput.type = "number";
+        qtyInput.className = "quantity-input";
+        qtyInput.min = 1;
+        qtyInput.value = quantity || 1;
+
+        const delBtn = document.createElement("i");
+        delBtn.className = "material-icons";
+        delBtn.textContent = "cancel";
+        delBtn.style = "font-size:33px;color:red;cursor:pointer;";
+        delBtn.onclick = () => {
+          row.remove();
+          debouncePreviewUpdate();
+          updateTotals();
+        };
+
+        row.appendChild(brandSelect);
+        row.appendChild(categorySelect);
+        row.appendChild(qtyInput);
+        row.appendChild(delBtn);
+
+        container.appendChild(row);
+
+        // ✅ Fetch product list for brand/category
+        const token = localStorage.getItem("access_token");
+        const params = new URLSearchParams();
+        if (brand) params.append("brand", brand);
+        if (category) params.append("category", category);
+
+        try {
+          const res = await fetch(
+            `https://order-app.gemegypt.net/api/products/orders?${params}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (res.ok) {
+            const json = await res.json();
+            const products = json.data || [];
+            const totalItems = products.length * qtyInput.value;
+            const totalPrice = products.reduce(
+              (acc, p) => acc + (parseFloat(p.price) || 0) * qtyInput.value,
+              0
+            );
+
+            row.dataset.totalItems = totalItems;
+            row.dataset.totalPrice = totalPrice.toFixed(2);
+
+            updateTotals();
+            debouncePreviewUpdate();
+          }
+        } catch (err) {
+          console.error("Error loading combined row products:", err);
+        }
+      });
+    }
+
+    debouncePreviewUpdate();
+    updateTotals();
+  } catch (err) {
+    console.error("Failed to load saved order from session:", err);
+  }
+}
 
 // Helper function to fetch lists from API
 async function fetchList(url, key, token) {
@@ -622,7 +867,10 @@ function updateTotals() {
 let previewTimeout;
 function debouncePreviewUpdate(delay = 1000) {
   clearTimeout(previewTimeout);
-  previewTimeout = setTimeout(updateOrderPreview, delay);
+  previewTimeout = setTimeout(() => {
+    updateOrderPreview();
+    saveOrderToSession(); // ✅ ADDED
+  }, delay);
 }
 
 async function updateOrderPreview() {
@@ -813,6 +1061,7 @@ async function submitOrder(token) {
 
     if (res.ok) {
       const result = await res.json();
+      sessionStorage.removeItem("orderDraft");
       alert("✅ Order created successfully!");
       window.location.href = `view-order.html?order_id=${result.order_id}`;
     } else {

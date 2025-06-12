@@ -119,7 +119,14 @@ async function fetchAndRenderProducts(token) {
             ? "available-badge"
             : "not-available-badge"
         }">
-          ${product.availability == "Available" ? "🟢" : "🔴"}
+          ${
+            product.availability === "Available"
+              ? "🟢"
+              : product.availability === "Limited"
+              ? "🟡"
+              : "🔴"
+          }
+          
         </span>
       </td>
       <td>
