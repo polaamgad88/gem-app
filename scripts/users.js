@@ -99,8 +99,8 @@ async function openEditModal(userId) {
   document.getElementById("edit-assigned-to").value =
     user.assigned_to_user_id || "";
   document.getElementById("edit-admin").checked = user.admin;
-  document.getElementById("edit-driver").checked = user.driver === 1;
-  document.getElementById("edit-storage").checked = user.storage === 1;
+  document.getElementById("edit-driver").checked = user.driver == 1;
+  document.getElementById("edit-storage").checked = user.storage == 1;
 
   document.getElementById("edit-user-modal").classList.remove("hidden");
 }

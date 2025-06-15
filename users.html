@@ -77,7 +77,14 @@
                 <label>Username: <input type="text" id="edit-username" /></label>
                 <label>Email: <input type="email" id="edit-email" /></label>
                 <label>Phone: <input type="text" id="edit-phone" /></label>
-                <label>Role: <input type="text" id="edit-role" /></label>
+                <label for="edit-role">Role:
+                    <select id="edit-role">
+                        <option value="delegate">Delegate</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="manager">Manager</option>
+                        <option value="financial">Financial</option>
+                    </select>
+                </label>
                 <label>Assigned To (User ID): <input type="number" id="edit-assigned-to" /></label>
                 <label><input type="checkbox" id="edit-admin" /> Admin</label>
                 <label><input type="checkbox" id="edit-driver" /> Driver</label>

@@ -608,8 +608,8 @@ function addOrderRow(container, brands, products) {
 
     const filtered = products.filter((p) => {
       return (
-        (!brand || p.brand === brand) &&
-        (!category || p.category === category) &&
+        (!brand || p.brand.toLowerCase() === brand.toLowerCase()) &&
+        (!category || p.category.toLowerCase() === category.toLowerCase()) &&
         p.product_name.toLowerCase().includes(value)
       );
     });
