@@ -2,30 +2,159 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <link rel="stylesheet" href="./styles/base.css">
-    <link rel="stylesheet" href="./styles/login.css">
-    <script src="./scripts/utils.js" defer></script>
-    <script src="./scripts/login.js" defer></script>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="./scripts/login.js" defer></script>
+  
+  <title>Login | GEM App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(145deg, #0b2a59, #123b75);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      color: white;
+    }
+
+    .header-title {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .header-sub {
+      text-align: center;
+      font-size: 15px;
+      color: #cfd8e2;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-sizing: border-box;
+      text-align: center;
+      color: #0b2a59;
+    }
+
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      height: 200px;
+      object-fit: contain;
+    }
+
+    h2 {
+      margin: 0 0 20px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      padding: 12px;
+      border: 1px solid #ccd6dd;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+      background-color: #f4f7fa;
+    }
+
+    input:focus {
+      border-color: #0056b3;
+      outline: none;
+    }
+
+    .btn-primary {
+      padding: 12px;
+      background-color: #28a745;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #218838;
+    }
+
+    #theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 16px;
+      font-size: 13px;
+      color: #cdd2d8;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 28px 20px;
+        margin: 0 12px;
+      }
+
+      .header-title {
+        font-size: 22px;
+      }
+
+      .logo {
+        height: 80px;
+      }
+
+      .footer {
+        font-size: 12px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
-        <h2>Gem Application</h2>
-        <form>
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-        <!-- Loader and error message containers will be added by JS -->
-    </div>
+  <!-- <button id="theme-toggle" aria-label="Toggle dark mode">🌙</button> -->
 
-    <!-- Theme toggle button -->
-    <button id="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+  <div class="header-title">Welcome to GEM Application</div>
+  <div class="header-sub">Please log in to continue</div>
+
+  <div class="container">
+    <img src="./assets/GEM Group 2024.jpg" alt="GEM Logo" class="logo" />
+    <h2>GEM Application</h2>
+    <form>
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+  </div>
+
+  <div class="footer">© 2025 GEM Group. All rights reserved.</div>
 </body>
 
 </html>
