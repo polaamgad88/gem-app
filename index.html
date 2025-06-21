@@ -2,35 +2,149 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delegate Dashboard</title>
-    <link rel="stylesheet" href="./styles/base.css">
-    <link rel="stylesheet" href="./styles/delegate-landing.css">
-    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
-    <script src="./scripts/utils.js" defer></script>
-    <script src="./scripts/delegate-landing.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delegate Dashboard</title>
+  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0b2a59;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 60px 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      max-width: 600px;
+      width: 80%;
+      min-height: 600px;
+    }
+
+    .logo {
+        display: block;
+      margin: 0 auto 20px;
+      height: 200px;
+      object-fit: contain;
+    }
+
+    h1 {
+      color: #0b2a59;
+      font-size: 24px;
+      margin-bottom: 40px;
+    }
+
+    #username {
+      font-weight: 600;
+    }
+
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      display: block;
+      padding: 18px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 17px;
+      transition: 0.2s ease-in-out;
+      cursor: pointer;
+      text-align: center;
+      border: none;
+    }
+
+    .view-orders,
+    .manage-customers,
+    .manage-user,
+    .manage-products {
+      background-color: #0b2a59;
+      color: white;
+    }
+
+    .add-order {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .logout {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn:hover {
+      opacity: 0.92;
+      transform: scale(1.01);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 40px 20px;
+        margin: 0 10px;
+        min-height: auto;
+      }
+
+      .logo {
+        height: 120px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .btn {
+        font-size: 15px;
+        padding: 14px;
+      }
+    }
+  </style>
+  <script src="./scripts/utils.js" defer></script>
+  <script src="./scripts/delegate-landing.js" defer></script>
 </head>
 
 <body>
-    <div class="container">
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
-        <h1>Welcome, <span id="username">NAME</span>!</h1>
+  <div class="container">
+    <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
+    <h1>Welcome, <span id="username"></span>!</h1>
 
-        <div class="btn-container">
-            <!-- Main navigation buttons -->
-            <a href="orders.html" class="btn view-orders">View Orders</a>
-            <a href="./create-order.html" class="btn add-order">Add New Order</a>
-
-            <!-- Admin-only buttons (hidden by default) -->
-            <a href="./customers.html" class="btn manage-customers">Manage Customers</a>
-            <a href="./users.html" class="btn manage-user" style="display: none;">Manage Users</a>
-            <a href="./products.html" class="btn manage-products" style="display: none;">Manage Products</a>
-
-            <!-- Logout button -->
-            <button id="logout-btn" class="btn logout">Logout</button>
+    <div class="btn-container">
+      <a href="orders.html" class="btn view-orders">View Orders</a>
+      <a href="./create-order.html" class="btn add-order">Add New Order</a>
+      <a href="./customers.html" class="btn manage-customers">Manage Customers</a>
+      <a href="./users.html" class="btn manage-user" style="display: none;">Manage Users</a>
+      <a href="./products.html" class="btn manage-products" style="display: none;">Manage Products</a>
+      <button id="logout-btn" class="btn logout" style="
+      background-color: #fff;
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      margin-top: 10%;
+    "
+    onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='#fff';"
+    onmouseout="this.style.backgroundColor='#fff'; this.style.color='#dc3545';">
+      Logout
+    </button>
         </div>
-    </div>
+  </div>
 </body>
 
 </html>

@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   clearBtn.className = "btn btn-danger";
   // clearBtn.style.marginTop = "10px";
   clearBtn.id = "clear-order-btn";
- clearBtn.style = `
+  clearBtn.style = `
   background-color: #fff;
   color: #dc3545;
   border: 1px solid #dc3545;
@@ -66,21 +66,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 `;
 
 
-clearBtn.onmouseover = () => {
-  clearBtn.style.backgroundColor = "#dc3545";
-  clearBtn.style.color = "#fff";
-};
-clearBtn.onmouseout = () => {
-  clearBtn.style.backgroundColor = "#fff";
-  clearBtn.style.color = "#dc3545";
-};
-document.getElementById("submit-order").insertAdjacentElement("afterend", clearBtn);
+  clearBtn.onmouseover = () => {
+    clearBtn.style.backgroundColor = "#dc3545";
+    clearBtn.style.color = "#fff";
+  };
+  clearBtn.onmouseout = () => {
+    clearBtn.style.backgroundColor = "#fff";
+    clearBtn.style.color = "#dc3545";
+  };
+  document.getElementById("submit-order").insertAdjacentElement("afterend", clearBtn);
 
   clearBtn.addEventListener("click", () => {
     if (confirm("Are you sure you want to clear this order?")) {
       sessionStorage.removeItem("orderDraft");
       location.reload();
-    } 
+    }
   });
 });
 
@@ -244,9 +244,8 @@ function loadOrderFromSession() {
 
         const categorySelect = document.createElement("select");
         categorySelect.className = "category-select";
-        categorySelect.innerHTML = `<option value="${category}" selected>${
-          category || "All"
-        }</option>`;
+        categorySelect.innerHTML = `<option value="${category}" selected>${category || "All"
+          }</option>`;
 
         const qtyInput = document.createElement("input");
         qtyInput.type = "number";
@@ -359,8 +358,8 @@ function populateCustomerDropdown(customers) {
     const value = searchInput.value.toLowerCase();
     const matches = value
       ? allCustomers.filter((cust) =>
-          `${cust.first_name} ${cust.last_name}`.toLowerCase().includes(value)
-        )
+        `${cust.first_name} ${cust.last_name}`.toLowerCase().includes(value)
+      )
       : allCustomers;
 
     renderSuggestions(matches);
@@ -618,7 +617,7 @@ function addOrderRow(container, brands, products) {
       const productId = e.target.dataset.productId;
       const selectedProduct = products.find((p) => p.product_id == productId);
       if (selectedProduct && quantityInput.value) {
-        lockFields(selectedProduct); 
+        lockFields(selectedProduct);
       }
       barcodeSuggestions.style.display = "none";
     }
@@ -774,8 +773,8 @@ function addCombinedRow(container, brands) {
 
     const url = selectedBrand
       ? `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
-          selectedBrand
-        )}`
+        selectedBrand
+      )}`
       : `https://order-app.gemegypt.net/api/products/categories/orders`;
 
     categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
@@ -887,7 +886,11 @@ function updateTotals() {
     });
 
   document.getElementById("total-items").textContent = totalItems;
-  document.getElementById("total-price").textContent = totalPrice.toFixed(2);
+  document.getElementById("total-price").textContent = Number(totalPrice).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
 }
 
 let previewTimeout;
@@ -980,10 +983,9 @@ async function updateOrderPreview() {
       const card = document.createElement("div");
       card.className = "preview-card";
       card.innerHTML = `
-        ${
-          photoUrl
-            ? `<img src="${photoUrl}" alt="${name}" />`
-            : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
+        ${photoUrl
+          ? `<img src="${photoUrl}" alt="${name}" />`
+          : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
         }
         <div class="card-content">
           <div class="product-name">${name} - (${bar_code})</div>
@@ -1101,9 +1103,26 @@ async function submitOrder(token) {
   }
 }
 
-// Add a function to toggle tabs if not already defined
 if (typeof window.toggleTab !== "function") {
-  window.toggleTab = function (id) {
+  window.toggleTab = function (id, it) {
+    // Automatically close the other tab when one is opened
+    const allTabs = {
+      "detailed-order-content": "combined-order",
+      "combined-order": "detailed-order-content"
+    };
+
+    // Close the opposite tab if we're opening one
+    const oppositeId = allTabs[id];
+    if (it === 1 && oppositeId) {
+      const oppositeContent = document.getElementById(oppositeId);
+      const oppositeArrow = oppositeContent?.previousElementSibling?.querySelector(".arrow");
+      if (oppositeContent && oppositeContent.style.display === "block") {
+        oppositeContent.style.display = "none";
+        if (oppositeArrow) oppositeArrow.textContent = "▼";
+      }
+    }
+
+    // Toggle current tab
     const content = document.getElementById(id);
     const arrow = content.previousElementSibling.querySelector(".arrow");
     const isVisible = content.style.display === "block";

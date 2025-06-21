@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   setupLogoutButton();
 });
 
+
 // Helper function to set up admin buttons
 function setupAdminButtons(admin, role) {
   if (admin == 1 || role !== "delegate") {
