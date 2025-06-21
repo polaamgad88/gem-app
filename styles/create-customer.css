@@ -1,5 +1,11 @@
 @import url('./base.css');
-
+.body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #0b2a59;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
 .container {
     max-width: 500px;
     margin: 0 auto;

@@ -2,11 +2,17 @@
 @import url('./base.css');
 
 body {
-  background-color: var(--gray-100);
-  padding: var(--spacing-md);
-  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0b2a59;
+  margin: 0;
+  padding: 0;
+  color: #333;
 }
-
+@media screen and (max-width: 600px) {
+  .container {
+    width: 95%;
+  }
+}
 .container {
   max-width: var(--container-lg);
   margin: 0 auto;
@@ -421,4 +427,35 @@ th {
   .action-buttons button {
     width: 100%;
   }
+}
+
+.order-info-grid {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.info-box {
+  flex: 1 1 22%;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-box label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.info-value {
+  background-color: #f2f3f5;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
 }

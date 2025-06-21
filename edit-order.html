@@ -36,10 +36,65 @@
               </svg>
               Dashboard
           </a>
-          <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
-        <h1>Edit Order - <span id="orderId"></span></h1>
+          <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
+          display: block;
+          margin: 0 auto 0px;
+          height: 150px;
+          max-height: 140px;
+          object-fit: contain;
+        " />
+    <style>
+      .logo {
+        display: block;
+        margin: 0 auto 0px;
+        height: 137px;
+        max-height: 140px;
+        object-fit: contain;
+      }
 
-        <div class="order-info">
+      @media (max-width: 576px) {
+        .logo {
+          height: 90px;
+        }
+      }
+    </style>
+
+<h2 style="
+text-align: center;
+font-size: 28px;
+font-weight: 600;
+margin-bottom: 30px;
+color: #0b2a59;
+letter-spacing: 0.5px;
+">
+      Edit Order <span id="orderId" style="color: #28a745;"></span>
+    </h2>
+
+
+    <div class="order-info-grid">
+        <div class="info-box">
+          <!-- <label>Order ID</label> -->
+          <div class="info-value" id="order-id"></div>
+        </div>
+  
+        <div class="info-box">
+          <!-- <label>Date</label> -->
+          <div class="info-value" id="order-date"></div>
+        </div>
+  
+        <div class="info-box">
+          <!-- <label>Status</label> -->
+          <div class="info-value" id="order-state"></div>
+        </div>
+  
+        <div class="info-box">
+          <!-- <label>Delegate Name</label> -->
+          <div class="info-value" id="delegate-name"></div>
+        </div>
+      </div>
+  
+
+        <!-- <div class="order-info">
             <div class="row">
                 <p><strong>Order ID:</strong> <span id="order-id"></span></p>
                 <p><strong>Date:</strong> <span id="order-date"></span></p>
@@ -48,7 +103,7 @@
                 <p><strong>Status:</strong> <span id="order-state" class="state pending"></span></p>
                 <p><strong>Delegate Name:</strong> <span id="delegate-name"></span></p>
             </div>
-        </div>
+        </div> -->
 
         <div class="customer-info">
             <h2>Customer Info</h2>
@@ -91,7 +146,7 @@
             </div>
 
             <div style="text-align: left; margin-top: 10px;">
-                <button id="add-product-btn" class="confirm-btn">➕ Add Product</button>
+                <button id="add-product-btn" class="confirm-btn"> Add Product</button>
             </div>
         </div>
 
@@ -100,7 +155,7 @@
         </div>
 
         <div class="action-buttons" style="text-align: right;">
-            <button id="save-order" class="confirm-btn">💾 Save Changes</button>
+            <button id="save-order" class="confirm-btn">Confirm Changes</button>
         </div>
     </div>
 </body>
