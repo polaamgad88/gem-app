@@ -248,17 +248,63 @@ document.addEventListener("DOMContentLoaded", async function () {
   function renderOrderSummary(summary) {
     const tableRow = document.getElementById("orderSummaryRow");
     const cardSummary = document.getElementById("cardSummary");
-
     const html = `
-    Total: <b>EGP${(summary.overall_total || 0).toFixed(2)}</b> <br>
-    Confirmed: <b style="color:green;">EGP${(
-      summary.confirmed_total || 0
-    ).toFixed(2)}</b> |
-    Refunded/Canceled: <b style="color:red;">EGP${(
-      summary.refunded_or_canceled_total || 0
-    ).toFixed(2)}</b>
+    <div style="
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    ">
+      <div style="
+        flex: 1;
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 12px 16px;
+        font-size: 16px;
+        font-weight: 500;
+        color: green;
+      ">
+         Confirmed<br>
+        <span style="font-weight: bold;">
+          EGP ${(summary.confirmed_total || 0).toLocaleString()}
+        </span>
+      </div>
+  
+      <div style="
+        flex: 1;
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: red;
+      ">
+        Refunded<br>
+        <span style="font-weight: bold;">
+          EGP ${(summary.refunded_or_canceled_total || 0).toLocaleString()}
+        </span>
+      </div>
+  
+      <div style="
+        flex: 1;
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+      ">
+        Total<br>
+        <span style="font-weight: bold;">
+          EGP ${(summary.overall_total || 0).toLocaleString()}
+        </span>
+      </div>
+    </div>
   `;
-
+  
     if (tableRow) {
       // Grab the only <td> inside <tr id="orderSummaryRow">
       const summaryCell = tableRow.querySelector("td");
