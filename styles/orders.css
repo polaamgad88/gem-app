@@ -150,8 +150,8 @@ th[onclick]:hover {
 }
 
 .back-link:before {
-  content: "←";
-  margin-right: var(--spacing-xs);
+  /* content: "←"; */
+  /* margin-right: var(--spacing-xs); */
 }
 
 /* modal */

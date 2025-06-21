@@ -14,8 +14,28 @@
 
 <body>
     <div class="container">
-        <a href="users.html" class="back-link">Back to Users</a>
-        <h1>Create New User</h1>
+        <a href="index.html" style="
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        padding: 8px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-bottom: 24px;
+        transition: background-color 0.2s ease;
+        gap: 8px;
+      " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M15 18l-6-6 6-6" />
+              </svg>
+              Dashboard
+          </a>
+          <h1>Create New User</h1>
 
         <form id="create-user-form">
             <label for="username">Username:</label>

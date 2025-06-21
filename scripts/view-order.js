@@ -43,16 +43,16 @@ async function fetchOrderDetails(orderId, token) {
 
 function populateOrderDetails(order) {
   document.getElementById("orderId").textContent = `#${order.order_id}`;
-  document.getElementById("order-id").textContent = `#${order.order_id}`;
-  document.getElementById("order-date").textContent = Utils.Format.date(
-    order.order_date
-  );
+  document.getElementById("order-id").value = `#${order.order_id}`;
+  document.getElementById("order-date").value = Utils.Format.date(order.order_date);
+
 
   const orderState = document.getElementById("order-state");
   orderState.textContent = order.status;
-  orderState.className = `state ${order.status.toLowerCase()}`;
+  // orderState.className = `state ${order.status.toLowerCase()}`;
 
-  document.getElementById("delegate-name").textContent = order.username;
+  document.getElementById("order-state").value = order.status;
+  document.getElementById("delegate-name").value = order.username;
   document.getElementById("customer-name").textContent = order.customer_name;
   document.getElementById(
     "customer-id"

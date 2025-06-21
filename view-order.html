@@ -6,38 +6,215 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details</title>
     <link rel="stylesheet" href="./styles/base.css">
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
     <link rel="stylesheet" href="./styles/view-order.css">
     <script src="./scripts/utils.js" defer></script>
     <script src="./scripts/view-order.js" defer></script>
+    <style>
+        body {
+          font-family: 'Segoe UI', sans-serif;
+          background-color: #0b2a59;
+          margin: 0;
+          padding: 0;
+          color: #333;
+        }
+    
+        .container {
+          max-width: 950px;
+          margin: 30px auto;
+          background: #fff;
+          border-radius: 10px;
+          padding: 30px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+    
+        .logo {
+                    display: block;
+                    margin: 0 auto 0px;
+                    height: 137px;
+                    max-height: 140px;
+                    object-fit: contain;
+                }
+    
+                @media (max-width: 576px) {
+                    .logo {
+                        height: 90px;
+                    }
+                }
+        h1 {
+          text-align: center;
+          font-size: 28px;
+          margin-bottom: 20px;
+          color: #0b2a59;
+        }
+        .order-info-grid {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.info-box {
+  flex: 1 1 22%;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-box label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.info-value {
+  background-color: #f2f3f5;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.info-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-group {
+  flex: 1 1 30%;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-group label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+@media (max-width: 768px) {
+  .info-group {
+    flex: 1 1 100%;
+  }
+  .container{
+    max-width: 97%;
+  }
+}
+      </style>
 </head>
 
 <body>
 
 
     <div class="container">
-        <a href="orders.html" class="back-link">Back to Orders</a>
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
-        <h1>Order Details - <span id="orderId"></span></h1>
+        <a href="index.html" style="
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        padding: 8px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-bottom: 24px;
+        transition: background-color 0.2s ease;
+        gap: 8px;
+      " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M15 18l-6-6 6-6" />
+              </svg>
+              Dashboard
+          </a>
+          <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
+          display: block;
+          margin: 0 auto 0px;
+          height: 150px;
+          max-height: 140px;
+          object-fit: contain;
+        " />
+            <style>
+                .logo {
+                    display: block;
+                    margin: 0 auto 0px;
+                    height: 137px;
+                    max-height: 140px;
+                    object-fit: contain;
+                }
+      
+                @media (max-width: 576px) {
+                    .logo {
+                        height: 90px;
+                    }
+                }
+            </style>
+<h2 style="
+text-align: center;
+font-size: 28px;
+font-weight: 600;
+margin-bottom: 30px;
+color: #0b2a59;
+letter-spacing: 0.5px;
+">
+Order Details <span id="orderId" style="color: #28a745;"></span>
+</h2>
 
-        <!-- Order Information -->
-        <div class="order-info">
-            <div class="row">
-                <p><strong>Order ID:</strong> <span id="order-id"></span></p>
-                <p><strong>Date:</strong> <span id="order-date"></span></p>
-            </div>
-            <div class="row">
-                <p><strong>Status:</strong> <span id="order-state" class="state pending"></span></p>
-                <p><strong>Delegate Name:</strong> <span id="delegate-name"></span></p>
-            </div>
-        </div>
+<div class="order-info-grid">
+    <div class="info-box">
+      <!-- <label>Order ID</label> -->
+      <div class="info-value" id="order-id">#48</div>
+    </div>
+  
+    <div class="info-box">
+      <!-- <label>Date</label> -->
+      <div class="info-value" id="order-date">2025-06-21</div>
+    </div>
+  
+    <div class="info-box">
+      <!-- <label>Status</label> -->
+      <div class="info-value" id="order-state">confirmed_by_delegate</div>
+    </div>
+  
+    <div class="info-box">
+      <!-- <label>Delegate Name</label> -->
+      <div class="info-value" id="delegate-name">abanoub.kamil</div>
+    </div>
+  </div>
+  
+          
 
         <!-- Customer Information -->
         <div class="customer-info">
-            <h2>Customer Information</h2>
-            <p><strong>Name:</strong> <span id="customer-name"></span></p>
-            <p><strong>ID:</strong> <span id="customer-id"></span></p>
-            <p><strong>Address:</strong> <span id="customer-address"></span></p>
-        </div>
+            <h2 class="section-title">Customer Information</h2>
+          
+            <div class="info-boxes">
+              <div class="info-group">
+                <label>Name</label>
+                <div class="info-value" id="customer-name"></div>
+              </div>
+              <div class="info-group">
+                <label>ID</label>
+                <div class="info-value" id="customer-id"></div>
+              </div>
+              <div class="info-group">
+                <label>Address</label>
+                <div class="info-value" id="customer-address"></div>
+              </div>
+            </div>
+          </div>
+          
 
         <!-- Ordered Items -->
         <div class="items-list">
@@ -71,15 +248,20 @@
 
         <!-- Total Price -->
         <div class="total">
-            <h2><span id="total-price"></span></h2>
-        </div>
+            <p><strong>Total Amount:</strong></p>
+            <div class="gray-box" id="total-price">EGP 13900.00</div>
+          </div>
+          
 
         <!-- Action Buttons -->
-        <div class="order-actions">
-            <button id="refund-order" class="refund-btn">❌ Refund Order</button>
-            <button id="edit-order" class="edit-btn">✏️ Edit Order</button>
-            <button id="confirm-order" class="confirm-btn">✅ Confirm Order</button>
-        </div>
+        <div class="order-actions horizontal-buttons">
+            <button id="refund-order" class="refund-btn-outline"> Refund</button>
+            <button id="edit-order" class="edit-btn-outline">Edit</button>
+
+            <button id="confirm-order" class="confirm-btn-outline">Confirm</button>
+
+          </div>
+          
     </div>
 </body>
 
