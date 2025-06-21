@@ -121,13 +121,12 @@ document
     const token = localStorage.getItem("access_token");
     const userId = document.getElementById("edit-user-id").value;
 
+    // First: update info
     const infoRes = await fetch(
       `https://order-app.gemegypt.net/api/users/edit_info/${userId}`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: new URLSearchParams({
           username: document.getElementById("edit-username").value,
           email: document.getElementById("edit-email").value,
@@ -138,16 +137,30 @@ document
       }
     );
 
+    // Second: update role
     const roleRes = await fetch(
       `https://order-app.gemegypt.net/api/users/edit_role/${userId}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: new URLSearchParams({
+          role: document.getElementById("edit-role").value,
+          admin: document.getElementById("edit-admin").checked ? "1" : "0",
+        }),
+      }
+    );
+
+    // 🔄 Third: update assigned manager
+    await fetch(
+      `https://order-app.gemegypt.net/api/users/change_manager/${userId}`,
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
         body: new URLSearchParams({
-          role: document.getElementById("edit-role").value,
-          admin: document.getElementById("edit-admin").checked ? "1" : "0",
+          assigned_to_user_id:
+            document.getElementById("edit-assigned-to").value,
         }),
       }
     );
@@ -159,6 +172,7 @@ document
     closeEditModal();
     await loadUsers(token);
   });
+
 document
   .getElementById("change-password-form")
   .addEventListener("submit", async (e) => {

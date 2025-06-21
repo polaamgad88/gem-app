@@ -89,7 +89,7 @@ h1 {
 .manage-customers:hover,
 .manage-user:hover,
 .manage-products:hover {
-  background-color: var(--main-btn-color-dark);
+  background-color: white;
 }
 
 .logout {

@@ -270,6 +270,7 @@ h3 {
 .quantity-btn:hover {
   background-color: var(--primary-light);
 }
+
 /* Base styles (Desktop & Tablet) */
 .quantity-input,
 .quantity-wrapper input {
@@ -295,9 +296,10 @@ h3 {
 
 /* 📱 Mobile Optimization */
 @media (max-width: 768px) {
+
   .quantity-input,
   .quantity-wrapper input {
-    width: 40px;
+    width: 60;
     height: 32px;
     font-size: 14px;
   }
@@ -442,7 +444,7 @@ h3 {
 
 .preview-summary {
   background-color: #f8f9fb;
-  border: #0b2a59 2px solid ;
+  border: #0b2a59 2px solid;
 }
 
 .custom-customer-select {
