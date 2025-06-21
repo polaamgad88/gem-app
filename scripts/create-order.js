@@ -45,19 +45,45 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // ✅ ADDED Clear Order Button Listener
   const clearBtn = document.createElement("button");
-  clearBtn.textContent = "🗑️ Clear Order";
+  clearBtn.textContent = "Clear Order";
   clearBtn.className = "btn btn-danger";
-  clearBtn.style.marginTop = "10px";
+  // clearBtn.style.marginTop = "10px";
   clearBtn.id = "clear-order-btn";
-  document.querySelector(".container").appendChild(clearBtn);
+ clearBtn.style = `
+  background-color: #fff;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  margin-top: 40px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+
+clearBtn.onmouseover = () => {
+  clearBtn.style.backgroundColor = "#dc3545";
+  clearBtn.style.color = "#fff";
+};
+clearBtn.onmouseout = () => {
+  clearBtn.style.backgroundColor = "#fff";
+  clearBtn.style.color = "#dc3545";
+};
+document.getElementById("submit-order").insertAdjacentElement("afterend", clearBtn);
 
   clearBtn.addEventListener("click", () => {
     if (confirm("Are you sure you want to clear this order?")) {
       sessionStorage.removeItem("orderDraft");
       location.reload();
-    }
+    } 
   });
 });
+
 
 function saveOrderToSession() {
   const customerId = document.getElementById("customer-select").value;
@@ -591,8 +617,8 @@ function addOrderRow(container, brands, products) {
     if (e.target.tagName === "LI") {
       const productId = e.target.dataset.productId;
       const selectedProduct = products.find((p) => p.product_id == productId);
-      if (selectedProduct) {
-        lockFields(selectedProduct);
+      if (selectedProduct && quantityInput.value) {
+        lockFields(selectedProduct); 
       }
       barcodeSuggestions.style.display = "none";
     }

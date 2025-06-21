@@ -2,79 +2,142 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Order</title>
-    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
-    <link rel="stylesheet" href="./styles/base.css">
-    <link rel="stylesheet" href="./styles/create-order.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="./scripts/utils.js" defer></script>
-    <script src="./scripts/create-order.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Order</title>
+  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/create-order.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <script src="./scripts/utils.js" defer></script>
+  <script src="./scripts/create-order.js" defer></script>
 </head>
 
-<body>
-    <div class="container">
-        <a href="index.html" class="back-link">Back to Dashboard</a>
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo">
-        <h2>New Order</h2>
+<body style="font-family: 'Segoe UI', sans-serif; background-color: #0b2a59; color: #333; margin: 0; padding: 0;">
+  <div class="container" style="max-width: 950px; margin: 30px auto; background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);">
+    
+    <a href="index.html" 
+    style="
+      display: inline-flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      background-color: #f8f9fa;
+      border: 1px solid #ced4da;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-bottom: 24px;
+      transition: background-color 0.2s ease;
+      gap: 8px;
+    "
+    onmouseover="this.style.backgroundColor='#e9ecef'"
+    onmouseout="this.style.backgroundColor='#f8f9fa'"
+ >
+   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+     <path d="M15 18l-6-6 6-6" />
+   </svg>
+   Dashboard
+ </a>
+     
+    <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo"
+    style="
+      display: block;
+      margin: 0 auto 0px;
+      height: 150px;
+      max-height: 140px;
+      object-fit: contain;
+    " />
+  
+      
+    <h2 style="text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 30px;">NEW ORDER</h2>
 
-        <div class="order-header">
-            <input type="date" id="order-date" readonly>
-            <div class="custom-customer-select">
-                <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off" />
-                <ul id="customer-suggestions" class="dropdown-list"></ul>
-            </div>
-            <select id="customer-select" style="display: none;"></select>
+    <div class="order-header" style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; margin-bottom: 30px;">
+      <input type="date" id="order-date" readonly
+        style="flex: 1 1 30%; padding: 12px 14px; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; background-color: #f1f3f5; color: #555;" />
 
-            <select id="address-select">
-                <option value="">Select Address</option>
-            </select>
-        </div>
+      <div class="custom-customer-select" style="flex: 1 1 30%; position: relative; ">
+        <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off" 
+          style=" background-color: #f2f3f5;width: 100%; padding: 12px 14px; border-radius: 6px; border: 1px solid #ccc; font-size: 16px;" />
+        <ul id="customer-suggestions" class="dropdown-list" style="list-style: none; padding: 0; margin: 4px 0 0; position: absolute; background: white; z-index: 10;"></ul>
+      </div>
 
-        <div class="tabs">
-            <!-- Detailed Order Section -->
-            <div class="tab" onclick="toggleTab('detailed-order-content')">
-                Detailed Order <span class="arrow">▼</span>
-            </div>
-            <div id="detailed-order-content" class="tab-content" style="display: none;">
-                <div class="order-rows-scrollable order-rows-scrollable-detailed" id="detailed-order-rows"
-                    style="display: none;"></div>
-                <button class="add-row-btn" data-type="detailed">Add Row</button>
-            </div>
+      <select id="customer-select" style="display: none;"></select>
 
-            <!-- Combined Order Section -->
-            <div class="tab" onclick="toggleTab('combined-order')">
-                Combined Order <span class="arrow">▼</span>
-            </div>
-            <div id="combined-order" class="tab-content" style="display: none;">
-                <div class="order-rows-scrollable order-rows-scrollable-combined" id="combined-order-rows"
-                    style="display: none;"></div>
-                <button class="add-row-btn" data-type="combined">Add Row</button>
-            </div>
-        </div>
-
-        <div class="order-summary">
-            <div class="total-items">Total Items: <span id="total-items">0</span></div>
-            <div class="total-price">Total Price: EGP <span id="total-price">0.00</span></div>
-        </div>
-
-        <div class="order-preview">
-            <div id="preview-loader" style="display: none;">
-                <div class="loader"></div>
-                <span>Loading preview...</span>
-            </div>
-
-            <h3>Order Preview</h3>
-            <div class="order-preview-container">
-                <div id="order-preview-body" class="order-preview-cards"></div>
-
-            </div>
-        </div>
-
-        <button id="submit-order" class="btn btn-primary">Submit New Order</button>
-
+      <select id="address-select"
+        style="flex: 1 1 30%; padding: 12px 14px; border-radius: 6px; border: 1px solid #ccc; background-color: #f2f3f5; font-size: 16px;">
+        <option value="">Select Address</option>
+      </select>
     </div>
+
+    <div class="tabs" style="margin-bottom: 30px;">
+      <!-- Detailed Order Section -->
+      <div class="tab" onclick="toggleTab('detailed-order-content')"
+        style="padding: 12px; background: #0b2a59; color: white; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">
+        Detailed Order <span class="arrow" style="float: right;">▼</span>
+      </div>
+      <div id="detailed-order-content" class="tab-content" 
+      style="display: none; margin-bottom: 40px; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+ 
+   <div class="order-rows-scrollable order-rows-scrollable-detailed" 
+        id="detailed-order-rows" 
+        style="display: none; margin-bottom: 20px;"></div>
+ 
+   <button class="add-row-btn" data-type="detailed"
+     style="
+       display: block;
+       margin: 0 auto;
+       padding: 12px 24px;
+       background-color: #28a745;
+       border: none;
+       color: white;
+       font-weight: 600;
+       font-size: 15px;
+       border-radius: 8px;
+       cursor: pointer;
+       transition: background-color 0.2s ease;
+     "
+     onmouseover="this.style.backgroundColor='#218838'"
+     onmouseout="this.style.backgroundColor='#28a745'">
+     Add Row
+   </button>
+ </div>
+ 
+
+      <!-- Combined Order Section -->
+      <div class="tab" onclick="toggleTab('combined-order')"
+        style="padding: 12px; background: #0b2a59; color: white; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">
+        Combined Order <span class="arrow" style="float: right;">▼</span>
+      </div>
+      <div id="combined-order" class="tab-content" style="display: none; margin-bottom: 20px;">
+        <div class="order-rows-scrollable order-rows-scrollable-combined" id="combined-order-rows"
+          style="display: none;"></div>
+        <button class="add-row-btn" data-type="combined"
+          style="margin-top: 10px; padding: 10px 20px; background-color: #28a745; border: none; color: white; font-weight: 500; border-radius: 6px; cursor: pointer;">Add Row</button>
+      </div>
+    </div>
+
+    <div class="order-summary" style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; margin-bottom: 30px;">
+      <div class="total-items" style="font-weight: 500;">Total Items: <span id="total-items">0</span></div>
+      <div class="total-price" style="font-weight: 500;">Total Price: EGP <span id="total-price">0.00</span></div>
+    </div>
+
+    <div class="order-preview" style="margin-bottom: 30px;">
+      <div id="preview-loader" style="display: none;">
+        <div class="loader"></div>
+        <span>Loading preview...</span>
+      </div>
+
+      <h3 style="margin-bottom: 12px;">Order Preview</h3>
+      <div class="order-preview-container">
+        <div id="order-preview-body" class="order-preview-cards"></div>
+      </div>
+    </div>
+
+    <button id="submit-order" class="btn btn-primary"
+      style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">Submit New Order</button>
+  </div>
 </body>
 
 </html>
