@@ -10,14 +10,166 @@
     <script src="./scripts/view-customer.js"></script>
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+          font-family: 'Segoe UI', sans-serif;
+          background-color: #0b2a59;
+          margin: 0;
+          padding: 0;
+          color: #333;
+        }
+    
+        .container {
+          max-width: 950px;
+          margin: 30px auto;
+          background: #fff;
+          border-radius: 10px;
+          padding: 30px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+    
+        .logo {
+          display: block;
+          margin: 0 auto 0px;
+          height: 137px;
+          max-height: 140px;
+          object-fit: contain;
+        }
+    
+        @media (max-width: 576px) {
+          .logo {
+            height: 90px;
+          }
+        }
+    
+        h1 {
+          text-align: center;
+          font-size: 28px;
+          margin-bottom: 20px;
+          color: #0b2a59;
+        }
+    
+    
+    
+        @media (max-width: 768px) {
+          .info-group {
+            flex: 1 1 100%;
+          }
+    
+          .container {
+            max-width: 97%;
+          }
+        }
+        .total-income-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.total-income-box {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #0b2a59;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
 
+.total-income-label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.total-income-value {
+  background-color: #e9ecef;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  font-feature-settings: "tnum"; /* ensures tabular nums for equal spacing */
+}
+
+
+.total-income-label {
+  color: var(--primary-color);
+}
+
+.customer-info-box {
+  background-color: white;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.info-row {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.info-block {
+  flex: 1;
+  min-width: 250px;
+}
+
+.info-block label {
+  display: block;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 4px;
+}
+
+.info-value {
+  background-color: var(--gray-100);
+  padding: var(--spacing-sm);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+}
+
+.info-actions {
+  margin-top: var(--spacing-md);
+  text-align: right;
+}
+
+.address-section {
+  margin-top: var(--spacing-lg);
+}
+
+.address-section h2 {
+  font-size: var(--font-size-lg);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+#address-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: var(--spacing-sm);
+}
+
+#address-list li {
+  background-color: var(--gray-100);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+}
+
+
+      </style>
 </head>
 
 <body>
 
 
     <div class="container">
-        <a href="index.html" style="
+        <a href="./customers.html" style="
         display: inline-flex;
         align-items: center;
         font-size: 14px;
@@ -42,34 +194,60 @@
         <h1>Customer Details</h1>
 
         <!-- Customer Info Section -->
-        <div class="customer-info">
+        <div class="customer-info-box">
             <div class="info-row">
-                <p><strong>Customer Name:</strong> <span id="customer-name"></span></p>
-                <p><strong>Customer ID:</strong> <span id="customer-id"></span></p>
+              <div class="info-block">
+                <label>Customer Name:</label>
+                <div class="info-value" id="customer-name"></div>
+              </div>
+              <div class="info-block">
+                <label>Customer ID:</label>
+                <div class="info-value" id="customer-id"></div>
+              </div>
             </div>
+          
             <div class="info-row">
-                <p><strong>phone:</strong> <span id="customer-phone"></span></p>
-                <p><strong>email:</strong> <span id="customer-email"></span></p>
+              <div class="info-block">
+                <label>Phone:</label>
+                <div class="info-value" id="customer-phone"></div>
+              </div>
+              <div class="info-block">
+                <label>Email:</label>
+                <div class="info-value" id="customer-email"></div>
+              </div>
             </div>
-            <button id="edit-customer-btn" class="btn-edit">✏️ Edit Details</button>
+          
+            <div class="info-actions">
+              <button id="edit-customer-btn" class="btn edit-btn"> Edit Details</button>
+            </div>
+          
             <div class="address-section">
                 <h2>Customer Addresses</h2>
                 <ul id="address-list"></ul>
-                <button id="add-address-btn">Add Address</button>
-            </div>
+                <div class="info-actions">
+                  <button id="add-address-btn" class="btn edit-btn">Add Address</button>
+                </div>
+              </div>
+          
 
 
-        </div>
+
+
+        <!-- Info Boxes -->
+         
+
+
+
+
 
         <!-- Delegate Management -->
         <div class="delegate-management">
             <h2>Assigned Delegates</h2>
-            <ul id="delegate-list">
-
-            </ul>
-            <button id="add-delegate-btn">Add Delegate</button>
-        </div>
-
+            <ul id="delegate-list"></ul>
+            <div class="info-actions">
+              <button id="add-delegate-btn" class="btn edit-btn"> Add Delegate</button>
+            </div>
+          </div>
         <!-- Order History -->
         <h2>Orders History</h2>
         <table>
@@ -96,9 +274,17 @@
         </div>
 
         <!-- Total Income -->
-        <div class="total-income">
-            <h4>Orders total from Customer: <span id="total-income"></span></h4>
-        </div>
+       
+
+        
+        <div class="total-income-wrapper">
+            <div class="total-income-box">
+              <span class="total-income-label">Orders total from Customer:</span>
+              <span id="total-income-value" class="total-income-value">EGP 0.00</span>
+            </div>
+          </div>
+          
+          
     </div>
 
     <!-- Add Delegate Modal -->

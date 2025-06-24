@@ -77,30 +77,34 @@ h1 {
     border-bottom: 1px solid var(--gray-300);
     padding: var(--spacing-xs) 0;
 }
-
-.address-actions {
-    display: flex;
-    gap: var(--spacing-xs);
-}
-
-.address-actions .edit-btn {
-    background-color: var(--warning-color);
-    color: #212529;
-    border: none;
-    padding: 0.3rem 0.6rem;
+.address-actions button {
+    padding: 0.4rem 0.8rem;
+    min-width: 70px;
+    font-size: 14px;
     border-radius: var(--border-radius-sm);
+    border: none;
     cursor: pointer;
-}
-
-.address-actions .delete-btn {
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .address-actions .edit-btn {
+    background-color: #f0f0f0;
+    color: black; /* Unified with delete */
+  }
+    .address-actions .edit-btn:hover {
+        background-color: var(--secondary-dark);
+    }
+  
+  .address-actions .delete-btn {
     background-color: var(--danger-color);
     color: white;
-    border: none;
-    padding: 0.3rem 0.6rem;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-}
-
+  } .address-actions .delete-btn:hover {
+    background-color: var(--danger-dark); 
+    opacity: 0.9; 
+  }
+  
+  
 /* Buttons */
 button,
 .btn {
@@ -110,11 +114,16 @@ button,
     border: none;
     cursor: pointer;
 }
+#add-customer-btn {
+    background-color: var(--primary-color);
+    color: white;
+    margin-bottom: var(--spacing-md);
+}
 
 #add-address-btn,
 #add-delegate-btn {
-    background-color: var(--secondary-color);
-    color: white;
+    background-color: #f0f0f0;
+    color: black;
 }
 
 #add-address-btn:hover,
@@ -307,3 +316,18 @@ th {
     cursor: pointer;
     margin-top: var(--spacing-sm);
 }
+.edit-btn {
+    background-color: #f0f0f0;
+    color: black;
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    margin-top: var(--spacing-sm);
+}
+
+.edit-btn:hover {
+    background-color: var(--secondary-color); /* Replace with a green shade if not defined */
+    color: black;
+  }
+  

@@ -10,12 +10,47 @@
     <script src="./scripts/utils.js"></script>
     <script src="./scripts/create-customer.js" defer></script>
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0b2a59;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            height: 137px;
+            max-height: 140px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 576px) {
+            .logo {
+                height: 90px;
+            }
+            .container {
+                max-width: 97%;
+            }
+        }
+        </style>
 </head>
 
 <body>
 
     <div class="container">
-        <a href="index.html" style="
+        <a href="./customers.html" style="
         display: inline-flex;
         align-items: center;
         font-size: 14px;
@@ -36,6 +71,7 @@
               </svg>
               Dashboard
           </a>
+          <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
           <h1>Create New Customer</h1>
 
         <form id="create-customer-form">
@@ -54,7 +90,18 @@
             <label>code:</label>
             <input type="text" name="code" />
 
-            <button type="submit" class="btn btn-primary">Create Customer</button>
+            <button type="submit"  style="
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+          "
+          onmouseover="this.style.backgroundColor='#28a745'"
+          onmouseout="this.style.backgroundColor='#007bff'">Create Customer</button>
         </form>
 
         <div id="success-message" class="success" style="display: none;">✅ Customer created successfully!</div>

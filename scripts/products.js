@@ -100,15 +100,29 @@ async function fetchAndRenderProducts(token) {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td><img src="${imageUrl}" alt="${product.product_name}" /></td>
-      <td>
-        ${product.product_name}
-        <div class="barcode-text">${product.bar_code || "-"}</div>
-        <span class="visability-badge ${
-          product.visability === 1 ? "visible-badge" : "hidden-badge"
-        }">
-          ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
-        </span>
-      </td>
+     <td style="font-family: sans-serif; font-size: 13px; line-height: 1.4;">
+  <div style="font-weight: 600; margin-bottom: 2px;">
+    ${product.product_name}
+  </div>
+
+  <div style="color: #666; font-size: 12px; margin-bottom: 4px;">
+    <span style="opacity: 0.8;">Barcode:</span>
+    <span>${product.bar_code || "-"}</span>
+  </div>
+
+  <span style="
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 500;
+    color: white;
+    background-color: ${product.visability === 1 ? '#28a745' : '#999'};
+  ">
+    ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
+  </span>
+</td>
+
       <td>${product.Item_number || "-"}</td>
       <td>${product.brand}</td>
       <td>${product.category}</td>
@@ -129,37 +143,131 @@ async function fetchAndRenderProducts(token) {
           
         </span>
       </td>
-      <td>
-        <button class="btn btn-edit" onclick="openProductDialog('edit', ${
-          product.product_id
-        })">Edit</button>
-        <button class="btn btn-copy" onclick="openProductDialog('copy', ${
-          product.product_id
-        })">Copy</button>
-        <button class="btn btn-toggle-visability ${
-          product.visability === 1 ? "btn-hide" : "btn-show"
-        }" onclick="toggleVisability(${product.product_id}, ${
-      product.visability
-    })">
-          ${product.visability === 1 ? "Hide" : "Show"}
-        </button>
-        <button class="btn btn-delete" onclick="deleteProduct(${
-          product.product_id
-        })">Delete</button>
-      </td>`;
+     <td>
+  <style>
+    .action-container {
+      position: relative;
+      display: inline-block;
+      font-family: sans-serif;
+    }
+
+    .action-btn {
+      background-color: #f5f5f5;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #333;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: white;
+      min-width: 130px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    .dropdown-menu button {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .dropdown-menu button:hover {
+      background-color: #d3d3d3;
+      color: black;
+    }
+
+    .dropdown-menu .btn-delete:hover {
+      background-color: #f8d7da;
+      color: #c00;
+    }
+
+    .action-container:hover .dropdown-menu,
+    .action-container:focus-within .dropdown-menu {
+      display: block;
+    }
+  </style>
+
+  <div class="action-container">
+    <button class="action-btn">Actions ▾</button>
+    <div class="dropdown-menu">
+      <button onclick="openProductDialog('edit', ${product.product_id})">Edit</button>
+      <button onclick="openProductDialog('copy', ${product.product_id})">Copy</button>
+      <button onclick="toggleVisability(${product.product_id}, ${product.visability})">
+        ${product.visability === 1 ? "Hide" : "Show"}
+      </button>
+      <button class="btn-delete" onclick="deleteProduct(${product.product_id})">Delete</button>
+    </div>
+  </div>
+</td>
+`;
     tableBody.appendChild(row);
 
     // Card View
     const card = document.createElement("div");
     card.className = "product-card";
     card.innerHTML = `
-      <img src="${imageUrl}" alt="${product.product_name}" />
-      <div class="product-card-header">
-        ${product.product_name}
-        <span class="visability-badge ${
-          product.visability === 1 ? "visible-badge" : "hidden-badge"
-        }">${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}</span>
-      </div>
+       <img src="${imageUrl}" alt="${product.product_name}" style="
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  "/>
+     
+
+
+<div class="product-card-header" style="
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+">
+  <span style="flex-grow: 1; word-break: break-word;">
+    ${product.product_name}
+  </span>
+  <span style="
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    color: white;
+    background-color: ${product.visability === 1 ? '#28a745' : '#999'};
+    white-space: nowrap;
+  ">
+    ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
+  </span>
+</div>
+
+
+
+
+
+
       <div class="barcode-text text-center">${product.bar_code || "-"}</div>
       <div class="product-card-body">
         <p><strong>Item No.:</strong> ${product.Item_number || "-"}</p>
@@ -176,24 +284,103 @@ async function fetchAndRenderProducts(token) {
           </span>
         </p>
       </div>
-      <div class="product-card-footer text-right">
-        <button class="btn btn-edit" onclick="openProductDialog('edit', ${
-          product.product_id
-        })">Edit</button>
-        <button class="btn btn-copy" onclick="openProductDialog('copy', ${
-          product.product_id
-        })">Copy</button>
-        <button class="btn btn-toggle-visability ${
-          product.visability === 1 ? "btn-hide" : "btn-show"
-        }" onclick="toggleVisability(${product.product_id}, ${
-      product.visability
-    })">
-          ${product.visability === 1 ? "Hide" : "Show"}
-        </button>
-        <button class="btn btn-delete" onclick="deleteProduct(${
-          product.product_id
-        })">Delete</button>
-      </div>`;
+
+      
+    <div class="product-card-footer text-right">
+  <style>
+    .action-container-mobile {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      text-align: right;
+      font-family: sans-serif;
+    }
+
+    .action-btn-mobile {
+      background-color: #f5f5f5;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #333;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn-mobile:hover {
+      background-color: #e0e0e0;
+    }
+
+    .dropdown-menu-mobile {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: white;
+      min-width: 130px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    .dropdown-menu-mobile button {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .dropdown-menu-mobile button:hover {
+      background-color: #d3d3d3;
+      color: black;
+    }
+
+    .dropdown-menu-mobile .btn-delete:hover {
+      background-color: #f8d7da;
+      color: #c00;
+    }
+  </style>
+
+  <div class="action-container-mobile">
+    <button class="action-btn-mobile" data-dropdown-id="dropdown-${product.product_id}">
+      Actions ▾
+    </button>
+    <div class="dropdown-menu-mobile" id="dropdown-${product.product_id}">
+      <button onclick="openProductDialog('edit', ${product.product_id})">Edit</button>
+      <button onclick="openProductDialog('copy', ${product.product_id})">Copy</button>
+      <button onclick="toggleVisability(${product.product_id}, ${product.visability})">
+        ${product.visability === 1 ? "Hide" : "Show"}
+      </button>
+      <button class="btn-delete" onclick="deleteProduct(${product.product_id})">Delete</button>
+    </div>
+  </div>
+</div>
+`;
+document.addEventListener("click", function (e) {
+  const isButton = e.target.matches(".action-btn-mobile");
+  const openMenus = document.querySelectorAll(".dropdown-menu-mobile");
+
+  // Close all menus first
+  openMenus.forEach(menu => (menu.style.display = "none"));
+
+  // If it's the Actions button
+  if (isButton) {
+    e.stopPropagation();
+    const dropdownId = e.target.getAttribute("data-dropdown-id");
+    const menu = document.getElementById(dropdownId);
+    if (menu) {
+      menu.style.display = "block";
+    }
+  }
+});
+
     cardContainer.appendChild(card);
   });
 

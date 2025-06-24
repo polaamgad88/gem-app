@@ -258,24 +258,99 @@ function renderUsers(users) {
     }</td>
       <td>${user.phone || "—"}</td>
       <td>
-        <button class="btn view-btn" onclick="openEditModal(${
-          user.user_id
-        })">Edit</button>
-        <button class="btn" onclick="openPasswordModal(${
-          user.user_id
-        })">Change Password</button>
-        <button class="btn toggle-btn" onclick="toggleUserStatus(${
-          user.user_id
-        }, ${isActive ? 0 : 1})">
-          ${isActive ? "Deactivate" : "Activate"}
-        </button>
-        ${
-          isAdmin
-            ? `<button class="btn delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
-            : ""
-        }
-      </td>
+  <style>
+    .action-container {
+      position: relative;
+      display: inline-block;
+      font-family: sans-serif;
+    }
+
+    .action-btn {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #333;
+      transition: background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: white;
+      min-width: 150px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      border-radius: 6px;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    .dropdown-menu button {
+      width: 100%;
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .dropdown-menu button:hover {
+      background-color: #d3d3d3;
+      color: black;
+    }
+
+    .dropdown-menu .delete-btn:hover {
+      background-color: #f8d7da;
+      color: #c00;
+    }
+  </style>
+
+  <div class="action-container">
+    <button class="action-btn" data-dropdown-id="user-dropdown-${user.user_id}">
+      Actions ▾
+    </button>
+    <div class="dropdown-menu" id="user-dropdown-${user.user_id}">
+      <button onclick="openEditModal(${user.user_id})">Edit</button>
+      <button onclick="openPasswordModal(${user.user_id})">Change Password</button>
+      <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
+        ${isActive ? "Deactivate" : "Activate"}
+      </button>
+      ${
+        isAdmin
+          ? `<button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
+          : ""
+      }
+    </div>
+  </div>
+</td>
+
     `;
+    document.addEventListener("click", function (e) {
+      const isActionBtn = e.target.matches(".action-btn");
+      const openMenus = document.querySelectorAll(".dropdown-menu");
+    
+      openMenus.forEach(menu => menu.style.display = "none");
+    
+      if (isActionBtn) {
+        e.stopPropagation();
+        const id = e.target.getAttribute("data-dropdown-id");
+        const menu = document.getElementById(id);
+        if (menu) menu.style.display = "block";
+      }
+    });
+    
     tableBody.appendChild(tr);
 
     // === Card view ===

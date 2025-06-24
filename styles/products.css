@@ -94,6 +94,8 @@ table img {
 
 .btn:hover {
     transform: translateY(-1px);
+    color: white;
+    background-color: var(--secondary-color);
 }
 
 .btn-view {
@@ -495,3 +497,73 @@ table img {
         margin-bottom: var(--spacing-xs);
     }
 }
+
+
+
+/* Dropdown Button */
+.dropdown {
+    position: relative;
+  }
+  
+  .dropdown-toggle {
+    background-color: #0b2a59;
+    color: white;
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+  }
+  
+  .dropdown-toggle:hover {
+    background-color: #083466;
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--box-shadow-sm);
+    min-width: 140px;
+  }
+  
+  .dropdown:hover .dropdown-menu {
+    display: flex;
+  }
+  
+  .dropdown-item {
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: white;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .dropdown-item:hover {
+    background-color: var(--gray-100);
+  }
+  
+  /* Visibility Badge */
+  .visibility-badge {
+    display: inline-block;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .visibility-badge.visible {
+    color: green;
+  }
+  
+  .visibility-badge.hidden {
+    color: red;
+  }
+  

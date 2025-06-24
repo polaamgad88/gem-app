@@ -10,41 +10,118 @@
     <script src="./scripts/utils.js"></script>
     <script src="./scripts/users.js" defer></script>
     <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0b2a59;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            height: 137px;
+            max-height: 140px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 576px) {
+            .logo {
+                height: 90px;
+            }
+            .container{
+                max-width: 97%;
+            }
+        }
+        </style>
 </head>
 
 <body>
-    <div class="container">
         <!-- Back to Dashboard Link -->
-        <a href="index.html" style="
-        display: inline-flex;
-        align-items: center;
-        font-size: 14px;
-        font-weight: 500;
-        color: #333;
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        padding: 8px 14px;
-        border-radius: 6px;
-        text-decoration: none;
-        margin-bottom: 24px;
-        transition: background-color 0.2s ease;
-        gap: 8px;
-      " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                  <path d="M15 18l-6-6 6-6" />
-              </svg>
-              Dashboard
-          </a>
+       
   
         <!-- Page Heading -->
-        <h1>All Users</h1>
+        <div class="container">
+            <a href="index.html" style="
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-bottom: 24px;
+            transition: background-color 0.2s ease;
+            gap: 8px;
+          " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                      <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  Dashboard
+              </a>
+              <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
+            <h1>Users</h1>
 
-        <div class="search-container">
-            <label for="user-search">Search by Username:</label>
-            <input type="search" id="user-search" placeholder="Type username...">
-        </div>
-
+            <div style="
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            font-family: sans-serif;
+            margin-bottom: 16px;
+          ">
+            <!-- Search Field -->
+            <div style="flex: 1;">
+              <label for="user-search" style="
+                font-size: 13px;
+                margin-bottom: 4px;
+                display: inline-block;
+              ">Search by Username:</label>
+              <input type="search" id="user-search" placeholder="Type username..." style="
+                width: 100%;
+                padding: 8px 10px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+              ">
+            </div>
+          
+            <!-- Add Button -->
+            <div style="flex: 1;">
+              <button id="create-user-btn" style="
+                width: 100%;
+                padding: 8px 10px;
+                font-size: 14px;
+                background-color: #f0f0f0;
+                color: #333;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.2s ease, color 0.2s ease;
+              "
+              onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';"
+              onmouseout="this.style.backgroundColor='#f0f0f0'; this.style.color='#333';"
+              >
+                Add User
+              </button>
+            </div>
+          </div>
+          
 
         <!-- Table View -->
         <div class="table-responsive">
@@ -69,9 +146,7 @@
             <div id="user-cards"></div>
         </div>
 
-        <div class="actions-row">
-            <button id="create-user-btn" class="btn btn-add">➕ Create User</button>
-        </div>
+     
     </div>
 
 

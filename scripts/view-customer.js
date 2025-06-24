@@ -254,9 +254,11 @@ async function loadCustomerDetails(customerId, token) {
         }
       });
 
-    document.getElementById("total-income").textContent = `EGP${total.toFixed(
-      2
-    )}`;
+      document.getElementById("total-income-value").textContent = 
+      total % 1 === 0
+        ? `EGP ${total.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+        : `EGP ${total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}`;
+    
     await loadCustomerAddresses(customerId, token);
 
     renderOrderCards(orders);

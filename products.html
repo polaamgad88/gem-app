@@ -10,6 +10,77 @@
     <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
     <script src="./scripts/utils.js" defer></script>
     <script src="./scripts/products.js" defer></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0b2a59;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            height: 137px;
+            max-height: 140px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 576px) {
+            .logo {
+                height: 90px;
+            }
+            .container{
+                max-width: 97%;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #0b2a59;
+        } 
+        
+        .filters-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  flex-grow: 1;
+}
+
+.filter-group select,
+.filter-group input[type="search"] {
+  padding: 8px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  background-color: #f8f9fa;
+  min-width: 180px;
+  flex-grow: 1;
+}
+
+        
+        </style>
 </head>
 
 <body>
@@ -39,26 +110,25 @@
         <h1>Products</h1>
 
         <!-- Filters -->
-        <div class="filters d-flex justify-content-between mb-4">
-            <div class="d-flex gap-3">
-                <div>
-                    <label for="brand-filter">Brand:</label>
-                    <select id="brand-filter"></select>
-                </div>
-                <div>
-                    <label for="category-filter">Category:</label>
-                    <select id="category-filter"></select>
-                </div>
+        <div class="filters-row">
+            <div class="filter-group">
+              <select id="brand-filter">
+                <option value="">All Brands</option>
+              </select>
+              <select id="category-filter">
+                <option value="">All Categories</option>
+              </select>
+              <input id="barcode-search" type="search" placeholder="Enter barcode..." />
             </div>
-            <div class="search-barcode">
-                <label for="barcode-search">Search by Barcode:</label>
-                <input id="barcode-search" type="search" placeholder="Enter barcode..." />
-            </div>
-        </div>
+          </div>
+          
+
+
+
         <div class="actions-row text-right mb-4">
-            <button class="btn btn-add" onclick="openAddProductDialog()">➕ Add Product</button>
-            <button id="export-open-btn" class="btn btn-add">📤 Export Products</button>
-            <button class="btn edit-btn" onclick="openImportDialog()">📥 Import Products</button>
+            <button class="btn btn-add" onclick="openAddProductDialog()">Add Product</button>
+            <button id="export-open-btn" class="btn btn-add"> Export Products</button>
+            <button class="btn edit-btn" onclick="openImportDialog()">Import Products</button>
         </div>
 
 
