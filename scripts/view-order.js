@@ -92,9 +92,9 @@ function populateOrderDetails(order) {
         ${item.product_name}
         ${barCodeLine}
       </td>
-      <td>EGP ${parseFloat(item.price).toFixed(2)}</td>
+      <td>EGP ${parseFloat(item.price).toLocaleString()}</td>
       <td>${item.quantity}</td>
-      <td>EGP ${itemTotal.toFixed(2)}</td>
+      <td>EGP ${itemTotal.toLocaleString()}</td>
     `;
     itemsTableBody.appendChild(row);
 
@@ -116,19 +116,15 @@ function populateOrderDetails(order) {
       <div class="item-card-body">
         <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
           item.price
-        ).toFixed(2)}</p>
+        ).toLocaleString()}</p>
         <p><span class="item-card-label">Quantity:</span> ${item.quantity}</p>
-        <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toFixed(
-          2
-        )}</p>
+        <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toLocaleString()}</p>
       </div>
     `;
     itemsCardView.appendChild(card);
   });
 
-  document.getElementById("total-price").textContent = `EGP ${total.toFixed(
-    2
-  )}`;
+  document.getElementById("total-price").textContent = `EGP ${total.toLocaleString()}`;
 }
 
 // Helper function to set up action buttons

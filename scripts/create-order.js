@@ -990,7 +990,7 @@ async function updateOrderPreview() {
         <div class="card-content">
           <div class="product-name">${name} - (${bar_code})</div>
           <div class="product-detail"><strong>Qty:</strong> ${quantity}</div>
-          <div class="product-detail"><strong>Unit Price:</strong> EGP ${price}</div>
+          <div class="product-detail"><strong>Unit Price:</strong> EGP ${price.toLocaleString()}</div>
           <div class="product-detail"><strong>Total:</strong> EGP ${total}</div>
         </div>
       `;
@@ -1129,4 +1129,28 @@ if (typeof window.toggleTab !== "function") {
     content.style.display = isVisible ? "none" : "block";
     arrow.textContent = isVisible ? "▼" : "▲";
   };
+}
+function enableSaveNoteButton() {
+  const note = document.getElementById("order-note").value.trim();
+  const button = document.getElementById("save-note-btn");
+
+  if (note.length > 0) {
+    button.disabled = false;
+    button.style.backgroundColor = "#0b2a59";
+    button.style.color = "white";
+    button.style.cursor = "pointer";
+  } else {
+    button.disabled = true;
+    button.style.backgroundColor = "#ccc";
+    button.style.cursor = "not-allowed";
+  }
+}
+
+function saveNote() {
+  const note = document.getElementById("order-note").value.trim();
+  const message = document.getElementById("note-confirmation");
+
+  if (note.length > 0) {
+    message.style.display = "block";
+  }
 }

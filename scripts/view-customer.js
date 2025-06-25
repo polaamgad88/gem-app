@@ -240,10 +240,10 @@ async function loadCustomerDetails(customerId, token) {
         tr.innerHTML = `
           <td>${i + 1}</td>
           <td>${o.order_id}</td>
-          <td>${new Date(o.order_date).toISOString().slice(0, 10)}</td>
+          <td>${new Date(o.order_date).toISOString().slice(0, 10)}</td> 
           <td>${o.username}</td>
           <td>${o.status}</td>
-          <td class="price">EGP${parseFloat(o.total_amount).toFixed(2)}</td>
+          <td class="price">EGP ${parseFloat(o.total_amount).toLocaleString()}</td>
           <td><button class="view-btn" onclick="viewOrder(${
             o.order_id
           })">View</button></td>`;
@@ -284,7 +284,7 @@ function renderOrderCards(orders) {
           <p><strong>Status:</strong> ${order.status}</p>
           <p><strong>Total:</strong> EGP${parseFloat(
             order.total_amount
-          ).toFixed(2)}</p>
+          ).toLocaleString()}</p>
         </div>
         <div class="order-card-footer">
           <button class="view-btn" onclick="viewOrder(${

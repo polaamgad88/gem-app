@@ -17,7 +17,7 @@
     <div class="container"
         style="max-width: 950px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);">
 
-        <a href="./orders.html" style="
+        <a href="./index.html" style="
       display: inline-flex;
       align-items: center;
       font-size: 14px;
@@ -137,6 +137,56 @@
             </div>
         </div>
 
+<!-- Note Section -->
+<div style="
+  margin-bottom: 16px;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+">
+  <!-- Note Label -->
+  <!-- <label for="order-note" style="
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  ">Note (optional):</label> -->
+
+  <!-- Note Textarea -->
+  <textarea id="order-note" name="order_note" placeholder="Add any special note..." style="
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+    min-height: 80px;
+    font-family: 'Segoe UI', sans-serif;
+  " oninput="enableSaveNoteButton()"></textarea>
+
+  <!-- Button Right-Aligned -->
+  <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+    <button type="button" id="save-note-btn" onclick="saveNote()" disabled style="
+      padding: 8px 14px;
+      font-size: 14px;
+      background-color: #f0f0f0;
+      color: black;
+      border: none;
+      border-radius: 6px;
+      cursor: not-allowed;
+      transition: background-color 0.2s ease;
+    ">
+      Save Note
+    </button>
+  </div>
+
+  <!-- Confirmation Message -->
+  <div id="note-confirmation" style="
+    display: none;
+    margin-top: 10px;
+    color: #28a745;
+    font-weight: 500;
+    text-align: right;
+  ">Note added successfully.</div>
+</div>
 
         <div class="order-summary">
             <div class="summary-box items-box" style="width: 40%;">

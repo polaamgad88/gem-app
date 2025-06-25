@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         <td><span class="status-${o.status.toLowerCase()}">${
         o.status
       }</span></td>
-        <td>EGP${o.total_amount}</td>
+<td>EGP${o.total_amount.toLocaleString()}</td>
         <td><button class="view-btn" data-order-id="${
           o.order_id
         }">View</button></td>
