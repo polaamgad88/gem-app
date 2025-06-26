@@ -34,9 +34,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function populateBrands(token) {
-  const res = await fetch("https://order-app.gemegypt.net/api/products/brands", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await fetch(
+    "https://order-app.gemegypt.net/api/products/brands",
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   const brands = (await res.json()).brands || [];
   const brandSelect = document.getElementById("brand-filter");
   brandSelect.innerHTML =
@@ -117,7 +120,7 @@ async function fetchAndRenderProducts(token) {
     border-radius: 10px;
     font-weight: 500;
     color: white;
-    background-color: ${product.visability === 1 ? '#28a745' : '#999'};
+    background-color: ${product.visability === 1 ? "#28a745" : "#999"};
   ">
     ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
   </span>
@@ -211,12 +214,20 @@ async function fetchAndRenderProducts(token) {
   <div class="action-container">
     <button class="action-btn">Actions ▾</button>
     <div class="dropdown-menu">
-      <button onclick="openProductDialog('edit', ${product.product_id})">Edit</button>
-      <button onclick="openProductDialog('copy', ${product.product_id})">Copy</button>
-      <button onclick="toggleVisability(${product.product_id}, ${product.visability})">
+      <button onclick="openProductDialog('edit', ${
+        product.product_id
+      })">Edit</button>
+      <button onclick="openProductDialog('copy', ${
+        product.product_id
+      })">Copy</button>
+      <button onclick="toggleVisability(${product.product_id}, ${
+      product.visability
+    })">
         ${product.visability === 1 ? "Hide" : "Show"}
       </button>
-      <button class="btn-delete" onclick="deleteProduct(${product.product_id})">Delete</button>
+      <button class="btn-delete" onclick="deleteProduct(${
+        product.product_id
+      })">Delete</button>
     </div>
   </div>
 </td>
@@ -256,7 +267,7 @@ async function fetchAndRenderProducts(token) {
     border-radius: 10px;
     font-weight: 500;
     color: white;
-    background-color: ${product.visability === 1 ? '#28a745' : '#999'};
+    background-color: ${product.visability === 1 ? "#28a745" : "#999"};
     white-space: nowrap;
   ">
     ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
@@ -280,7 +291,13 @@ async function fetchAndRenderProducts(token) {
               ? "available-badge"
               : "not-available-badge"
           }">
-            ${product.availability == "Available" ? "🟢" : "🔴"}
+             ${
+               product.availability === "Available"
+                 ? "🟢"
+                 : product.availability === "Limited"
+                 ? "🟡"
+                 : "🔴"
+             }
           </span>
         </p>
       </div>
@@ -349,37 +366,47 @@ async function fetchAndRenderProducts(token) {
   </style>
 
   <div class="action-container-mobile">
-    <button class="action-btn-mobile" data-dropdown-id="dropdown-${product.product_id}">
+    <button class="action-btn-mobile" data-dropdown-id="dropdown-${
+      product.product_id
+    }">
       Actions ▾
     </button>
     <div class="dropdown-menu-mobile" id="dropdown-${product.product_id}">
-      <button onclick="openProductDialog('edit', ${product.product_id})">Edit</button>
-      <button onclick="openProductDialog('copy', ${product.product_id})">Copy</button>
-      <button onclick="toggleVisability(${product.product_id}, ${product.visability})">
+      <button onclick="openProductDialog('edit', ${
+        product.product_id
+      })">Edit</button>
+      <button onclick="openProductDialog('copy', ${
+        product.product_id
+      })">Copy</button>
+      <button onclick="toggleVisability(${product.product_id}, ${
+      product.visability
+    })">
         ${product.visability === 1 ? "Hide" : "Show"}
       </button>
-      <button class="btn-delete" onclick="deleteProduct(${product.product_id})">Delete</button>
+      <button class="btn-delete" onclick="deleteProduct(${
+        product.product_id
+      })">Delete</button>
     </div>
   </div>
 </div>
 `;
-document.addEventListener("click", function (e) {
-  const isButton = e.target.matches(".action-btn-mobile");
-  const openMenus = document.querySelectorAll(".dropdown-menu-mobile");
+    document.addEventListener("click", function (e) {
+      const isButton = e.target.matches(".action-btn-mobile");
+      const openMenus = document.querySelectorAll(".dropdown-menu-mobile");
 
-  // Close all menus first
-  openMenus.forEach(menu => (menu.style.display = "none"));
+      // Close all menus first
+      openMenus.forEach((menu) => (menu.style.display = "none"));
 
-  // If it's the Actions button
-  if (isButton) {
-    e.stopPropagation();
-    const dropdownId = e.target.getAttribute("data-dropdown-id");
-    const menu = document.getElementById(dropdownId);
-    if (menu) {
-      menu.style.display = "block";
-    }
-  }
-});
+      // If it's the Actions button
+      if (isButton) {
+        e.stopPropagation();
+        const dropdownId = e.target.getAttribute("data-dropdown-id");
+        const menu = document.getElementById(dropdownId);
+        if (menu) {
+          menu.style.display = "block";
+        }
+      }
+    });
 
     cardContainer.appendChild(card);
   });
@@ -398,10 +425,13 @@ async function deleteProduct(id) {
 
   const token = localStorage.getItem("access_token");
   try {
-    const res = await fetch(`https://order-app.gemegypt.net/api/product/delete/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `https://order-app.gemegypt.net/api/product/delete/${id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     if (res.ok) {
       alert("Product deleted successfully.");
