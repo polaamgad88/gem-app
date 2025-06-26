@@ -44,8 +44,9 @@ async function fetchOrderDetails(orderId, token) {
 function populateOrderDetails(order) {
   document.getElementById("orderId").textContent = `#${order.order_id}`;
   document.getElementById("order-id").textContent = `#${order.order_id}`;
-  document.getElementById("order-date").textContent = Utils.Format.date(order.order_date);
-
+  document.getElementById("order-date").textContent = Utils.Format.date(
+    order.order_date
+  );
 
   const orderState = document.getElementById("order-state");
   orderState.textContent = order.status;
@@ -58,6 +59,11 @@ function populateOrderDetails(order) {
     "customer-id"
   ).textContent = `CUST-${order.customer_id}`;
   document.getElementById("customer-address").textContent = order.address;
+  if (order.note)
+    document.getElementById("customer-note").textContent = order.note;
+  else
+      document.getElementById("customer-note").textContent = "NO NOTES";
+
 
   const itemsTableBody = document.getElementById("items-table-body");
   const itemsCardView = document.getElementById("items-card-view");
@@ -124,7 +130,9 @@ function populateOrderDetails(order) {
     itemsCardView.appendChild(card);
   });
 
-  document.getElementById("total-price").textContent = `EGP ${total.toLocaleString()}`;
+  document.getElementById(
+    "total-price"
+  ).textContent = `EGP ${total.toLocaleString()}`;
 }
 
 // Helper function to set up action buttons

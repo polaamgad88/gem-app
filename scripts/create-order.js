@@ -65,7 +65,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   margin-right: auto;
 `;
 
-
   clearBtn.onmouseover = () => {
     clearBtn.style.backgroundColor = "#dc3545";
     clearBtn.style.color = "#fff";
@@ -74,7 +73,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     clearBtn.style.backgroundColor = "#fff";
     clearBtn.style.color = "#dc3545";
   };
-  document.getElementById("submit-order").insertAdjacentElement("afterend", clearBtn);
+  document
+    .getElementById("submit-order")
+    .insertAdjacentElement("afterend", clearBtn);
 
   clearBtn.addEventListener("click", () => {
     if (confirm("Are you sure you want to clear this order?")) {
@@ -83,7 +84,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
 });
-
 
 function saveOrderToSession() {
   const customerId = document.getElementById("customer-select").value;
@@ -244,8 +244,9 @@ function loadOrderFromSession() {
 
         const categorySelect = document.createElement("select");
         categorySelect.className = "category-select";
-        categorySelect.innerHTML = `<option value="${category}" selected>${category || "All"
-          }</option>`;
+        categorySelect.innerHTML = `<option value="${category}" selected>${
+          category || "All"
+        }</option>`;
 
         const qtyInput = document.createElement("input");
         qtyInput.type = "number";
@@ -358,8 +359,8 @@ function populateCustomerDropdown(customers) {
     const value = searchInput.value.toLowerCase();
     const matches = value
       ? allCustomers.filter((cust) =>
-        `${cust.first_name} ${cust.last_name}`.toLowerCase().includes(value)
-      )
+          `${cust.first_name} ${cust.last_name}`.toLowerCase().includes(value)
+        )
       : allCustomers;
 
     renderSuggestions(matches);
@@ -773,8 +774,8 @@ function addCombinedRow(container, brands) {
 
     const url = selectedBrand
       ? `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
-        selectedBrand
-      )}`
+          selectedBrand
+        )}`
       : `https://order-app.gemegypt.net/api/products/categories/orders`;
 
     categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
@@ -886,11 +887,12 @@ function updateTotals() {
     });
 
   document.getElementById("total-items").textContent = totalItems;
-  document.getElementById("total-price").textContent = Number(totalPrice).toLocaleString('en-US', {
+  document.getElementById("total-price").textContent = Number(
+    totalPrice
+  ).toLocaleString("en-US", {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
-
 }
 
 let previewTimeout;
@@ -983,9 +985,10 @@ async function updateOrderPreview() {
       const card = document.createElement("div");
       card.className = "preview-card";
       card.innerHTML = `
-        ${photoUrl
-          ? `<img src="${photoUrl}" alt="${name}" />`
-          : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
+        ${
+          photoUrl
+            ? `<img src="${photoUrl}" alt="${name}" />`
+            : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
         }
         <div class="card-content">
           <div class="product-name">${name} - (${bar_code})</div>
@@ -1007,6 +1010,7 @@ async function updateOrderPreview() {
 async function submitOrder(token) {
   const customerId = document.getElementById("customer-select").value;
   const addressId = document.getElementById("address-select").value;
+  const note = document.getElementById("order-note").value;
 
   if (!customerId || !addressId) {
     alert("Please select both a customer and an address.");
@@ -1066,10 +1070,10 @@ async function submitOrder(token) {
     alert("Please add at least one product to the order.");
     return;
   }
-
   const payload = {
     customer_id: parseInt(customerId),
     address_id: parseInt(addressId),
+    note: note,
     products,
   };
 
@@ -1108,14 +1112,15 @@ if (typeof window.toggleTab !== "function") {
     // Automatically close the other tab when one is opened
     const allTabs = {
       "detailed-order-content": "combined-order",
-      "combined-order": "detailed-order-content"
+      "combined-order": "detailed-order-content",
     };
 
     // Close the opposite tab if we're opening one
     const oppositeId = allTabs[id];
     if (it === 1 && oppositeId) {
       const oppositeContent = document.getElementById(oppositeId);
-      const oppositeArrow = oppositeContent?.previousElementSibling?.querySelector(".arrow");
+      const oppositeArrow =
+        oppositeContent?.previousElementSibling?.querySelector(".arrow");
       if (oppositeContent && oppositeContent.style.display === "block") {
         oppositeContent.style.display = "none";
         if (oppositeArrow) oppositeArrow.textContent = "▼";

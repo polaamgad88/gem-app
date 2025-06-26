@@ -137,21 +137,21 @@
             </div>
         </div>
 
-<!-- Note Section -->
-<div style="
+        <!-- Note Section -->
+        <div style="
   margin-bottom: 16px;
   font-family: 'Segoe UI', sans-serif;
   font-size: 14px;
 ">
-  <!-- Note Label -->
-  <!-- <label for="order-note" style="
+            <!-- Note Label -->
+            <!-- <label for="order-note" style="
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
   ">Note (optional):</label> -->
 
-  <!-- Note Textarea -->
-  <textarea id="order-note" name="order_note" placeholder="Add any special note..." style="
+            <!-- Note Textarea -->
+            <textarea id="order-note" name="order_note" placeholder="Add any special note..." style="
     width: 100%;
     padding: 10px;
     font-size: 14px;
@@ -159,10 +159,9 @@
     border-radius: 6px;
     resize: vertical;
     min-height: 80px;
-    font-family: 'Segoe UI', sans-serif;
-  " oninput="enableSaveNoteButton()"></textarea>
+    font-family: 'Segoe UI', sans-serif;"></textarea>
 
-  <!-- Button Right-Aligned -->
+            <!-- Button Right-Aligned
   <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
     <button type="button" id="save-note-btn" onclick="saveNote()" disabled style="
       padding: 8px 14px;
@@ -178,7 +177,7 @@
     </button>
   </div>
 
-  <!-- Confirmation Message -->
+  Confirmation Message
   <div id="note-confirmation" style="
     display: none;
     margin-top: 10px;
@@ -186,39 +185,39 @@
     font-weight: 500;
     text-align: right;
   ">Note added successfully.</div>
-</div>
+</div> -->
 
-        <div class="order-summary">
-            <div class="summary-box items-box" style="width: 40%;">
-                <span class="summary-icon" aria-label="Total Items">📦</span>
-                <span class="summary-label">Total Items:</span>
-                <span id="total-items">0</span>
+            <div class="order-summary">
+                <div class="summary-box items-box" style="width: 40%;">
+                    <span class="summary-icon" aria-label="Total Items">📦</span>
+                    <span class="summary-label">Total Items:</span>
+                    <span id="total-items">0</span>
+                </div>
+                <div class="summary-box price-box">
+                    <span class="summary-icon" aria-label="Total Price">💰</span>
+                    <span class="summary-label">Total Price:</span>
+                    <span>EGP <span id="total-price">0.00</span></span>
+                </div>
             </div>
-            <div class="summary-box price-box">
-                <span class="summary-icon" aria-label="Total Price">💰</span>
-                <span class="summary-label">Total Price:</span>
-                <span>EGP <span id="total-price">0.00</span></span>
+
+
+            <div class="order-preview" style="margin-bottom: 30px;">
+                <div id="preview-loader" style="display: none;">
+                    <div class="loader"></div>
+                    <span>Loading preview...</span>
+                </div>
+
+                <h3 style="margin-bottom: 12px; text-align: center;">Order Preview</h3>
+
+                <div class="order-preview-container">
+                    <div id="order-preview-body" class="order-preview-cards"></div>
+                </div>
             </div>
+
+            <button id="submit-order" class="btn btn-primary"
+                style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">Submit
+                New Order</button>
         </div>
-
-
-        <div class="order-preview" style="margin-bottom: 30px;">
-            <div id="preview-loader" style="display: none;">
-                <div class="loader"></div>
-                <span>Loading preview...</span>
-            </div>
-
-            <h3 style="margin-bottom: 12px; text-align: center;">Order Preview</h3>
-
-            <div class="order-preview-container">
-                <div id="order-preview-body" class="order-preview-cards"></div>
-            </div>
-        </div>
-
-        <button id="submit-order" class="btn btn-primary"
-            style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">Submit
-            New Order</button>
-    </div>
 </body>
 
 </html>
