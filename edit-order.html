@@ -107,15 +107,33 @@ letter-spacing: 0.5px;
 
         <div class="customer-info">
             <h2>Customer Info</h2>
+          
             <p><strong>Name:</strong> <span id="customer-name"></span></p>
             <p><strong>ID:</strong> <span id="customer-id"></span></p>
-            <p><strong>Address:</strong>
-                <select id="customer-address-select" class="address-dropdown">
-                    <!-- Addresses will be populated by JavaScript -->
-                </select>
+          
+            <p>
+              <strong>Address:</strong>
+              <select id="customer-address-select" class="address-dropdown">
+                <!-- Addresses will be populated by JavaScript -->
+              </select>
             </p>
-        </div>
-
+          
+            <!-- ✅ Editable Note Section -->
+            <p style="margin-top: 10px;">
+              <strong>Note:</strong><br />
+              <textarea id="customer-note" name="customer_note" placeholder="Add note for this order..." style="
+                width: 100%;
+                padding: 8px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                resize: vertical;
+                min-height: 70px;
+                font-family: 'Segoe UI', sans-serif;
+              "></textarea>
+            </p>
+          </div>
+          
         <div class="items-list">
             <h2>Edit Items</h2>
 
@@ -145,14 +163,32 @@ letter-spacing: 0.5px;
                 </div>
             </div>
 
-            <div style="text-align: left; margin-top: 10px;">
-                <button id="add-product-btn" class="confirm-btn"> Add Product</button>
-            </div>
+            <div style="display: flex; justify-content: center; margin-top: 16px;">
+                <button id="add-product-btn" class="confirm-btn" style="
+                  padding: 10px 20px;
+                  background-color: #0b2a59;
+                  color: white;
+                  font-size: 14px;
+                  font-weight: 500;
+                  border: none;
+                  border-radius: 6px;
+                  cursor: pointer;
+                  transition: background-color 0.2s ease;
+                "
+                onmouseover="this.style.backgroundColor='#28a745';"
+                onmouseout="this.style.backgroundColor='#0b2a59';"
+                >
+                  Add Product
+                </button>
+              </div>
+              
         </div>
-
-        <div class="total">
-            <h2><span id="total-price">EGP 0</span></h2>
-        </div>
+        <div class="total" >
+        <h2 style="margin: 0; font-size: 20px; color: #0b2a59;">
+          <span id="total-price" style="background-color: #f8f9fb; color:#333; font-size: larger; font-weight: 500;">EGP 0</span>
+        </h2>
+      </div>
+      
 
         <div class="action-buttons" style="text-align: right;">
             <button id="save-order" class="confirm-btn">Confirm Changes</button>

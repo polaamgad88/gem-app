@@ -147,7 +147,7 @@ function populateEditableItems(order, token) {
 
   order.items.forEach((item) => {
     const productId = item.product_id;
-    const price = parseFloat(item.price);
+    const price = parseFloat(item.price.toLocaleString());
     const quantity = parseInt(item.quantity);
     const itemTotal = price * quantity;
     total += itemTotal;
@@ -173,9 +173,9 @@ function populateEditableItems(order, token) {
         <div style="font-size: 12px; color: #666;">${item.bar_code}</div>
       </td>
 
-      <td>EGP ${price.toFixed(2)}</td>
+      <td>EGP ${price.toLocaleString()}</td>
       <td><input type="number" class="qty" value="${quantity}" min="1"></td>
-      <td>EGP ${itemTotal.toFixed(2)}</td>
+      <td>EGP ${itemTotal.toLocaleString()}</td>
       <td><button class="remove-btn">Remove</button></td>
     `;
     tableBody.appendChild(row);
@@ -196,13 +196,9 @@ function populateEditableItems(order, token) {
       </div>
       <div class="item-card-body">
       <p><span class="item-card-label">Barcode:</span>  ${item.bar_code}</p>
-        <p><span class="item-card-label">Price:</span> EGP ${price.toFixed(
-          2
-        )}</p>
+        <p><span class="item-card-label">Price:</span> EGP ${price.toLocaleString()}</p>
         <p><span class="item-card-label">Quantity:</span> <input type="number" class="qty" value="${quantity}" min="1"></p>
-        <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toFixed(
-          2
-        )}</p>
+        <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toLocaleString()}</p>
       </div>
       <div class="item-card-footer">
         <button class="remove-btn">Remove</button>
@@ -235,9 +231,7 @@ function populateEditableItems(order, token) {
   });
 
   // Set initial total
-  document.getElementById("total-price").textContent = `EGP ${total.toFixed(
-    2
-  )}`;
+  document.getElementById("total-price").textContent = `EGP ${total.toLocaleString()}`;
 }
 
 // Helper function to update totals
@@ -254,7 +248,7 @@ function updateTotals() {
     const itemTotal = price * qty;
 
     // Update item total cell
-    row.cells[4].textContent = `EGP ${itemTotal.toFixed(2)}`;
+    row.cells[4].textContent = `EGP ${itemTotal.toLocaleString()}`;
 
     total += itemTotal;
   });
@@ -278,9 +272,7 @@ function updateTotals() {
   });
 
   // Update total price
-  document.getElementById("total-price").textContent = `EGP ${total.toFixed(
-    2
-  )}`;
+  document.getElementById("total-price").textContent = `EGP ${total.toLocaleString()}`;
 }
 
 // Helper function to set up event listeners
@@ -594,9 +586,9 @@ async function addProductToOrder(productId, price, quantity, token) {
         <div style="font-size: 12px; color: #666;">${productData.bar_code}</div>
       </td>
 
-      <td>EGP ${parseFloat(price).toFixed(2)}</td>
+      <td>EGP ${parseFloat(price).toLocaleString()}</td>
       <td><input type="number" class="qty" value="${quantity}" min="1"></td>
-      <td>EGP ${(parseFloat(price) * quantity).toFixed(2)}</td>
+      <td>EGP ${(parseFloat(price) * quantity).toLocaleString()}</td>
       <td><button class="remove-btn">Remove</button></td>
     `;
     tableBody.appendChild(row);
@@ -619,14 +611,14 @@ async function addProductToOrder(productId, price, quantity, token) {
       <div class="item-card-body">
       <p><span class="item-card-label">Barcode:</span>${parseFloat(
         price
-      ).toFixed(2)}</p>
+      ).toLocaleString()}</p>
         <p><span class="item-card-label">Price:</span> EGP ${
           productData.bar_code
         }</p>
         <p><span class="item-card-label">Quantity:</span> <input type="number" class="qty" value="${quantity}" min="1"></p>
         <p><span class="item-card-label">Total:</span> EGP ${(
           parseFloat(price) * quantity
-        ).toFixed(2)}</p>
+        ).toLocaleString()}</p>
       </div>
       <div class="item-card-footer">
         <button class="remove-btn">Remove</button>
