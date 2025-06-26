@@ -78,6 +78,7 @@ async function fetchCustomerAddresses(customerId, token) {
 async function populateOrderInfo(order, token) {
   document.getElementById("orderId").textContent = `#${order.order_id}`;
   document.getElementById("order-id").textContent = `#${order.order_id}`;
+  document.getElementById("customer-note").textContent = order.note;
   document.getElementById("order-date").textContent = Utils.Format.date(
     order.order_date
   );
@@ -231,7 +232,9 @@ function populateEditableItems(order, token) {
   });
 
   // Set initial total
-  document.getElementById("total-price").textContent = `EGP ${total.toLocaleString()}`;
+  document.getElementById(
+    "total-price"
+  ).textContent = `EGP ${total.toLocaleString()}`;
 }
 
 // Helper function to update totals
@@ -272,7 +275,9 @@ function updateTotals() {
   });
 
   // Update total price
-  document.getElementById("total-price").textContent = `EGP ${total.toLocaleString()}`;
+  document.getElementById(
+    "total-price"
+  ).textContent = `EGP ${total.toLocaleString()}`;
 }
 
 // Helper function to set up event listeners
@@ -664,6 +669,7 @@ async function saveOrder(orderId, token) {
     const addressSelect = document.getElementById("customer-address-select");
     const addressId = addressSelect.value;
     const customerId = addressSelect.dataset.customerId;
+    const note = document.getElementById("customer-note").value;
 
     if (!addressId) {
       Utils.UI.hideLoader("loader");
@@ -704,6 +710,7 @@ async function saveOrder(orderId, token) {
     const requestData = {
       customer_id: parseInt(customerId),
       address_id: parseInt(addressId),
+      note: note,
       products: products,
     };
 

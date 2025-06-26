@@ -458,9 +458,7 @@ function addOrderRow(container, brands, products) {
   row.className = "order-row";
 
   const scrollable = document.querySelector(".order-rows-scrollable-detailed");
-  if (scrollable) {
-    scrollable.style.display = "block";
-  }
+  if (scrollable) scrollable.style.display = "block";
 
   const brandSelect = document.createElement("select");
   brandSelect.className = "brand-select";
@@ -495,7 +493,26 @@ function addOrderRow(container, brands, products) {
   quantityInput.className = "quantity-input";
   quantityInput.type = "number";
   quantityInput.min = 1;
-  quantityInput.value = 1;
+  quantityInput.placeholder = "Qty";
+  quantityInput.value = "";
+  const addBtn = document.createElement("button");
+  addBtn.textContent = "Add";
+  addBtn.className = "add-qty-btn";
+  addBtn.style = `
+  margin-left: 8px;
+  padding: 5px 12px;
+  font-size: 14px;
+  background-color: #0b2a59;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+`;
+
+  addBtn.addEventListener("click", () => {
+    quantityInput.style.border = "";
+    lockRowIfValid();
+  });
 
   const deleteBtn = document.createElement("i");
   deleteBtn.className = "material-icons";
@@ -514,10 +531,24 @@ function addOrderRow(container, brands, products) {
   row.appendChild(nameInput);
   row.appendChild(nameSuggestions);
   row.appendChild(quantityInput);
+  row.appendChild(addBtn);
   row.appendChild(deleteBtn);
   container.appendChild(row);
 
-  function lockFields(selectedProduct) {
+  function lockRowIfValid() {
+    const selectedId = row.dataset.selectedProductId;
+    const qty = parseInt(quantityInput.value);
+
+    if (!selectedId) return;
+
+    if (!qty || qty <= 0) {
+      quantityInput.style.border = "2px solid red";
+      return;
+    }
+
+    const selectedProduct = products.find((p) => p.product_id == selectedId);
+    if (!selectedProduct) return;
+
     const lockedRow = document.createElement("div");
     lockedRow.className = "order-row";
 
@@ -525,9 +556,8 @@ function addOrderRow(container, brands, products) {
     quantityInputLocked.className = "quantity-input";
     quantityInputLocked.type = "number";
     quantityInputLocked.min = 1;
-    quantityInputLocked.value = quantityInput.value;
+    quantityInputLocked.value = qty;
 
-    // 🔧 FIX: trigger preview and totals when qty changes
     quantityInputLocked.addEventListener("input", () => {
       debouncePreviewUpdate();
       updateTotals();
@@ -567,10 +597,51 @@ function addOrderRow(container, brands, products) {
     lockedRow.dataset.productPrice = selectedProduct.price;
 
     container.insertBefore(lockedRow, row);
+    // row.remove();
+    barcodeInput.value = "";
+    nameInput.value = "";
+    quantityInput.value = "";
 
     debouncePreviewUpdate();
     updateTotals();
   }
+
+  quantityInput.addEventListener("input", () => {
+    quantityInput.style.border = "";
+  });
+
+  barcodeSuggestions.addEventListener("click", (e) => {
+    if (e.target.tagName === "LI") {
+      const productId = e.target.dataset.productId;
+      const product = products.find((p) => p.product_id == productId);
+      if (!product) return;
+
+      row.dataset.selectedProductId = productId;
+      barcodeSuggestions.style.display = "none";
+
+      // Show name in input to indicate selection
+      nameInput.value = `${product.product_name}`;
+      quantityInput.style.border = "2px solid red";
+
+      // Wait for user to enter qty
+    }
+  });
+
+  nameSuggestions.addEventListener("click", (e) => {
+    if (e.target.tagName === "LI") {
+      const productId = e.target.dataset.productId;
+      const product = products.find((p) => p.product_id == productId);
+      if (!product) return;
+
+      row.dataset.selectedProductId = productId;
+      nameSuggestions.style.display = "none";
+
+      nameInput.value = `${product.product_name}`;
+      quantityInput.style.border = "2px solid red";
+
+      // Wait for quantity to be filled
+    }
+  });
 
   barcodeInput.addEventListener("input", async () => {
     const query = barcodeInput.value.trim();
@@ -588,14 +659,11 @@ function addOrderRow(container, brands, products) {
 
     try {
       const res = await fetch(
-        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?${params.toString()}`,
+        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (!res.ok) return;
-
       const data = await res.json();
       const matches = data.data || [];
 
@@ -612,19 +680,6 @@ function addOrderRow(container, brands, products) {
     }
   });
 
-  // Barcode selection
-  barcodeSuggestions.addEventListener("click", (e) => {
-    if (e.target.tagName === "LI") {
-      const productId = e.target.dataset.productId;
-      const selectedProduct = products.find((p) => p.product_id == productId);
-      if (selectedProduct && quantityInput.value) {
-        lockFields(selectedProduct);
-      }
-      barcodeSuggestions.style.display = "none";
-    }
-  });
-
-  // Name search
   nameInput.addEventListener("input", () => {
     const value = nameInput.value.trim().toLowerCase();
     nameSuggestions.innerHTML = "";
@@ -651,6 +706,8 @@ function addOrderRow(container, brands, products) {
   });
 
   nameInput.addEventListener("focus", () => {
+    // Always show all suggestions when field is focused
+    nameSuggestions.innerHTML = "";
     const brand = brandSelect.value;
     const category = categorySelect.value;
 
@@ -660,7 +717,6 @@ function addOrderRow(container, brands, products) {
       );
     });
 
-    nameSuggestions.innerHTML = "";
     filtered.forEach((p) => {
       const li = document.createElement("li");
       li.textContent = `${p.product_name} (${p.bar_code})`;
@@ -671,17 +727,6 @@ function addOrderRow(container, brands, products) {
     nameSuggestions.style.display = filtered.length ? "block" : "none";
   });
 
-  nameSuggestions.addEventListener("click", (e) => {
-    if (e.target.tagName === "LI") {
-      const productId = e.target.dataset.productId;
-      const selectedProduct = products.find((p) => p.product_id == productId);
-      if (selectedProduct) {
-        lockFields(selectedProduct);
-      }
-      nameSuggestions.style.display = "none";
-    }
-  });
-
   document.addEventListener("click", (e) => {
     if (!row.contains(e.target)) {
       barcodeSuggestions.style.display = "none";
@@ -689,7 +734,6 @@ function addOrderRow(container, brands, products) {
     }
   });
 
-  // Load categories when brand changes
   brandSelect.onchange = async () => {
     categorySelect.innerHTML = `<option value="">Select Category</option>`;
     const token = localStorage.getItem("access_token");
@@ -714,11 +758,6 @@ function addOrderRow(container, brands, products) {
     } catch (err) {
       console.error("Category loading failed:", err);
     }
-  };
-
-  quantityInput.oninput = () => {
-    debouncePreviewUpdate();
-    updateTotals();
   };
 }
 

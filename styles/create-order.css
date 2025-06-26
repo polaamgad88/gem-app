@@ -274,7 +274,7 @@ h3 {
 /* Base styles (Desktop & Tablet) */
 .quantity-input,
 .quantity-wrapper input {
-  width: 60px;
+  width: 100px;
   height: 40px;
   text-align: center;
   border: 1px solid var(--gray-300);
@@ -299,7 +299,7 @@ h3 {
 
   .quantity-input,
   .quantity-wrapper input {
-    width: 60;
+    width: 100px;
     height: 32px;
     font-size: 14px;
   }
