@@ -244,9 +244,8 @@ function loadOrderFromSession() {
 
         const categorySelect = document.createElement("select");
         categorySelect.className = "category-select";
-        categorySelect.innerHTML = `<option value="${category}" selected>${
-          category || "All"
-        }</option>`;
+        categorySelect.innerHTML = `<option value="${category}" selected>${category || "All"
+          }</option>`;
 
         const qtyInput = document.createElement("input");
         qtyInput.type = "number";
@@ -359,8 +358,8 @@ function populateCustomerDropdown(customers) {
     const value = searchInput.value.toLowerCase();
     const matches = value
       ? allCustomers.filter((cust) =>
-          `${cust.first_name} ${cust.last_name}`.toLowerCase().includes(value)
-        )
+        `${cust.first_name} ${cust.last_name}`.toLowerCase().includes(value)
+      )
       : allCustomers;
 
     renderSuggestions(matches);
@@ -496,7 +495,7 @@ function addOrderRow(container, brands, products) {
   quantityInput.placeholder = "Qty";
   quantityInput.value = "";
   const addBtn = document.createElement("button");
-  addBtn.textContent = "Add";
+  addBtn.textContent = "Add  Item";
   addBtn.className = "add-qty-btn";
   addBtn.style = `
   margin-left: 8px;
@@ -507,6 +506,8 @@ function addOrderRow(container, brands, products) {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  height: 40px;
+  width: 100px;
 `;
 
   addBtn.addEventListener("click", () => {
@@ -530,13 +531,27 @@ function addOrderRow(container, brands, products) {
   row.appendChild(barcodeSuggestions);
   row.appendChild(nameInput);
   row.appendChild(nameSuggestions);
-  row.appendChild(quantityInput);
-  row.appendChild(addBtn);
+  const qtyAddWrap = document.createElement("div");
+  qtyAddWrap.style.display = "flex";
+  qtyAddWrap.style.alignItems = "center";
+  qtyAddWrap.style.gap = "10px"; 
+  qtyAddWrap.style.margin = "auto"; 
+  qtyAddWrap.style.placeContent = "center";
+  qtyAddWrap.style.width = "100%"; 
+
+
+  
+
+  qtyAddWrap.appendChild(quantityInput);
+  qtyAddWrap.appendChild(addBtn);
+
+  row.appendChild(qtyAddWrap);
+
   row.appendChild(deleteBtn);
   container.appendChild(row);
 
   function lockRowIfValid() {
-    const selectedId = row.dataset.selectedProductId;
+    const selectedId = row.dataset.selectedProductId
     const qty = parseInt(quantityInput.value);
 
     if (!selectedId) return;
@@ -813,8 +828,8 @@ function addCombinedRow(container, brands) {
 
     const url = selectedBrand
       ? `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
-          selectedBrand
-        )}`
+        selectedBrand
+      )}`
       : `https://order-app.gemegypt.net/api/products/categories/orders`;
 
     categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
@@ -1024,10 +1039,9 @@ async function updateOrderPreview() {
       const card = document.createElement("div");
       card.className = "preview-card";
       card.innerHTML = `
-        ${
-          photoUrl
-            ? `<img src="${photoUrl}" alt="${name}" />`
-            : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
+        ${photoUrl
+          ? `<img src="${photoUrl}" alt="${name}" />`
+          : `<div style="width:60px; height:60px; background-color:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center;">No Photo</div>`
         }
         <div class="card-content">
           <div class="product-name">${name} - (${bar_code})</div>

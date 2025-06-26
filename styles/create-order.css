@@ -100,12 +100,12 @@ h3 {
   gap: var(--spacing-sm);
   align-items: flex-start;
   flex-direction: column;
-  margin-bottom: var(--spacing-md);
+  /* margin-bottom: var(--spacing-md); */
   padding: var(--spacing-md);
   padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--gray-200);
+  /* border-bottom: 1px solid var(--gray-200); */
   background-color: var(--gray-100);
-  border: 1px solid var(--gray-300);
+  /* border: 1px solid var(--gray-300); */
   border-radius: var(--border-radius-md);
 }
 
