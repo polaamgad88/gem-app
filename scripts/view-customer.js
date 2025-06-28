@@ -76,20 +76,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
   // Modal interactions
-  document.getElementById("add-delegate-btn").addEventListener("click", () => {
-    document.getElementById("delegate-modal").style.display = "block";
+  document.getElementById("add-Delegate-btn").addEventListener("click", () => {
+    document.getElementById("Delegate-modal").style.display = "block";
   });
 
   document.querySelector(".close-btn").addEventListener("click", () => {
-    document.getElementById("delegate-modal").style.display = "none";
+    document.getElementById("Delegate-modal").style.display = "none";
   });
 
   document
-    .getElementById("save-delegate-btn")
+    .getElementById("save-Delegate-btn")
     .addEventListener("click", async () => {
-      const userId = document.getElementById("delegate-dropdown").value;
+      const userId = document.getElementById("Delegate-dropdown").value;
       const username =
-        document.getElementById("delegate-dropdown").selectedOptions[0].text;
+        document.getElementById("Delegate-dropdown").selectedOptions[0].text;
 
       const res = await fetch("https://order-app.gemegypt.net/api/customers/assign", {
         method: "POST",
@@ -107,9 +107,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       if (res.ok) {
         addDelegateToList(userId, username);
-        document.getElementById("delegate-modal").style.display = "none";
+        document.getElementById("Delegate-modal").style.display = "none";
       } else {
-        alert(data.message || "Failed to assign delegate");
+        alert(data.message || "Failed to assign Delegate");
       }
     });
   document.getElementById("address-save-btn").addEventListener("click", () => {
@@ -223,7 +223,7 @@ async function loadCustomerDetails(customerId, token) {
     document.getElementById("customer-phone").textContent = customer.phone;
     document.getElementById("customer-email").textContent = customer.email;
 
-    const list = document.getElementById("delegate-list");
+    const list = document.getElementById("Delegate-list");
     list.innerHTML = "";
     customer.assigned_users.forEach(({ user_id, username }) => {
       addDelegateToList(user_id, username);
@@ -314,7 +314,7 @@ async function setupAddDelegateDropdown(token) {
       headers: { Authorization: `Bearer ${token}` },
     });
     const users = (await res.json()).users;
-    const select = document.getElementById("delegate-dropdown");
+    const select = document.getElementById("Delegate-dropdown");
     select.innerHTML = "";
 
     users.forEach((u) => {
@@ -335,7 +335,7 @@ function addDelegateToList(userId, username) {
       <button class="remove-btn" onclick="removeDelegate(${userId}, '${username}')">
         <i class="fas fa-trash-alt"></i>
       </button>`;
-  document.getElementById("delegate-list").appendChild(li);
+  document.getElementById("Delegate-list").appendChild(li);
 }
 
 async function removeDelegate(userId, username) {
@@ -360,16 +360,16 @@ async function removeDelegate(userId, username) {
     });
 
     if (res.ok) {
-      [...document.getElementById("delegate-list").children].forEach((li) => {
+      [...document.getElementById("Delegate-list").children].forEach((li) => {
         if (li.textContent.includes(username)) li.remove();
       });
     } else {
       const data = await res.json();
-      alert(data.message || "Failed to remove delegate");
+      alert(data.message || "Failed to remove Delegate");
     }
   } catch (err) {
-    console.error("Failed to remove delegate", err);
-    alert("Error occurred while removing delegate.");
+    console.error("Failed to remove Delegate", err);
+    alert("Error occurred while removing Delegate.");
   }
 }
 

@@ -87,7 +87,7 @@ async function populateOrderInfo(order, token) {
   orderState.textContent = order.status;
   orderState.className = `state ${order.status.toLowerCase()}`;
 
-  document.getElementById("delegate-name").textContent = order.username;
+  document.getElementById("Delegate-name").textContent = order.username;
   document.getElementById("customer-name").textContent = order.customer_name;
   document.getElementById(
     "customer-id"

@@ -53,7 +53,7 @@ function populateOrderDetails(order) {
   // orderState.className = `state ${order.status.toLowerCase()}`;
 
   document.getElementById("order-state").textContent = order.status;
-  document.getElementById("delegate-name").textContent = order.username;
+  document.getElementById("Delegate-name").textContent = order.username;
   document.getElementById("customer-name").textContent = order.customer_name;
   document.getElementById(
     "customer-id"

@@ -40,7 +40,7 @@ h1 {
 
 /* Sections */
 .customer-info,
-.delegate-management,
+.Delegate-management,
 .order-section,
 .total-income,
 .address-section {
@@ -121,13 +121,13 @@ button,
 }
 
 #add-address-btn,
-#add-delegate-btn {
+#add-Delegate-btn {
     background-color: #f0f0f0;
     color: black;
 }
 
 #add-address-btn:hover,
-#add-delegate-btn:hover {
+#add-Delegate-btn:hover {
     background-color: var(--secondary-dark);
 }
 
@@ -254,13 +254,13 @@ th {
 }
 
 /* Assigned Delegates List */
-#delegate-list {
+#Delegate-list {
     list-style: none;
     padding-left: 0;
     margin-top: var(--spacing-sm);
 }
 
-#delegate-list li {
+#Delegate-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -272,12 +272,12 @@ th {
     box-shadow: var(--box-shadow-sm);
 }
 
-#delegate-list li span {
+#Delegate-list li span {
     font-weight: 500;
     color: var(--gray-900);
 }
 
-#delegate-list .remove-btn {
+#Delegate-list .remove-btn {
     background-color: var(--danger-color);
     color: white;
     border: none;
@@ -287,7 +287,7 @@ th {
     cursor: pointer;
 }
 
-#delegate-list .remove-btn:hover {
+#Delegate-list .remove-btn:hover {
     background-color: var(--danger-dark);
 }
 

@@ -150,7 +150,7 @@ document
       }
     );
 
-    // 🔄 Third: update assigned manager
+    // 🔄 Third: update assigned Manager
     await fetch(
       `https://order-app.gemegypt.net/api/users/change_manager/${userId}`,
       {

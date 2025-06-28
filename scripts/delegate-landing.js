@@ -49,11 +49,11 @@ function setupAdminButtons(admin, role) {
 
   }
   else {
-    if (admin == 1 || role !== "delegate") {
+    if (admin == 1 || role !== "Delegate") {
       const manageUserBtn = document.querySelector(".manage-user");
       if (manageUserBtn) manageUserBtn.style.display = "block";
     }
-    if (admin == 1 || role !== "delegate") {
+    if (admin == 1 || role !== "Delegate") {
       const manageUserBtn = document.querySelector(".manage-user");
       if (manageUserBtn) manageUserBtn.style.display = "block";
     }
