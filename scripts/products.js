@@ -34,12 +34,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function populateBrands(token) {
-  const res = await fetch(
-    "https://order-app.gemegypt.net/api/products/brands",
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+  const res = await fetch("https://order-app.gemegypt.net/api/products/brands", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   const brands = (await res.json()).brands || [];
   const brandSelect = document.getElementById("brand-filter");
   brandSelect.innerHTML =
@@ -425,13 +422,10 @@ async function deleteProduct(id) {
 
   const token = localStorage.getItem("access_token");
   try {
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/product/delete/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const res = await fetch(`https://order-app.gemegypt.net/api/product/delete/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (res.ok) {
       alert("Product deleted successfully.");
@@ -675,40 +669,54 @@ async function handleImport() {
 
   errorMsg.style.display = "none";
 
-  // Require only the XLSX
-  if (!xlsxInput.files.length) {
-    errorMsg.textContent = "Please select the Excel file to upload.";
+  const hasXlsx = xlsxInput.files.length > 0;
+  const hasZip = zipInput.files.length > 0;
+
+  if (!hasXlsx && !hasZip) {
+    errorMsg.textContent =
+      "Please select at least one file to upload (Excel or ZIP).";
     errorMsg.style.display = "block";
     return;
   }
 
   const formData = new FormData();
-  formData.append("file", xlsxInput.files[0]);
-  formData.append("mode", selectedImportMode);
 
-  // Append images_zip only if the user picked one
-  if (zipInput.files.length) {
+  if (hasXlsx) {
+    formData.append("file", xlsxInput.files[0]);
+    formData.append("mode", selectedImportMode); // "update" or "add"
+  }
+
+  if (hasZip) {
     formData.append("images_zip", zipInput.files[0]);
   }
 
   try {
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/products/import?mode=${selectedImportMode}`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      }
-    );
+    let endpoint = "";
+    if (hasXlsx) {
+      endpoint = `https://order-app.gemegypt.net/api/products/import?mode=${selectedImportMode}`;
+    } else {
+      endpoint = `https://order-app.gemegypt.net/api/products/images/import`;
+    }
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
     const result = await res.json();
 
     if (res.ok) {
-      alert(
-        "Import successful: Added " +
-          result.added +
-          " Updated:" +
-          result.updated
-      );
+      if (hasXlsx) {
+        alert(
+          `Import successful: Added ${result.added}, Updated ${result.updated}`
+        );
+      } else {
+        alert(
+          `Image import successful. Updated: ${result.updated}. Skipped: ${result.skipped.length}`
+        );
+      }
+
       closeImportDialog();
       fetchAndRenderProducts(token);
     } else {
