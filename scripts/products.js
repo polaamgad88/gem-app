@@ -34,9 +34,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function populateBrands(token) {
-  const res = await fetch("https://order-app.gemegypt.net/api/products/brands", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await fetch(
+    "https://order-app.gemegypt.net/api/products/brands",
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   const brands = (await res.json()).brands || [];
   const brandSelect = document.getElementById("brand-filter");
   brandSelect.innerHTML =
@@ -236,8 +239,8 @@ async function fetchAndRenderProducts(token) {
     card.className = "product-card";
     card.innerHTML = `
        <img src="${imageUrl}" alt="${product.product_name}" style="
-    width: 32px;
-    height: 32px;
+    width: 60px;
+    height: 60px;
     object-fit: cover;
     border-radius: 6px;
     margin-bottom: 6px;
@@ -422,10 +425,13 @@ async function deleteProduct(id) {
 
   const token = localStorage.getItem("access_token");
   try {
-    const res = await fetch(`https://order-app.gemegypt.net/api/product/delete/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `https://order-app.gemegypt.net/api/product/delete/${id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     if (res.ok) {
       alert("Product deleted successfully.");
