@@ -427,7 +427,10 @@ function addTemporaryProductRow(brands, token) {
         const li = document.createElement("li");
         li.innerHTML = `<div><strong>${product.product_name}</strong><br><small>Barcode: ${product.bar_code}, Price: ${product.price}</small></div>`;
         li.style.cursor = "pointer";
-        li.onclick = () => selectProduct(product);
+        li.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          selectProduct(product);
+        });
         suggestionsEl.appendChild(li);
       });
 
