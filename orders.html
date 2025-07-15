@@ -284,12 +284,12 @@
       </div>
 
 
-      
+
       <div class="filter-group">
         <label style="opacity: 0;color:#28a745;">Export</label>
-        <button id="exportBtn" class="export-btn" title="Confirm Orders">
+        <!-- <button id="exportBtn" class="export-btn" title="Confirm Orders">
           <p style="color: black; ">Confirm </p>
-        </button>
+        </button> -->
 
       </div>
     </div>
@@ -348,13 +348,29 @@
         </div>
         <div class="form-group">
           <label>Amount&nbsp;(EGP)</label>
-          <input type="number" id="amountStart" placeholder="From" />
-          <input type="number" id="amountEnd" placeholder="To" />
+          <div style="display: flex; gap: 0.5rem; flex-direction: row;">
+            <input type="number" id="amountStart" placeholder="From" />
+            <input type="number" id="amountEnd" placeholder="To" />
+          </div>
+
         </div>
         <div class="form-group">
-          <label>Date&nbsp;range</label>
-          <input type="date" id="dateStart" />
-          <input type="date" id="dateEnd" />
+          <label>create Date&nbsp;range</label>
+          <div style="display: flex; gap: 0.5rem; flex-direction: row;">
+            <input type="date" id="dateStart" />
+            <input type="date" id="dateEnd" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>update Date&nbsp;range</label>
+          <div style="display: flex; gap: 0.5rem; flex-direction: row;">
+            <input type="date" id="dateStartUpdate" placeholder="From" />
+            <input type="date" id="dateEndUpdate" placeholder="To" />
+          </div>
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
+          <input style="margin-top: 0rem; width: inherit;" type="checkbox" id="fullyconfirmed" />
+          <label for="fullyconfirmed">only Fully Confirmed Orders</label>
         </div>
         <button type="submit" class="export-btn" style="color: #28a745;">Export</button>
       </form>

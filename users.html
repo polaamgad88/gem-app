@@ -40,20 +40,21 @@
             .logo {
                 height: 90px;
             }
-            .container{
+
+            .container {
                 max-width: 97%;
             }
         }
-        </style>
+    </style>
 </head>
 
 <body>
-        <!-- Back to Dashboard Link -->
-       
-  
-        <!-- Page Heading -->
-        <div class="container">
-            <a href="index.html" style="
+    <!-- Back to Dashboard Link -->
+
+
+    <!-- Page Heading -->
+    <div class="container">
+        <a href="index.html" style="
             display: inline-flex;
             align-items: center;
             font-size: 14px;
@@ -68,16 +69,16 @@
             transition: background-color 0.2s ease;
             gap: 8px;
           " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                      <path d="M15 18l-6-6 6-6" />
-                  </svg>
-                  Dashboard
-              </a>
-              <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
-            <h1>Users</h1>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Dashboard
+        </a>
+        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
+        <h1>Users</h1>
 
-            <div style="
+        <div style="
             display: flex;
             gap: 12px;
             align-items: flex-end;
@@ -86,12 +87,12 @@
           ">
             <!-- Search Field -->
             <div style="flex: 1;">
-              <label for="user-search" style="
+                <label for="user-search" style="
                 font-size: 13px;
                 margin-bottom: 4px;
                 display: inline-block;
               ">Search by Username:</label>
-              <input type="search" id="user-search" placeholder="Type username..." style="
+                <input type="search" id="user-search" placeholder="Type username..." style="
                 width: 100%;
                 padding: 8px 10px;
                 font-size: 14px;
@@ -100,10 +101,10 @@
                 box-sizing: border-box;
               ">
             </div>
-          
+
             <!-- Add Button -->
             <div style="flex: 1;">
-              <button id="create-user-btn" style="
+                <button id="create-user-btn" style="
                 width: 100%;
                 padding: 8px 10px;
                 font-size: 14px;
@@ -113,15 +114,13 @@
                 border-radius: 4px;
                 cursor: pointer;
                 transition: background-color 0.2s ease, color 0.2s ease;
-              "
-              onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';"
-              onmouseout="this.style.backgroundColor='#f0f0f0'; this.style.color='#333';"
-              >
-                Add User
-              </button>
+              " onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';"
+                    onmouseout="this.style.backgroundColor='#f0f0f0'; this.style.color='#333';">
+                    Add User
+                </button>
             </div>
-          </div>
-          
+        </div>
+
 
         <!-- Table View -->
         <div class="table-responsive">
@@ -146,7 +145,7 @@
             <div id="user-cards"></div>
         </div>
 
-     
+
     </div>
 
 

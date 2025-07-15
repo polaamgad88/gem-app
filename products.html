@@ -40,7 +40,8 @@
             .logo {
                 height: 90px;
             }
-            .container{
+
+            .container {
                 max-width: 97%;
             }
         }
@@ -50,37 +51,35 @@
             font-size: 28px;
             margin-bottom: 20px;
             color: #0b2a59;
-        } 
-        
+        }
+
         .filters-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-  flex-wrap: wrap;
-}
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
 
-.filter-group {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-  flex-grow: 1;
-}
+        .filter-group {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+            flex-grow: 1;
+        }
 
-.filter-group select,
-.filter-group input[type="search"] {
-  padding: 8px 12px;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-sm);
-  background-color: #f8f9fa;
-  min-width: 180px;
-  flex-grow: 1;
-}
-
-        
-        </style>
+        .filter-group select,
+        .filter-group input[type="search"] {
+            padding: 8px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-sm);
+            background-color: #f8f9fa;
+            min-width: 180px;
+            flex-grow: 1;
+        }
+    </style>
 </head>
 
 <body>
@@ -100,28 +99,28 @@
         transition: background-color 0.2s ease;
         gap: 8px;
       " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                  <path d="M15 18l-6-6 6-6" />
-              </svg>
-              Dashboard
-          </a>
-          <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Dashboard
+        </a>
+        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
         <h1>Products</h1>
 
         <!-- Filters -->
         <div class="filters-row">
             <div class="filter-group">
-              <select id="brand-filter">
-                <option value="">All Brands</option>
-              </select>
-              <select id="category-filter">
-                <option value="">All Categories</option>
-              </select>
-              <input id="barcode-search" type="search" placeholder="Enter barcode..." />
+                <select id="brand-filter">
+                    <option value="">All Brands</option>
+                </select>
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                </select>
+                <input id="barcode-search" type="search" placeholder="Enter barcode..." />
             </div>
-          </div>
-          
+        </div>
+
 
 
 

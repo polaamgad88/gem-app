@@ -2,20 +2,20 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Order</title>
-    <link rel="stylesheet" href="./styles/base.css" />
-    <link rel="stylesheet" href="./styles/edit-order.css" />
-    <script src="./scripts/utils.js" defer></script>
-    <script src="./scripts/edit-order.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Order</title>
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/edit-order.css" />
+  <script src="./scripts/utils.js" defer></script>
+  <script src="./scripts/edit-order.js" defer></script>
 </head>
 
 <body>
 
 
-    <div class="container">
-        <a href="index.html" style="
+  <div class="container">
+    <a href="index.html" style="
         display: inline-flex;
         align-items: center;
         font-size: 14px;
@@ -30,13 +30,13 @@
         transition: background-color 0.2s ease;
         gap: 8px;
       " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                  <path d="M15 18l-6-6 6-6" />
-              </svg>
-              Dashboard
-          </a>
-          <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+      Dashboard
+    </a>
+    <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
           display: block;
           margin: 0 auto 0px;
           height: 150px;
@@ -59,7 +59,7 @@
       }
     </style>
 
-<h2 style="
+    <h2 style="
 text-align: center;
 font-size: 28px;
 font-weight: 600;
@@ -72,29 +72,29 @@ letter-spacing: 0.5px;
 
 
     <div class="order-info-grid">
-        <div class="info-box">
-          <!-- <label>Order ID</label> -->
-          <div class="info-value" id="order-id"></div>
-        </div>
-  
-        <div class="info-box">
-          <!-- <label>Date</label> -->
-          <div class="info-value" id="order-date"></div>
-        </div>
-  
-        <div class="info-box">
-          <!-- <label>Status</label> -->
-          <div class="info-value" id="order-state"></div>
-        </div>
-  
-        <div class="info-box">
-          <!-- <label>Delegate Name</label> -->
-          <div class="info-value" id="Delegate-name"></div>
-        </div>
+      <div class="info-box">
+        <!-- <label>Order ID</label> -->
+        <div class="info-value" id="order-id"></div>
       </div>
-  
 
-        <!-- <div class="order-info">
+      <div class="info-box">
+        <!-- <label>Date</label> -->
+        <div class="info-value" id="order-date"></div>
+      </div>
+
+      <div class="info-box">
+        <!-- <label>Status</label> -->
+        <div class="info-value" id="order-state"></div>
+      </div>
+
+      <div class="info-box">
+        <!-- <label>Delegate Name</label> -->
+        <div class="info-value" id="Delegate-name"></div>
+      </div>
+    </div>
+
+
+    <!-- <div class="order-info">
             <div class="row">
                 <p><strong>Order ID:</strong> <span id="order-id"></span></p>
                 <p><strong>Date:</strong> <span id="order-date"></span></p>
@@ -105,23 +105,23 @@ letter-spacing: 0.5px;
             </div>
         </div> -->
 
-        <div class="customer-info">
-            <h2>Customer Info</h2>
-          
-            <p><strong>Name:</strong> <span id="customer-name"></span></p>
-            <p><strong>ID:</strong> <span id="customer-id"></span></p>
-          
-            <p>
-              <strong>Address:</strong>
-              <select id="customer-address-select" class="address-dropdown">
-                <!-- Addresses will be populated by JavaScript -->
-              </select>
-            </p>
-          
-            <!-- ✅ Editable Note Section -->
-            <p style="margin-top: 10px;">
-              <strong>Note:</strong><br />
-              <textarea id="customer-note" name="customer_note" placeholder="Add note for this order..." style="
+    <div class="customer-info">
+      <h2>Customer Info</h2>
+
+      <p><strong>Name:</strong> <span id="customer-name"></span></p>
+      <p><strong>ID:</strong> <span id="customer-id"></span></p>
+
+      <p>
+        <strong>Address:</strong>
+        <select id="customer-address-select" class="address-dropdown">
+          <!-- Addresses will be populated by JavaScript -->
+        </select>
+      </p>
+
+      <!-- ✅ Editable Note Section -->
+      <p style="margin-top: 10px;">
+        <strong>Note:</strong><br />
+        <textarea id="customer-note" name="customer_note" placeholder="Add note for this order..." style="
                 width: 100%;
                 padding: 8px;
                 font-size: 14px;
@@ -131,40 +131,40 @@ letter-spacing: 0.5px;
                 min-height: 100px;
                 font-family: 'Segoe UI', sans-serif;
               "></textarea>
-            </p>
-          </div>
-          
-        <div class="items-list">
-            <h2>Edit Items</h2>
+      </p>
+    </div>
 
-            <!-- Table view (for desktop) -->
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Item</th>
-                            <th>Unit Price</th>
-                            <th>Qty</th>
-                            <th>Total</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="editable-items-body">
-                        <!-- Items will be populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
+    <div class="items-list">
+      <h2>Edit Items</h2>
 
-            <!-- Card view (for mobile) -->
-            <div class="card-view">
-                <div id="editable-items-cards">
-                    <!-- Cards will be populated by JavaScript -->
-                </div>
-            </div>
+      <!-- Table view (for desktop) -->
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Item</th>
+              <th>Unit Price</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="editable-items-body">
+            <!-- Items will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
 
-            <div style="display: flex; justify-content: center; margin-top: 16px;">
-                <button id="add-product-btn" class="confirm-btn" style="
+      <!-- Card view (for mobile) -->
+      <div class="card-view">
+        <div id="editable-items-cards">
+          <!-- Cards will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; margin-top: 16px;">
+        <button id="add-product-btn" class="confirm-btn" style="
                   padding: 10px 20px;
                   background-color: #0b2a59;
                   color: white;
@@ -174,26 +174,25 @@ letter-spacing: 0.5px;
                   border-radius: 6px;
                   cursor: pointer;
                   transition: background-color 0.2s ease;
-                "
-                onmouseover="this.style.backgroundColor='#28a745';"
-                onmouseout="this.style.backgroundColor='#0b2a59';"
-                >
-                  Add Product
-                </button>
-              </div>
-              
-        </div>
-        <div class="total" >
-        <h2 style="margin: 0; font-size: 20px; color: #0b2a59;">
-          <span id="total-price" style="background-color: #f8f9fb; color:#333; font-size: larger; font-weight: 500;">EGP 0</span>
-        </h2>
+                " onmouseover="this.style.backgroundColor='#28a745';"
+          onmouseout="this.style.backgroundColor='#0b2a59';">
+          Add Product
+        </button>
       </div>
-      
 
-        <div class="action-buttons" style="text-align: right;">
-            <button id="save-order" class="confirm-btn">Confirm Changes</button>
-        </div>
     </div>
+    <div class="total">
+      <h2 style="margin: 0; font-size: 20px; color: #0b2a59;">
+        <span id="total-price" style="background-color: #f8f9fb; color:#333; font-size: larger; font-weight: 500;">EGP
+          0</span>
+      </h2>
+    </div>
+
+
+    <div class="action-buttons" style="text-align: right;">
+      <button id="save-order" class="confirm-btn">Confirm Changes</button>
+    </div>
+  </div>
 </body>
 
 </html>

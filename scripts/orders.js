@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           o.order_id
         }"></td>
         <td>${o.order_id}</td>
-        <td>${Utils.Format.dateSlash(o.order_date)}</td>
+        <td>${Utils.Format.dateSlash(o.update_date)}</td>
         <td>${o.customer_name}</td>
         <td>${o.username}</td>
         <td>${o.role}</td>
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             <input type="checkbox" class="order-checkbox" value="${o.order_id}">
             &nbsp;#${o.order_id}
           </span>
-          <span>${Utils.Format.dateSlash(o.order_date)}</span>
+          <span>${Utils.Format.dateSlash(o.update_date)}</span>
         </div>
         <div class="order-card-body">
           <p><b>Customer:</b> ${o.customer_name}</p>
@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       </div>
     </div>
   `;
-  
+
     if (tableRow) {
       // Grab the only <td> inside <tr id="orderSummaryRow">
       const summaryCell = tableRow.querySelector("td");
@@ -414,6 +414,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (dStart) params.append("date_start", dStart);
     if (dEnd) params.append("date_end", dEnd);
 
+    const dStart_update = document.getElementById("dateStartUpdate").value;
+    const dEnd_update = document.getElementById("dateEndUpdate").value;
+    if (dStart_update) params.append("update_date_start", dStart_update);
+    if (dEnd_update) params.append("update_date_end", dEnd_update);
+    if (document.getElementById("fullyconfirmed").checked) {
+      params.append("confirmed_cycle_only", "true");
+    }
     toggleModal(false);
     await downloadExport(params.toString());
   }
