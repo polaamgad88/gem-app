@@ -73,15 +73,29 @@ document.addEventListener("DOMContentLoaded", async function () {
       dl.appendChild(opt);
     });
   }
-
   async function fetchAndRenderOrders(page = 1) {
     Utils.UI.showLoader();
-
+    function isConfirmedOnly() {
+      return document
+        .getElementById("confirmedToggle")
+        .classList.contains("active");
+    }
     const userId = document.getElementById("userFilter").value;
     const customerName = document.getElementById("customerFilter").value;
+    const dateStart = document.getElementById("dateStart").value;
+    const dateEnd = document.getElementById("dateEnd").value;
+    const updateStart = document.getElementById("updateDateStart").value;
+    const updateEnd = document.getElementById("updateDateEnd").value;
+    const confirmedOnly = isConfirmedOnly();
+
+    const pageSize = parseInt(
+      document.getElementById("pageSize").value || "25"
+    );
 
     let params = new URLSearchParams();
+
     if (userId !== "all") params.append("user_id", userId);
+
     if (customerName !== "all") {
       const matchedCustomer = allOrders.find(
         (o) => o.customer_name === customerName
@@ -90,43 +104,59 @@ document.addEventListener("DOMContentLoaded", async function () {
         params.append("customer_id", matchedCustomer.customer_id);
     }
 
+    if (dateStart) params.append("date_start", dateStart);
+    if (dateEnd) params.append("date_end", dateEnd);
+    if (updateStart) params.append("date_start_update", updateStart);
+    if (updateEnd) params.append("date_end_update", updateEnd);
+
     params.append("page", page);
-    params.append("limit", 10);
+    params.append("limit", pageSize);
 
-    const url = `https://order-app.gemegypt.net/api/orders?${params.toString()}`;
+    const endpoint = confirmedOnly
+      ? "https://order-app.gemegypt.net/api/orders/confirmed-chain"
+      : "https://order-app.gemegypt.net/api/orders";
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const url = `${endpoint}?${params.toString()}`;
 
     const tb = document.getElementById("ordersTable");
     const cc = document.getElementById("ordersCards");
     tb.innerHTML = cc.innerHTML = "";
 
-    if (!res.ok) {
-      renderNoOrders();
+    try {
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        renderNoOrders();
+        Utils.UI.hideLoader();
+        return;
+      }
+
+      const data = await res.json();
+      allOrders = data.orders || [];
+
+      if (data.summary) renderOrderSummary(data.summary);
+      else renderOrderSummary({});
+
+      currentPage = data.page || 1;
+      totalPages = data.pages || 1;
+
+      if (!allOrders.length) {
+        renderNoOrders();
+        Utils.UI.hideLoader();
+        return;
+      }
+
+      populateCustomerFilter(allOrders);
+      renderOrders(allOrders);
+      renderPagination();
+    } catch (err) {
+      console.error(err);
+      Utils.UI.showError("Failed to load orders.");
+    } finally {
       Utils.UI.hideLoader();
-      return;
     }
-
-    const data = await res.json();
-    allOrders = data.orders || [];
-    console.log("SUMMARY", data.summary);
-    renderOrderSummary(data.summary || {});
-
-    currentPage = data.page || 1;
-    totalPages = data.pages || 1;
-
-    if (!allOrders.length) {
-      renderNoOrders();
-      Utils.UI.hideLoader();
-      return;
-    }
-
-    populateCustomerFilter(allOrders);
-    renderOrders(allOrders);
-    renderPagination();
-    Utils.UI.hideLoader();
   }
 
   function renderPagination() {
@@ -331,6 +361,31 @@ document.addEventListener("DOMContentLoaded", async function () {
     ).innerHTML = `<div style="text-align:center;padding:20px;">No orders</div>`;
   }
   function setupEventListeners() {
+    const toggleButton = document.getElementById("confirmedToggle");
+
+    toggleButton.addEventListener("click", () => {
+      toggleButton.classList.toggle("active");
+      const isConfirmed = toggleButton.classList.contains("active");
+      toggleButton.textContent = isConfirmed ? "Fully Confirmed" : "All Orders";
+      fetchAndRenderOrders();
+    });
+
+    document
+      .getElementById("dateStart")
+      .addEventListener("change", () => fetchAndRenderOrders());
+    document
+      .getElementById("dateEnd")
+      .addEventListener("change", () => fetchAndRenderOrders());
+    document
+      .getElementById("updateDateStart")
+      .addEventListener("change", () => fetchAndRenderOrders());
+    document
+      .getElementById("updateDateEnd")
+      .addEventListener("change", () => fetchAndRenderOrders());
+    document
+      .getElementById("pageSize")
+      .addEventListener("change", () => fetchAndRenderOrders());
+
     document
       .getElementById("userFilter")
       .addEventListener("change", async () => {
