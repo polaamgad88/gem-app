@@ -735,7 +735,7 @@ async function saveOrder(orderId, token) {
 
     if (res.ok) {
       alert("Order updated successfully!");
-      window.location.reload();
+      window.location.href = `view-order.html?order_id=${orderId}`;
     } else {
       const data = await res.json();
       alert(`Failed to update order: ${data.message || "Unknown error"}`);

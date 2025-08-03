@@ -43,11 +43,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     Utils.UI.showError("Failed to load initial data. Please refresh the page.");
   }
 
-  // ✅ ADDED Clear Order Button Listener
   const clearBtn = document.createElement("button");
   clearBtn.textContent = "Clear Order";
   clearBtn.className = "btn btn-danger";
-  // clearBtn.style.marginTop = "10px";
   clearBtn.id = "clear-order-btn";
   clearBtn.style = `
   background-color: #fff;
@@ -79,12 +77,69 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   clearBtn.addEventListener("click", () => {
     if (confirm("Are you sure you want to clear this order?")) {
-      sessionStorage.removeItem("orderDraft");
+      localStorage.removeItem("orderDraft");
       location.reload();
     }
   });
-});
+  const fileInput = document.getElementById("order-sheet");
+  const fileNameSpan = document.getElementById("selected-file-name");
+  fileInput.addEventListener("change", () => {
+    fileNameSpan.textContent = fileInput.files[0]?.name || "No file chosen";
+  });
 
+  document
+    .getElementById("upload-sheet-btn")
+    .addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      const customerId = document.getElementById("customer-select").value;
+      const addressId = document.getElementById("address-select").value;
+
+      if (!file) {
+        alert("❌ Please choose an Excel file first.");
+        return;
+      }
+
+      if (!customerId || !addressId) {
+        alert("❌ Please select both a customer and an address.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("customer_id", customerId);
+      formData.append("address_id", addressId);
+
+      try {
+        Utils.UI.showLoader("loader");
+
+        const res = await fetch("https://order-app.gemegypt.net/api/orders/upload-sheet", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: formData,
+        });
+
+        Utils.UI.hideLoader("loader");
+        const data = await res.json();
+
+        if (res.ok) {
+          alert("✅ Order created successfully from sheet.");
+          sessionStorage.removeItem("orderDraft");
+          window.location.href = `view-order.html?order_id=${data.order_id}`;
+        } else {
+          alert(`❌ Failed to upload: ${data.message || "Unknown error"}`);
+          if (data.note) {
+            console.warn("Note:", data.note);
+          }
+        }
+      } catch (err) {
+        Utils.UI.hideLoader("loader");
+        console.error("Upload error:", err);
+        alert("❌ An error occurred while uploading the sheet.");
+      }
+    });
+});
 function saveOrderToSession() {
   const customerId = document.getElementById("customer-select").value;
   const addressId = document.getElementById("address-select").value;
@@ -100,7 +155,7 @@ function saveOrderToSession() {
       if (!productId || productId === "undefined") return null;
       return { productId, quantity };
     })
-    .filter(Boolean); // ⛔ removes nulls
+    .filter(Boolean);
 
   const combinedRows = Array.from(
     document.querySelectorAll("#combined-order-rows .order-row")
@@ -118,13 +173,14 @@ function saveOrderToSession() {
     orderDate,
     detailedRows,
     combinedRows,
+    timestamp: Date.now(), // ✅ Add timestamp for future expiry logic
   };
 
-  sessionStorage.setItem("orderDraft", JSON.stringify(sessionData));
+  localStorage.setItem("orderDraft", JSON.stringify(sessionData));
 }
 
 function loadOrderFromSession() {
-  const draft = sessionStorage.getItem("orderDraft");
+  const draft = localStorage.getItem("orderDraft");
   if (!draft) return;
 
   try {
@@ -135,7 +191,6 @@ function loadOrderFromSession() {
       document.getElementById("order-date").value = orderDate;
     }
 
-    // ✅ Load customer
     if (customerId && allCustomers.length > 0) {
       const customer = allCustomers.find(
         (c) => String(c.customer_id) === String(customerId)
@@ -149,7 +204,6 @@ function loadOrderFromSession() {
       }
     }
 
-    // ✅ Wait for address list and select saved one
     if (addressId) {
       const addressSelect = document.getElementById("address-select");
       const interval = setInterval(() => {
@@ -163,7 +217,6 @@ function loadOrderFromSession() {
       }, 300);
     }
 
-    // ✅ Restore detailed product rows
     if (Array.isArray(detailedRows)) {
       const container = document.getElementById("detailed-order-rows");
       const scrollable = document.querySelector(
@@ -226,7 +279,6 @@ function loadOrderFromSession() {
       });
     }
 
-    // ✅ Restore combined rows with data fetching
     if (Array.isArray(combinedRows)) {
       const container = document.getElementById("combined-order-rows");
       const scrollable = document.querySelector(
@@ -271,7 +323,6 @@ function loadOrderFromSession() {
 
         container.appendChild(row);
 
-        // ✅ Fetch product list for brand/category
         const token = localStorage.getItem("access_token");
         const params = new URLSearchParams();
         if (brand) params.append("brand", brand);
@@ -309,7 +360,7 @@ function loadOrderFromSession() {
     debouncePreviewUpdate();
     updateTotals();
   } catch (err) {
-    console.error("Failed to load saved order from session:", err);
+    console.error("Failed to load saved order from localStorage:", err);
   }
 }
 
@@ -1061,12 +1112,17 @@ async function updateOrderPreview() {
 }
 
 async function submitOrder(token) {
+  const submitBtn = document.getElementById("submit-order");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
   const customerId = document.getElementById("customer-select").value;
   const addressId = document.getElementById("address-select").value;
   const note = document.getElementById("order-note").value;
 
   if (!customerId || !addressId) {
     alert("Please select both a customer and an address.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit New Order";
     return;
   }
 
@@ -1116,11 +1172,15 @@ async function submitOrder(token) {
     }
   } catch (err) {
     console.error("Error collecting combined order products:", err);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit New Order";
   }
 
   console.log(products);
   if (products.length === 0) {
     alert("Please add at least one product to the order.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit New Order";
     return;
   }
   const payload = {
@@ -1152,11 +1212,15 @@ async function submitOrder(token) {
     } else {
       const data = await res.json();
       alert(`❌ Failed to create order: ${data.message || "Unknown error"}`);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit New Order";
     }
   } catch (err) {
     Utils.UI.hideLoader("loader");
     console.error("Error saving order:", err);
     alert("❌ An error occurred while creating the order. Please try again.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit New Order";
   }
 }
 

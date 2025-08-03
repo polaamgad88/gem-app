@@ -4,33 +4,26 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (!token) return;
 
   try {
-    // Get user information
     const username = localStorage.getItem("username");
     const admin = localStorage.getItem("is_admin");
     const role = localStorage.getItem("user_role");
 
     if (!username) throw new Error("Username not found");
 
-    // Display username
     const usernameElement = document.getElementById("username");
     if (usernameElement) {
       usernameElement.textContent = username;
     }
 
-    // Show admin buttons if applicable
     setupAdminButtons(admin, role);
-
-    // Verify token is still valid
     await verifyToken(token);
   } catch (err) {
     console.error("Dashboard initialization error:", err);
     window.location.href = "login.html";
   }
 
-  // Set up logout button
   setupLogoutButton();
 });
-
 
 // Helper function to set up admin buttons
 function setupAdminButtons(admin, role) {
@@ -46,9 +39,7 @@ function setupAdminButtons(admin, role) {
     if (manageCustomersBtn) manageCustomersBtn.style.display = "none";
     const viewOrderBtn = document.querySelector(".view-orders");
     if (viewOrderBtn) viewOrderBtn.style.display = "none";
-
-  }
-  else {
+  } else {
     if (admin == 1 || role !== "Delegate") {
       const manageUserBtn = document.querySelector(".manage-user");
       if (manageUserBtn) manageUserBtn.style.display = "block";

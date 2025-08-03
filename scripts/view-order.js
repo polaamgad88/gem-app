@@ -61,9 +61,7 @@ function populateOrderDetails(order) {
   document.getElementById("customer-address").textContent = order.address;
   if (order.note)
     document.getElementById("customer-note").textContent = order.note;
-  else
-      document.getElementById("customer-note").textContent = "NO NOTES";
-
+  else document.getElementById("customer-note").textContent = "NO NOTES";
 
   const itemsTableBody = document.getElementById("items-table-body");
   const itemsCardView = document.getElementById("items-card-view");
@@ -164,7 +162,7 @@ function setupActionButtons(orderId, token) {
 
         if (response.ok) {
           alert(data.message || "✅ Order confirmed successfully!");
-          location.reload();
+          location.href = "orders.html";
         } else {
           alert(data.message || "❌ Failed to confirm order.");
         }
@@ -202,7 +200,7 @@ function setupActionButtons(orderId, token) {
 
         if (response.ok) {
           alert(data.message || "✅ Order refunded successfully!");
-          location.reload(); // Refresh to reflect new status
+          location.href = "orders.html";
         } else {
           alert(data.message || "❌ Failed to refund order.");
         }

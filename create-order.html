@@ -191,6 +191,37 @@
             <button id="submit-order" class="btn btn-primary"
                 style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">Submit
                 New Order</button>
+            <hr style="margin: 40px 0;" />
+
+            <div style="text-align: center; margin-bottom: 12px;">
+                <h3 style="font-size: 20px; font-weight: 600; color: #0b2a59; margin-bottom: 6px;">
+                    OR Upload from Excel
+                </h3>
+                <p style="color: #666; font-size: 14px; margin-top: 0;">Import an order directly from a sheet</p>
+            </div>
+
+            <div id="upload-sheet-section"
+                style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: center; margin-bottom: 30px;">
+                <label for="order-sheet" style="
+                    padding: 12px 20px;
+                    background-color: #f1f3f5;
+                    color: #333;
+                    border: 1px solid #ccc;
+                    border-radius: 6px;
+                    font-size: 15px;
+                    cursor: pointer;
+                ">
+                    📄 Choose Excel File
+                    <input type="file" id="order-sheet" accept=".xlsx,.xls" style="display: none;" />
+                </label>
+                <span id="selected-file-name" style="font-size: 14px; color: #555;">No file chosen</span>
+
+                <button id="upload-sheet-btn" class="btn btn-primary" onmouseover="this.style.backgroundColor='#09335a'"
+                    onmouseout="this.style.backgroundColor='#0b2a59'">
+                    Upload from Sheet
+                </button>
+            </div>
+
         </div>
 </body>
 
