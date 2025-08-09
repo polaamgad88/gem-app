@@ -24,8 +24,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         "categories",
         token
       ),
-      fetchList("https://order-app.gemegypt.net/api/products/orders", "data", token),
-      fetchList("https://order-app.gemegypt.net/api/customers?all=true", "customers", token),
+      fetchList(
+        "https://order-app.gemegypt.net/api/products/orders",
+        "data",
+        token
+      ),
+      fetchList(
+        "https://order-app.gemegypt.net/api/customers?all=true",
+        "customers",
+        token
+      ),
     ]);
 
     // ✅ Make products globally accessible
@@ -86,59 +94,62 @@ document.addEventListener("DOMContentLoaded", async function () {
   fileInput.addEventListener("change", () => {
     fileNameSpan.textContent = fileInput.files[0]?.name || "No file chosen";
   });
+// The oldest uploaded file functionality is commented out
+  // document
+  //   .getElementById("upload-sheet-btn")
+  //   .addEventListener("click", async () => {
+  //     const file = fileInput.files[0];
+  //     const customerId = document.getElementById("customer-select").value;
+  //     const addressId = document.getElementById("address-select").value;
 
-  document
-    .getElementById("upload-sheet-btn")
-    .addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      const customerId = document.getElementById("customer-select").value;
-      const addressId = document.getElementById("address-select").value;
+  //     if (!file) {
+  //       alert("❌ Please choose an Excel file first.");
+  //       return;
+  //     }
 
-      if (!file) {
-        alert("❌ Please choose an Excel file first.");
-        return;
-      }
+  //     if (!customerId || !addressId) {
+  //       alert("❌ Please select both a customer and an address.");
+  //       return;
+  //     }
 
-      if (!customerId || !addressId) {
-        alert("❌ Please select both a customer and an address.");
-        return;
-      }
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("customer_id", customerId);
+  //     formData.append("address_id", addressId);
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("customer_id", customerId);
-      formData.append("address_id", addressId);
+  //     try {
+  //       Utils.UI.showLoader("loader");
 
-      try {
-        Utils.UI.showLoader("loader");
+  //       const res = await fetch(
+  //         "https://order-app.gemegypt.net/api/orders/upload-sheet",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+  //           },
+  //           body: formData,
+  //         }
+  //       );
 
-        const res = await fetch("https://order-app.gemegypt.net/api/orders/upload-sheet", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: formData,
-        });
+  //       Utils.UI.hideLoader("loader");
+  //       const data = await res.json();
 
-        Utils.UI.hideLoader("loader");
-        const data = await res.json();
-
-        if (res.ok) {
-          alert("✅ Order created successfully from sheet.");
-          sessionStorage.removeItem("orderDraft");
-          window.location.href = `view-order.html?order_id=${data.order_id}`;
-        } else {
-          alert(`❌ Failed to upload: ${data.message || "Unknown error"}`);
-          if (data.note) {
-            console.warn("Note:", data.note);
-          }
-        }
-      } catch (err) {
-        Utils.UI.hideLoader("loader");
-        console.error("Upload error:", err);
-        alert("❌ An error occurred while uploading the sheet.");
-      }
-    });
+  //       if (res.ok) {
+  //         alert("✅ Order created successfully from sheet.");
+  //         sessionStorage.removeItem("orderDraft");
+  //         window.location.href = `view-order.html?order_id=${data.order_id}`;
+  //       } else {
+  //         alert(`❌ Failed to upload: ${data.message || "Unknown error"}`);
+  //         if (data.note) {
+  //           console.warn("Note:", data.note);
+  //         }
+  //       }
+  //     } catch (err) {
+  //       Utils.UI.hideLoader("loader");
+  //       console.error("Upload error:", err);
+  //       alert("❌ An error occurred while uploading the sheet.");
+  //     }
+  //   });
 });
 function saveOrderToSession() {
   const customerId = document.getElementById("customer-select").value;
@@ -1083,7 +1094,10 @@ async function updateOrderPreview() {
       const price = parseFloat(data.price || 0).toFixed(2);
       const total = (price * quantity).toFixed(2);
       const photoUrl = data.image_path
-        ? `https://order-app.gemegypt.net/api/images/${data.image_path.replace(/^\/+/, "")}`
+        ? `https://order-app.gemegypt.net/api/images/${data.image_path.replace(
+            /^\/+/,
+            ""
+          )}`
         : "";
       const bar_code = data.bar_code;
       const card = document.createElement("div");
@@ -1193,14 +1207,17 @@ async function submitOrder(token) {
   try {
     Utils.UI.showLoader("loader");
 
-    const res = await fetch("https://order-app.gemegypt.net/api/orders/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(
+      "https://order-app.gemegypt.net/api/orders/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     Utils.UI.hideLoader("loader");
 
@@ -1276,3 +1293,50 @@ function saveNote() {
     message.style.display = "block";
   }
 }
+
+// The newest uploaded file functionality 
+document
+  .getElementById("order-sheet")
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    const customerId = document.getElementById("customer-select").value;
+    const addressId = document.getElementById("address-select").value;
+
+    if (!file) {
+      alert("❌ Please choose an Excel file first.");
+      return;
+    }
+    if (!customerId || !addressId) {
+      alert("❌ Please select both a customer and an address.");
+      return;
+    }
+
+    document.getElementById("selected-file-name").textContent = file.name;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("customer_id", customerId);
+    formData.append("address_id", addressId);
+
+    fetch("https://order-app.gemegypt.net/api/orders/upload-sheet", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+      body: formData,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Upload failed");
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Upload success:", data);
+        alert("✅The file has been uploaded successfully!");
+        sessionStorage.removeItem("orderDraft");
+        window.location.href = `view-order.html?order_id=${data.order_id}`;
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("❌ Failed to upload the file. Please try again.");
+      });
+  });
