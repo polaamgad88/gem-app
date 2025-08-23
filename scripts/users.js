@@ -223,11 +223,46 @@ function renderUsers(users) {
 
   tableBody.innerHTML = "";
   cardContainer.innerHTML = "";
-
+  const usersLength = users.length;
+  counter = 0;
   users.forEach((user) => {
     const isUserAdmin = user.admin;
     const isActive = user.status == "1";
-
+    counter += 1;
+    menu = "";
+    if (usersLength - counter <= 2) {
+      menu = `
+      <div class="dropdown-menu look_up" id="user-dropdown-${user.user_id}">
+      <button onclick="openEditModal(${user.user_id})">Edit</button>
+      <button onclick="openPasswordModal(${
+        user.user_id
+      })">Change Password</button>
+      <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
+        ${isActive ? "Deactivate" : "Activate"}
+      </button>
+      ${
+        isAdmin
+          ? `<button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
+          : ""
+      }
+    </div>`;
+    } else {
+      menu = `
+      <div class="dropdown-menu look_down" id="user-dropdown-${user.user_id}">
+      <button onclick="openEditModal(${user.user_id})">Edit</button>
+      <button onclick="openPasswordModal(${
+        user.user_id
+      })">Change Password</button>
+      <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
+        ${isActive ? "Deactivate" : "Activate"}
+      </button>
+      ${
+        isAdmin
+          ? `<button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
+          : ""
+      }
+    </div>`;
+    }
     let userClass = "";
     let badgeLabel = "";
 
@@ -270,7 +305,7 @@ function renderUsers(users) {
     }
 
     .action-btn:hover {
-      background-color: #28a745;
+      background-color: #0b2a59;
       color: white;
     }
 
@@ -278,13 +313,12 @@ function renderUsers(users) {
       display: none;
       position: absolute;
       right: 0;
-      top: 100%;
       background-color: white;
       min-width: 150px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       border-radius: 6px;
       overflow: hidden;
-      z-index: 100;
+      z-index: 9999;
     }
 
     .dropdown-menu button {
@@ -311,23 +345,10 @@ function renderUsers(users) {
   </style>
 
   <div class="action-container">
-    <button class="action-btn" data-dropdown-id="user-dropdown-${user.user_id}">
-      Actions ▾
-    </button>
-    <div class="dropdown-menu" id="user-dropdown-${user.user_id}">
-      <button onclick="openEditModal(${user.user_id})">Edit</button>
-      <button onclick="openPasswordModal(${
-        user.user_id
-      })">Change Password</button>
-      <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
-        ${isActive ? "Deactivate" : "Activate"}
-      </button>
-      ${
-        isAdmin
-          ? `<button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
-          : ""
-      }
-    </div>
+    <button class="action-btn look_up" data-dropdown-id="user-dropdown-${
+      user.user_id
+    }">⋮</button>
+    ${menu}
   </div>
 </td>
 
@@ -360,7 +381,9 @@ function renderUsers(users) {
       <p><strong>Phone:</strong> ${user.phone || "—"}</p>
      <div class="card-actions">
   <div class="row-actions">
-    <button class="btn view-btn" onclick="openEditModal(${user.user_id})">Edit</button>
+    <button class="btn view-btn" onclick="openEditModal(${
+      user.user_id
+    })">Edit</button>
     ${
       isAdmin
         ? `<button class="btn delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
@@ -369,8 +392,12 @@ function renderUsers(users) {
   </div>
 
   <div class="row-actions">
-    <button class="btn" onclick="openPasswordModal(${user.user_id})">Change Password</button>
-    <button class="btn toggle-btn" onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
+    <button class="btn" onclick="openPasswordModal(${
+      user.user_id
+    })">Change Password</button>
+    <button class="btn toggle-btn" onclick="toggleUserStatus(${user.user_id}, ${
+      isActive ? 0 : 1
+    })">
       ${isActive ? "Deactivate" : "Activate"}
     </button>
   </div>

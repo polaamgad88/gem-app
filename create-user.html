@@ -12,12 +12,36 @@
     <style>
       body {
         font-family: "Segoe UI", sans-serif;
-        background-color: #0b2a59;
+        background-color: #f3f3f5;
         margin: 0;
         padding: 0;
         color: #333;
       }
 
+          .navbar {
+        width: 100%;
+        background-color: #0b2a59;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 30px;
+        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar .logout-btn {
+        background-color: #fff;
+        color: #0b2a59;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+      }
       .container {
         max-width: 980px;
         margin: 30px auto;
@@ -48,6 +72,39 @@
   </head>
 
   <body>
+    <div class="navbar">
+      <img
+        src="./assets/GEM Icon.jpg"
+        alt="gem logo"
+        class="logo"
+        style="
+          display: block;
+          margin: 0;
+          height: 100px;
+          max-height: 45px;
+          object-fit: contain;
+          border-radius: 10%;
+        "
+      />
+      <style>
+        .logo {
+          display: block;
+          margin: 0 auto 0px;
+          height: 137px;
+          max-height: 120px;
+          object-fit: contain;
+        }
+        @media (max-width: 576px) {
+          .logo {
+            height: 90px;
+          }
+        }
+      </style>
+      <!-- <button class="logout-btn">Logout</button> -->
+      <button id="logout-btn" class="logout-btn">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
     <div class="container">
       <a
         href="./users.html"
@@ -84,8 +141,7 @@
         </svg>
         Dashboard
       </a>
-      <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
-      <h1>Add User</h1>
+      <h2 style="color: #333; text-align: center;margin-bottom: 20px;">Add User</h2>
 
       <form id="create-user-form">
         <div style="display: flex; flex-direction: column">
@@ -187,7 +243,7 @@
           type="submit"
           class="btn btn-add"
           style="
-            background-color: #007bff;
+            background: linear-gradient(135deg, #28a745, #218838);
             color: white;
             padding: 10px;
             font-size: 15px;
@@ -196,8 +252,8 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
           "
-          onmouseover="this.style.backgroundColor='#28a745'"
-          onmouseout="this.style.backgroundColor='#007bff'"
+          onmouseover="this.style.backgroundColor='#0b2a59'"
+          onmouseout="this.style.backgroundColor='#0b2a59'"
         >
           Add User
         </button>
