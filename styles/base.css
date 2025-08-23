@@ -576,3 +576,16 @@ h6,
   content: "←";
   margin-right: var(--spacing-xs);
 }
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.row-actions {
+  display: flex;
+  justify-content: right; 
+  gap: 6px;
+}

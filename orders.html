@@ -1,242 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orders</title>
-  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
-  <link rel="stylesheet" href="./styles/base.css" />
-  <link rel="stylesheet" href="./styles/orders.css" />
-  <script src="./scripts/utils.js" defer></script>
-  <script src="./scripts/orders.js" defer></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0b2a59;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-
-    .container {
-      max-width: 950px;
-      margin: 30px auto;
-      background: #fff;
-      border-radius: 10px;
-      padding: 30px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    }
-
-    .logo {
-      display: block;
-      margin: 0 auto 0px;
-      height: 137px;
-      max-height: 140px;
-      object-fit: contain;
-    }
-
-    @media (max-width: 576px) {
-      .logo {
-        height: 90px;
-      }
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 20px;
-      color: #0b2a59;
-    }
-
-    /* Filters Container */
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: space-between;
-      margin-bottom: 30px;
-    }
-
-    /* Group wrapper for label + field */
-    .filter-group {
-      flex: 1 1 20%;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Label styling */
-    .filter-group label {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 4px;
-      color: #333;
-    }
-
-    /* Select field styling */
-    .filter-group select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      background-color: #f2f3f5;
-    }
-
-    .export-btn {
-      flex: 1 1 100%;
-      width: 100%;
-      background-color: white;
-      border: 2px solid #28a745;
-      /* green border */
-      padding: 10px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.25s ease;
-    }
-
-    .export-btn svg {
-      width: 20px;
-      height: 20px;
-      fill: #28a745;
-      /* green icon by default */
-      transition: fill 0.25s ease;
-    }
-
-    .export-btn:hover {
-      background-color: #28a745;
-      /* green fill */
-    }
-
-    .export-btn:hover svg {
-      fill: white;
-      /* white icon on hover */
-    }
-
-    /* Mobile view stacks filters */
-    @media (max-width: 768px) {
-      .filters {
-        flex-direction: column;
-      }
-
-      .filter-group,
-      .export-btn {
-        flex: 1 1 100%;
-      }
-    }
-
-
-    .back-link {
-      display: inline-block;
-      margin-bottom: 20px;
-      padding: 10px 20px;
-      font-weight: 600;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background-color: white;
-      text-decoration: none;
-      color: #0b2a59;
-      transition: background 0.2s ease;
-    }
-
-    .back-link:hover {
-      background-color: #f1f1f1;
-    }
-
-
-    .pagination-controls {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .pagination-controls button {
-      margin: 2px;
-      padding: 6px 10px;
-      cursor: pointer;
-      border: none;
-      background: #f0f0f0;
-      font-weight: bold;
-      border-radius: 5px;
-    }
-
-    .pagination-controls button.active {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .pagination-controls button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        width: 90%;
-        padding: 20px;
-      }
-
-      .filters {
-        flex-direction: column;
-      }
-
-      .logo {
-        height: 100px;
-      }
-
-      .export-btn {
-        justify-content: center;
-        width: 100%;
-      }
-
-      .back-link {
-        width: 100%;
-        text-align: center;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <div id="loader" style="display: none;">
-    <div class="loader"></div>
-    <strong>Loading orders...</strong>
-  </div>
-
-  <div class="container">
-    <a href="index.html" style="
-    display: inline-flex;
-    align-items: center;
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-    background-color: #f8f9fa;
-    border: 1px solid #ced4da;
-    padding: 8px 14px;
-    border-radius: 6px;
-    text-decoration: none;
-    margin-bottom: 24px;
-    transition: background-color 0.2s ease;
-    gap: 8px;
-  " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
-      Dashboard
-    </a>
-
-    <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
-    display: block;
-    margin: 0 auto 0px;
-    height: 150px;
-    max-height: 140px;
-    object-fit: contain;
-  " />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orders</title>
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/orders.css" />
+    <script src="./scripts/utils.js" defer></script>
+    <script src="./scripts/orders.js" defer></script>
     <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: #f3f3f5;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+      .navbar {
+        width: 100%;
+        background-color: #0b2a59;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 30px;
+        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar .logout-btn {
+        background-color: #fff;
+        color: #0b2a59;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+      }
+
+      .container {
+        max-width: 950px;
+        margin: 30px auto;
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
+      }
+
       .logo {
         display: block;
         margin: 0 auto 0px;
@@ -250,164 +64,504 @@
           height: 90px;
         }
       }
+
+      h1 {
+        text-align: center;
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #0b2a59;
+      }
+
+      /* Filters Container */
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+
+      /* Group wrapper for label + field */
+      .filter-group {
+        flex: 1 1 20%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Label styling */
+      .filter-group label {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: #333;
+      }
+
+      /* Select field styling */
+      .filter-group select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        background-color: #f2f3f5;
+      }
+
+      .export-btn {
+        /* flex: 1 1 100%;
+        width: 100%; */
+        background-color: #28a745;
+        /* border: 2px solid #0b2a59; */
+        /* green border */
+        padding: 10px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.25s ease;
+        box-shadow: 0 4px 12px rgba(3, 67, 2, 0.4);
+      }
+
+      .export-btn svg {
+        width: 22px;
+        height: 22px;
+        fill: #28a745;
+        /* green icon by default */
+        transition: fill 0.25s ease;
+        padding: 5px;
+      }
+
+      .export-btn:hover {
+        background-color: #28a745;
+        box-shadow: 0 4px 12px rgba(3, 67, 2, 0.4);
+        transition: all 0.3s ease;
+      }
+
+      .export-btn:hover svg {
+        fill: white;
+        /* white icon on hover */
+      }
+
+      @media (max-width: 768px) {
+        .export-wrapper {
+          margin-left: 0;
+          width: 100%;
+        }
+        .export-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      /* Mobile view stacks filters */
+      @media (max-width: 768px) {
+        .filters {
+          flex-direction: column;
+        }
+
+        .filter-group,
+        .export-btn {
+          flex: 1 1 100%;
+        }
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-bottom: 5px;
+        padding: 10px 20px;
+        font-weight: 600;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: white;
+        text-decoration: none;
+        color: #0b2a59;
+        transition: background 0.2s ease;
+      }
+
+      .back-link:hover {
+        background-color: #f1f1f1;
+      }
+
+      .pagination-controls {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .pagination-controls button {
+        margin: 2px;
+        padding: 6px 10px;
+        cursor: pointer;
+        border: none;
+        background: #f0f0f0;
+        font-weight: bold;
+        border-radius: 5px;
+      }
+
+      .pagination-controls button.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .pagination-controls button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          width: 90%;
+          padding: 20px;
+        }
+
+        .filters {
+          flex-direction: column;
+        }
+
+        .logo {
+          height: 100px;
+        }
+
+        /* .export-btn {
+          justify-content: center;
+          width: 100%;
+        } */
+
+        .back-link {
+          width: 100%;
+          text-align: center;
+        }
+      }
+      th {
+        background-color: #0b2a59;
+        color: white;
+      }
     </style>
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/delegate-landing.js"></script>
+  </head>
 
-
-    <h2 style="text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 30px;">ORDERS</h2>
-
-    <div class="filters">
-      <div class="filter-group">
-        <label for="userFilter">Filter by User:</label>
-        <select id="userFilter">
-          <option value="all">All Users</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label for="customerFilter">Filter by Customer:</label>
-        <select id="customerFilter">
-          <option value="all">All Customers</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="dateStart">Order Date From:</label>
-        <input type="date" id="dateStart" />
-      </div>
-
-      <div class="filter-group">
-        <label for="dateEnd">Order Date To:</label>
-        <input type="date" id="dateEnd" />
-      </div>
-
-      <div class="filter-group">
-        <label for="updateDateStart">Update Date From:</label>
-        <input type="date" id="updateDateStart" />
-      </div>
-
-      <div class="filter-group">
-        <label for="updateDateEnd">Update Date To:</label>
-        <input type="date" id="updateDateEnd" />
-      </div>
-
-      <div class="filter-group">
-        <label for="pageSize">Entries per page:</label>
-        <select id="pageSize">
-          <option value="10">10</option>
-          <option value="25" selected>25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label for="confirmedToggle">Show:</label>
-        <button id="confirmedToggle" class="toggle-btn">All Orders</button>
-      </div>
-
-      <label style="opacity: 0;color:#28a745;">Export</label>
-      <button id="exportBtn" class="export-btn" title="Export to Excel">
-        <p style="color: black; ">DOWNLOAD </p>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-          <path fill="#107C41" d="M369.9 97.98L286 14.1C277.5 5.6 266.2 0 254.4 0H48C21.49 0 0 21.49 0 48v416c0 
-                26.5 21.49 48 48 48h288c26.5 0 48-21.5 48-48V131.6c0-12.7-5.1-24.9-14.1-33.62zM256 51.9 
-                332.1 128H256V51.9zM231.1 352l-30.5-45.6-30.3 45.6H132.2l47.3-72-45.2-68h38.3l28.7 
-                42.4 28.5-42.4h38l-45.2 68 47.4 72H231.1z" />
-        </svg>
+  <body>
+    <div class="navbar">
+      <img
+        src="./assets/GEM Icon.jpg"
+        alt="gem logo"
+        class="logo"
+        style="
+          display: block;
+          margin: 0;
+          height: 100px;
+          max-height: 45px;
+          object-fit: contain;
+          border-radius: 10%;
+        "
+      />
+      <style>
+        .logo {
+          display: block;
+          margin: 0 auto 0px;
+          height: 137px;
+          max-height: 120px;
+          object-fit: contain;
+        }
+        @media (max-width: 576px) {
+          .logo {
+            height: 90px;
+          }
+        }
+      </style>
+      <!-- <button class="logout-btn">Logout</button> -->
+      <button id="logout-btn" class="logout-btn">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
       </button>
+    </div>
 
+    <div id="loader" style="display: none">
+      <div class="loader"></div>
+      <strong>Loading orders...</strong>
+    </div>
 
+    <div class="container">
+      <a
+        href="index.html"
+        style="
+          display: inline-flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 500;
+          color: #333;
+          background-color: #f8f9fa;
+          border: 1px solid #ced4da;
+          padding: 8px 14px;
+          border-radius: 6px;
+          text-decoration: none;
+          margin-bottom: 24px;
+          transition: background-color 0.2s ease;
+          gap: 8px;
+        "
+        onmouseover="this.style.backgroundColor='#e9ecef'"
+        onmouseout="this.style.backgroundColor='#f8f9fa'"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="#333"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        Dashboard
+      </a>
 
-      <div class="filter-group">
-        <label style="opacity: 0;color:#28a745;">Export</label>
-        <!-- <button id="exportBtn" class="export-btn" title="Confirm Orders">
+      <!-- <img
+        src="./assets/GEM Group 2024.jpg"
+        alt="gem logo"
+        class="logo"
+        style="
+          display: block;
+          margin: 0 auto 0px;
+          height: 150px;
+          max-height: 140px;
+          object-fit: contain;
+        "
+      />
+      <style>
+        .logo {
+          display: block;
+          margin: 0 auto 0px;
+          height: 137px;
+          max-height: 140px;
+          object-fit: contain;
+        }
+
+        @media (max-width: 576px) {
+          .logo {
+            height: 90px;
+          }
+        }
+      </style> -->
+
+      <h2
+        style="
+          text-align: left;
+          font-size: 26px;
+          font-weight: 700;
+          margin-bottom: 30px;
+          margin-left: 8px;
+        "
+      >
+        Orders
+      </h2>
+
+      <div class="filters" style="margin: 1px">
+        <div class="filter-group">
+          <label for="userFilter">Filter by User:</label>
+          <select id="userFilter" style="border-radius: 8px">
+            <option value="all">All Users</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="customerFilter">Filter by Customer:</label>
+          <select id="customerFilter" style="border-radius: 8px">
+            <option value="all">All Customers</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="dateStart">Order Date From:</label>
+          <input type="date" id="dateStart" style="border-radius: 8px" />
+        </div>
+
+        <div class="filter-group">
+          <label for="dateEnd">Order Date To:</label>
+          <input type="date" id="dateEnd" style="border-radius: 8px" />
+        </div>
+
+        <div class="filter-group">
+          <label for="updateDateStart">Update Date From:</label>
+          <input type="date" id="updateDateStart" style="border-radius: 8px" />
+        </div>
+
+        <div class="filter-group">
+          <label for="updateDateEnd">Update Date To:</label>
+          <input type="date" id="updateDateEnd" style="border-radius: 8px" />
+        </div>
+
+        <div class="filter-group">
+          <label for="pageSize">Entries per page:</label>
+          <select id="pageSize" style="border-radius: 8px">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="confirmedToggle">Show:</label>
+          <button
+            id="confirmedToggle"
+            class="toggle-btn"
+            style="border-radius: 8px"
+          >
+            All Orders
+          </button>
+        </div>
+
+        <div class="filter-group">
+          <label style="opacity: 0; color: #28a745">Export</label>
+          <!-- <button id="exportBtn" class="export-btn" title="Confirm Orders">
           <p style="color: black; ">Confirm </p>
         </button> -->
+        </div>
+      </div>
 
+      <div
+        class="export-wrapper"
+        style="display: flex; justify-content: end; border-radius: 8px"
+      >
+        <!-- <label style="opacity: 0; color: #28a745">Export</label> -->
+        <button id="exportBtn" class="export-btn" title="Export to Excel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <path
+              fill="#fff"
+              d="M369.9 97.98L286 14.1C277.5 5.6 266.2 0 254.4 0H48C21.49 0 0 21.49 0 48v416c0 
+          26.5 21.49 48 48 48h288c26.5 0 48-21.5 48-48V131.6c0-12.7-5.1-24.9-14.1-33.62zM256 51.9 
+          332.1 128H256V51.9zM231.1 352l-30.5-45.6-30.3 45.6H132.2l47.3-72-45.2-68h38.3l28.7 
+          42.4 28.5-42.4h38l-45.2 68 47.4 72H231.1z"
+            />
+          </svg>
+          <p style="color: #fff">DOWNLOAD</p>
+        </button>
+      </div>
+
+      <div class="table-responsive" style="margin-top: 10px">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="checkAll" /></th>
+              <th>Order&nbsp;ID</th>
+              <th style="cursor: pointer" onclick="sortTable(2,'date')">
+                Date ⬍
+              </th>
+              <th>Customer</th>
+              <th>Delegate</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th style="cursor: pointer" onclick="sortTable(7,'price')">
+                Total ⬍
+              </th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTable"></tbody>
+          <tfoot>
+            <tr id="orderSummaryRow">
+              <td colspan="9" style="text-align: right; font-weight: bold"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="card-view" style="display: none">
+        <div id="ordersCards"></div>
+        <div
+          id="cardSummary"
+          style="text-align: right; padding: 10px; font-weight: bold"
+        ></div>
       </div>
     </div>
 
-
-
-
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th><input type="checkbox" id="checkAll" /></th>
-            <th>Order&nbsp;ID</th>
-            <th style="cursor:pointer" onclick="sortTable(2,'date')">Date ⬍</th>
-            <th>Customer</th>
-            <th>Delegate</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th style="cursor:pointer" onclick="sortTable(7,'price')">Total ⬍</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="ordersTable"></tbody>
-        <tfoot>
-          <tr id="orderSummaryRow">
-            <td colspan="9" style="text-align:right; font-weight:bold;"></td>
-          </tr>
-        </tfoot>
-      </table>
+    <div id="pagination" class="pagination-controls">
+      <!-- JS will generate pagination buttons here -->
     </div>
 
-    <div class="card-view" style="display: none;">
-      <div id="ordersCards"></div>
-      <div id="cardSummary" style="text-align:right; padding: 10px; font-weight: bold;"></div>
+    <div id="exportModal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Export Orders</h2>
+        <form id="exportForm">
+          <div class="form-group">
+            <label for="modalCustomer">Customer</label>
+            <input
+              list="modalCustomerList"
+              id="modalCustomer"
+              placeholder="Type to filter"
+            />
+            <datalist id="modalCustomerList"></datalist>
+          </div>
+          <div class="form-group">
+            <label for="modalUser">User</label>
+            <input
+              list="modalUserList"
+              id="modalUser"
+              placeholder="Type to filter"
+            />
+            <datalist id="modalUserList"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Amount&nbsp;(EGP)</label>
+            <div style="display: flex; gap: 0.5rem; flex-direction: row">
+              <input type="number" id="amountStart" placeholder="From" />
+              <input type="number" id="amountEnd" placeholder="To" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>create Date&nbsp;range</label>
+            <div style="display: flex; gap: 0.5rem; flex-direction: row">
+              <input type="date" id="dateStart" />
+              <input type="date" id="dateEnd" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>update Date&nbsp;range</label>
+            <div style="display: flex; gap: 0.5rem; flex-direction: row">
+              <input type="date" id="dateStartUpdate" placeholder="From" />
+              <input type="date" id="dateEndUpdate" placeholder="To" />
+            </div>
+          </div>
+          <div
+            class="form-group"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              flex-direction: row;
+            "
+          >
+            <input
+              style="margin-top: 0rem; width: inherit"
+              type="checkbox"
+              id="fullyconfirmed"
+            />
+            <label for="fullyconfirmed">only Fully Confirmed Orders</label>
+          </div>
+          <button
+            type="submit"
+            class="export-btn"
+            style="color: #fff; background-color: #0b2a59; width: 100%;"
+          >
+            Export
+          </button>
+        </form>
+      </div>
     </div>
-  </div>
-
-  <div id="pagination" class="pagination-controls">
-    <!-- JS will generate pagination buttons here -->
-  </div>
-
-  <div id="exportModal" class="modal hidden">
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
-      <h2>Export Orders</h2>
-      <form id="exportForm">
-        <div class="form-group">
-          <label for="modalCustomer">Customer</label>
-          <input list="modalCustomerList" id="modalCustomer" placeholder="Type to filter" />
-          <datalist id="modalCustomerList"></datalist>
-        </div>
-        <div class="form-group">
-          <label for="modalUser">User</label>
-          <input list="modalUserList" id="modalUser" placeholder="Type to filter" />
-          <datalist id="modalUserList"></datalist>
-        </div>
-        <div class="form-group">
-          <label>Amount&nbsp;(EGP)</label>
-          <div style="display: flex; gap: 0.5rem; flex-direction: row;">
-            <input type="number" id="amountStart" placeholder="From" />
-            <input type="number" id="amountEnd" placeholder="To" />
-          </div>
-
-        </div>
-        <div class="form-group">
-          <label>create Date&nbsp;range</label>
-          <div style="display: flex; gap: 0.5rem; flex-direction: row;">
-            <input type="date" id="dateStart" />
-            <input type="date" id="dateEnd" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>update Date&nbsp;range</label>
-          <div style="display: flex; gap: 0.5rem; flex-direction: row;">
-            <input type="date" id="dateStartUpdate" placeholder="From" />
-            <input type="date" id="dateEndUpdate" placeholder="To" />
-          </div>
-        </div>
-        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
-          <input style="margin-top: 0rem; width: inherit;" type="checkbox" id="fullyconfirmed" />
-          <label for="fullyconfirmed">only Fully Confirmed Orders</label>
-        </div>
-        <button type="submit" class="export-btn" style="color: #28a745;">Export</button>
-      </form>
-    </div>
-  </div>
-</body>
-
+  </body>
 </html>

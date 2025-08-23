@@ -417,6 +417,21 @@ table img {
     font-size: var(--font-size-xs);
 }
 
+@media (max-width: 576px) {
+  .product-card {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .product-card strong {
+    display: inline-block;
+    min-width: 80px; 
+  }
+}
+
+
 
 .pagination {
     display: flex;

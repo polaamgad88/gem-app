@@ -34,12 +34,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function populateBrands(token) {
-  const res = await fetch(
-    "https://order-app.gemegypt.net/api/products/brands",
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+  const res = await fetch("http://localhost:5000/products/brands", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   const brands = (await res.json()).brands || [];
   const brandSelect = document.getElementById("brand-filter");
   brandSelect.innerHTML =
@@ -50,10 +47,10 @@ async function populateBrands(token) {
 async function populateCategories(token) {
   const brand = document.getElementById("brand-filter").value;
   const categoryEndpoint = brand
-    ? `https://order-app.gemegypt.net/api/products/categories?brand=${encodeURIComponent(
+    ? `http://localhost:5000/products/categories?brand=${encodeURIComponent(
         brand
       )}`
-    : `https://order-app.gemegypt.net/api/products/categories`;
+    : `http://localhost:5000/products/categories`;
 
   const res = await fetch(categoryEndpoint, {
     headers: { Authorization: `Bearer ${token}` },
@@ -81,7 +78,7 @@ async function fetchAndRenderProducts(token) {
   params.append("limit", pageLimit);
 
   const res = await fetch(
-    `https://order-app.gemegypt.net/api/products?${params.toString()}`,
+    `http://localhost:5000/products?${params.toString()}`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -97,7 +94,7 @@ async function fetchAndRenderProducts(token) {
   cardContainer.innerHTML = "";
 
   products.forEach((product) => {
-    const imageUrl = `https://order-app.gemegypt.net/api/images/${product.image_path}`;
+    const imageUrl = `http://localhost:5000/images/${product.image_path}`;
 
     // Table Row
     const row = document.createElement("tr");
@@ -148,9 +145,43 @@ async function fetchAndRenderProducts(token) {
       </td>
      <td>
   <style>
+td {
+  vertical-align: middle; 
+  text-align: center; 
+}
+
+.action-container, 
+.available-badge, 
+.not-available-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+td:nth-child(3), 
+td:nth-child(4), 
+td:nth-child(5), 
+td:nth-child(6), 
+td:nth-child(7), 
+td:nth-child(8)   {
+  vertical-align: middle;
+  text-align: center;
+}
+
+td:nth-child(7) span,
+td:nth-child(8) .action-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
     .action-container {
       position: relative;
-      display: inline-block;
+       display: flex;
+  justify-content: center; 
+  align-items: center;    
+  height: 100%;   
       font-family: sans-serif;
     }
 
@@ -211,12 +242,30 @@ async function fetchAndRenderProducts(token) {
     }
   </style>
 
-  <div class="action-container">
-    <button class="action-btn">Actions ▾</button>
+  <div class="action-container" style="display: flex; justify-content: center;align-items: center;">
+    <button class="action-btn">⋮</button>
+    <div class="dropdown-menu">
+      <button onclick="openProductDialog('edit', ${
+        product.product_id
+      })">Edit</button>  <div class="action-container" style="display: flex; justify-content: center;align-items: center;">
+    <button class="action-btn">⋮</button>
     <div class="dropdown-menu">
       <button onclick="openProductDialog('edit', ${
         product.product_id
       })">Edit</button>
+      <button onclick="openProductDialog('copy', ${
+        product.product_id
+      })">Copy</button>
+      <button onclick="toggleVisability(${product.product_id}, ${
+      product.visability
+    })">
+        ${product.visability === 1 ? "Hide" : "Show"}
+      </button>
+      <button class="btn-delete" onclick="deleteProduct(${
+        product.product_id
+      })">Delete</button>
+    </div>
+  </div>b
       <button onclick="openProductDialog('copy', ${
         product.product_id
       })">Copy</button>
@@ -238,6 +287,22 @@ async function fetchAndRenderProducts(token) {
     const card = document.createElement("div");
     card.className = "product-card";
     card.innerHTML = `
+    <div style="position: relative;">
+ <span style="
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 18px;
+    ">
+      ${
+        product.availability === "Available"
+          ? "🟢"
+          : product.availability === "Limited"
+          ? "🟡"
+          : "🔴"
+      }
+    </span>
+
        <img src="${imageUrl}" alt="${product.product_name}" style="
     width: 60px;
     height: 60px;
@@ -245,7 +310,10 @@ async function fetchAndRenderProducts(token) {
     border-radius: 6px;
     margin-bottom: 6px;
   "/>
-     
+           <div class="barcode-text text-center "><strong>${
+             product.bar_code || "-"
+           }</strong></div>
+            <hr style="margin: 20px 0;" />
 
 
 <div class="product-card-header" style="
@@ -256,7 +324,7 @@ async function fetchAndRenderProducts(token) {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;  
 ">
   <span style="flex-grow: 1; word-break: break-word;">
     ${product.product_name}
@@ -269,37 +337,20 @@ async function fetchAndRenderProducts(token) {
     color: white;
     background-color: ${product.visability === 1 ? "#28a745" : "#999"};
     white-space: nowrap;
+    margin-left: auto;
   ">
     ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
   </span>
 </div>
 
 
-
-
-
-
-      <div class="barcode-text text-center">${product.bar_code || "-"}</div>
+      
       <div class="product-card-body">
-        <p><strong>Item No.:</strong> ${product.Item_number || "-"}</p>
-        <p><strong>Brand:</strong> ${product.brand}</p>
-        <p><strong>Category:</strong> ${product.category}</p>
-        <p><strong>Price:</strong> ${Utils.Format.currency(product.price)}</p>
-        <p><strong>Availability:</strong>
-          <span class="${
-            product.availability == "Available"
-              ? "available-badge"
-              : "not-available-badge"
-          }">
-             ${
-               product.availability === "Available"
-                 ? "🟢"
-                 : product.availability === "Limited"
-                 ? "🟡"
-                 : "🔴"
-             }
-          </span>
-        </p>
+        <p>${product.Item_number || "-"}</p>
+        <p>${product.brand}</p>
+        <p>${product.category}</p>
+        <p>${Utils.Format.currency(product.price)}</p>
+       
       </div>
 
       
@@ -369,7 +420,7 @@ async function fetchAndRenderProducts(token) {
     <button class="action-btn-mobile" data-dropdown-id="dropdown-${
       product.product_id
     }">
-      Actions ▾
+      ⋮
     </button>
     <div class="dropdown-menu-mobile" id="dropdown-${product.product_id}">
       <button onclick="openProductDialog('edit', ${
@@ -425,13 +476,10 @@ async function deleteProduct(id) {
 
   const token = localStorage.getItem("access_token");
   try {
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/product/delete/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const res = await fetch(`http://localhost:5000/product/delete/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (res.ok) {
       alert("Product deleted successfully.");
@@ -459,7 +507,7 @@ function openProductDialog(action, productId) {
 
   errorMsg.style.display = "none"; // Clear previous error
 
-  fetch(`https://order-app.gemegypt.net/api/product/find/${productId}`, {
+  fetch(`http://localhost:5000/product/find/${productId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -540,10 +588,10 @@ document
 
     const url =
       currentAction === "add"
-        ? `https://order-app.gemegypt.net/api/add_product`
+        ? `http://localhost:5000/add_product`
         : currentAction === "edit"
-        ? `https://order-app.gemegypt.net/api/product/edit/${id}`
-        : `https://order-app.gemegypt.net/api/product/copy/${id}`;
+        ? `http://localhost:5000/product/edit/${id}`
+        : `http://localhost:5000/product/copy/${id}`;
     if (currentAction === "add") {
       document.getElementById("image-note").style.display = "none";
     } else {
@@ -612,7 +660,7 @@ async function handleExport(token) {
     if (barcode) params.append("bar_code", barcode);
   }
 
-  const url = `https://order-app.gemegypt.net/api/products/export?${params.toString()}`;
+  const url = `http://localhost:5000/products/export?${params.toString()}`;
   try {
     const res = await fetch(url, {
       method: "GET",
@@ -699,9 +747,9 @@ async function handleImport() {
   try {
     let endpoint = "";
     if (hasXlsx) {
-      endpoint = `https://order-app.gemegypt.net/api/products/import?mode=${selectedImportMode}`;
+      endpoint = `http://localhost:5000/products/import?mode=${selectedImportMode}`;
     } else {
-      endpoint = `https://order-app.gemegypt.net/api/products/images/import`;
+      endpoint = `http://localhost:5000/products/images/import`;
     }
 
     const res = await fetch(endpoint, {
@@ -750,7 +798,7 @@ async function toggleVisability(productId, currentVisability) {
 
   try {
     const res = await fetch(
-      `https://order-app.gemegypt.net/api/products/set_visability/${productId}/${newVisability}`,
+      `http://localhost:5000/products/set_visability/${productId}/${newVisability}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },

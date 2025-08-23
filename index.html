@@ -1,149 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delegate Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(145deg, #022048, #0b2a59);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+      .top-circle {
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 250px;
+        height: 250px;
+        background-color: #014f86;
+        border-radius: 50%;
+        z-index: 0;
+      }
+      .bottom-circle {
+        position: absolute;
+        bottom: -120px;
+        left: -120px;
+        width: 320px;
+        height: 320px;
+        background-color: #013a73;
+        border-radius: 50%;
+        z-index: 0;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delegate Dashboard</title>
-  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
-  <link rel="stylesheet" href="./styles/base.css" />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #0b2a59;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+      .bottom-circle-small {
+        position: absolute;
+        bottom: -60px;
+        left: 100px;
+        width: 200px;
+        height: 200px;
+        background-color: #004080;
+        border-radius: 50%;
+        z-index: 0;
+      }
 
-    .container {
-      background-color: #ffffff;
-      padding: 60px 40px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-      text-align: center;
-      max-width: 600px;
-      width: 80%;
-      min-height: 600px;
-    }
-
-    .logo {
-      display: block;
-      margin: 0 auto 20px;
-      height: 200px;
-      object-fit: contain;
-    }
-
-    h1 {
-      color: #0b2a59;
-      font-size: 24px;
-      margin-bottom: 40px;
-    }
-
-    #username {
-      font-weight: 600;
-    }
-
-    .btn-container {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      display: block;
-      padding: 18px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 17px;
-      transition: 0.2s ease-in-out;
-      cursor: pointer;
-      text-align: center;
-      border: none;
-    }
-
-    .view-orders,
-    .manage-customers,
-    .manage-user,
-    .manage-products {
-      background-color: #0b2a59;
-      color: white;
-    }
-
-    .add-order {
-      background-color: #28a745;
-      color: white;
-    }
-
-    .logout {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .btn:hover {
-      opacity: 0.92;
-      transform: scale(1.01);
-    }
-
-    @media (max-width: 480px) {
       .container {
-        padding: 40px 20px;
-        margin: 0 10px;
-        min-height: auto;
+        background-color: #ffffff;
+        padding: 50px 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        z-index: 1;
       }
 
       .logo {
+        display: block;
+        margin: 0 auto 15px;
         height: 120px;
+        object-fit: contain;
       }
 
       h1 {
-        font-size: 20px;
+        color: #0b2a59;
+        font-size: 26px;
+        font-weight: 600;
+        margin-bottom: 30px;
+      }
+
+      #username {
+        font-weight: 700;
+        color: #123b75;
+      }
+
+      .btn-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 10px;
       }
 
       .btn {
-        font-size: 15px;
-        padding: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+        border: none;
+        width: 400px;
+        margin: 0 auto;
       }
-    }
-  </style>
-  <script src="./scripts/utils.js"></script>
-  <script src="./scripts/delegate-landing.js"></script>
-</head>
 
-<body>
-  <div class="container">
-    <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
-    <h1>Welcome, <span id="username"></span>!</h1>
+      .view-orders,
+      .manage-customers,
+      .manage-user,
+      .manage-products {
+        background-color: #0b2a59;
+        color: white;
+      }
 
-    <div class="btn-container">
-      <a href="orders.html" class="btn view-orders">View Orders</a>
-      <a href="./create-order.html" class="btn add-order">Add New Order</a>
-      <a href="./customers.html" class="btn manage-customers">Manage Customers</a>
-      <a href="./users.html" class="btn manage-user" style="display: none;">Manage Users</a>
-      <a href="./products.html" class="btn manage-products" style="display: none;">Manage Products</a>
-      <button id="logout-btn" class="btn logout" style="
-      background-color: #fff;
-      color: #dc3545;
-      border: 1px solid #dc3545;
-      font-size: 16px;
-      font-weight: 500;
-      padding: 12px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.2s ease, color 0.2s ease;
-      margin-top: 10%;
-    " onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='#fff';"
-        onmouseout="this.style.backgroundColor='#fff'; this.style.color='#dc3545';">
-        Logout
+      .add-order {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .logout {
+        background-color: #db2a3c;
+        color: #fff;
+        border: 2px solid #db2a3c;
+        margin: 20px auto 0;
+        display: inline-flex;
+        width: fit-content;
+        justify-content: center;
+      }
+
+      .btn:hover {
+        opacity: 0.95;
+        transform: translateY(-2px);
+      }
+
+      /* .logout:hover {
+        background-color: #a82b37;
+        color: white;
+      } */
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 35px 20px;
+        }
+
+        .logo {
+          height: 90px;
+        }
+
+        h1 {
+          font-size: 14px;
+        }
+
+        .btn {
+          font-size: 15px;
+          padding: 12px;
+          width: 100%;
+        }
+      }
+      @media (max-width: 480px) {
+        .container {
+          padding: 25px 18px;
+          border-radius: 12px;
+        }
+
+        .logo {
+          height: 70px;
+          margin-bottom: 10px;
+        }
+
+        h1 {
+          font-size: 18px;
+          margin-bottom: 20px;
+        }
+
+        .btn-container {
+          gap: 12px;
+        }
+
+        .btn {
+          font-size: 14px;
+          padding: 10px;
+          width: 95%;
+          border-radius: 8px;
+        }
+
+        .logout {
+          font-size: 14px;
+          padding: 10px 18px;
+          margin-top: 15px;
+          width: 40%;
+        }
+      }
+    </style>
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/delegate-landing.js"></script>
+  </head>
+
+  <body>
+    <div class="top-circle"></div>
+    <div class="bottom-circle"></div>
+    <div class="bottom-circle-small"></div>
+    <div class="container">
+      <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
+      <h1>Welcome, <span id="username"></span>👋</h1>
+      <div class="btn-container">
+        <a href="orders.html" class="btn view-orders"
+          ><i class="fa-solid fa-list"></i> View Orders</a
+        >
+        <a href="./create-order.html" class="btn add-order"
+          ><i class="fa-solid fa-plus"></i> Add New Order</a
+        >
+        <a href="./customers.html" class="btn manage-customers"
+          ><i class="fa-solid fa-users"></i> Manage Customers</a
+        >
+        <a href="./users.html" class="btn manage-user" style="display: none"
+          ><i class="fa-solid fa-user-gear"></i> Manage Users</a
+        >
+        <a
+          href="./products.html"
+          class="btn manage-products"
+          style="display: none"
+          ><i class="fa-solid fa-box"></i> Manage Products</a
+        >
+        <!-- <button id="logout-btn" class="btn logout">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button> -->
+      </div>
+      <button id="logout-btn" class="btn logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
       </button>
     </div>
-  </div>
-</body>
-
+  </body>
 </html>

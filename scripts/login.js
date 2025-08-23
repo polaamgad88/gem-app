@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Create theme toggle functionality
   setupThemeToggle();
-  
+
   // Create loader and error container
   setupUIElements();
-  
+
   // Set up form submission
   setupFormSubmission();
 });
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // Helper function to set up theme toggle
 function setupThemeToggle() {
   const themeToggle = document.getElementById("theme-toggle");
-  
+
   if (themeToggle) {
     // Check for saved theme preference
     const savedTheme = localStorage.getItem("theme");
@@ -20,7 +20,7 @@ function setupThemeToggle() {
       document.body.classList.add("dark-mode");
       themeToggle.textContent = "☀️";
     }
-    
+
     // Add event listener for theme toggle
     themeToggle.addEventListener("click", function () {
       document.body.classList.toggle("dark-mode");
@@ -34,7 +34,7 @@ function setupThemeToggle() {
 // Helper function to set up UI elements
 function setupUIElements() {
   const form = document.querySelector("form");
-  
+
   // Create and append loader
   const loader = document.createElement("div");
   loader.id = "loader";
@@ -58,19 +58,19 @@ function setupFormSubmission() {
   const form = document.querySelector("form");
   const usernameInput = form.querySelector('input[name="username"]');
   const passwordInput = form.querySelector('input[type="password"]');
-  
+
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
-    
+
     // Show loader, hide errors
     showLoader();
     hideError();
-    
+
     // Validate inputs
     if (!validateInputs(usernameInput, passwordInput)) {
       return;
     }
-    
+
     // Attempt login
     try {
       await performLogin(usernameInput.value, passwordInput.value);
@@ -88,13 +88,13 @@ function validateInputs(usernameInput, passwordInput) {
     usernameInput.focus();
     return false;
   }
-  
+
   if (!passwordInput.value) {
     showError("Password is required");
     passwordInput.focus();
     return false;
   }
-  
+
   return true;
 }
 
@@ -102,19 +102,19 @@ function validateInputs(usernameInput, passwordInput) {
 async function performLogin(username, password) {
   try {
     // Make the request to the Flask backend
-    const response = await fetch("https://order-app.gemegypt.net/api/login", {
+    const response = await fetch("http://localhost:5000/login", {
       method: "POST",
       body: new URLSearchParams({
         username: username,
         password: password,
       }),
     });
-    
+
     hideLoader();
 
     if (response.ok) {
       const data = await response.json();
-      
+
       // Save user data to localStorage
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("user_role", data.role);
@@ -162,3 +162,15 @@ function hideError() {
     errorDiv.style.display = "none";
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const passwordInput = document.getElementById("password");
+  const togglePassword = document.getElementById("togglePassword");
+
+  togglePassword.addEventListener("click", () => {
+    const isPassword = passwordInput.type === "password";
+    passwordInput.type = isPassword ? "text" : "password";
+    togglePassword.classList.toggle("fa-eye");
+    togglePassword.classList.toggle("fa-eye-slash");
+  });
+});

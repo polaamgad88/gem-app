@@ -9,37 +9,111 @@
     <link rel="stylesheet" href="./styles/base.css" />
     <link rel="stylesheet" href="./styles/create-order.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+   <style>
+     .navbar {
+        width: 100%;
+        background-color: #0b2a59;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 30px;
+        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar .logout-btn {
+        background-color: #fff;
+        color: #0b2a59;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+      }
+   </style>
     <script src="./scripts/utils.js" defer></script>
     <script src="./scripts/create-order.js" defer></script>
+     <script src="./scripts/delegate-landing.js"></script>
 </head>
 
-<body style="font-family: 'Segoe UI', sans-serif; background-color: #0b2a59; color: #333; margin: 0; padding: 0;">
+<body style="font-family: 'Segoe UI', sans-serif; background-color: #f3f3f5; color: #333; margin: 0; padding: 0;">
+       <div class="navbar">
+      <img
+        src="./assets/GEM Icon.jpg"
+        alt="gem logo"
+        class="logo"
+        style="
+          display: block;
+          margin: 0;
+          height: 100px;
+          max-height: 45px;
+          object-fit: contain;
+          border-radius: 10%;
+        "
+      />
+      <style>
+        .logo {
+          display: block;
+          margin: 0 auto 0px;
+          height: 137px;
+          max-height: 120px;
+          object-fit: contain;
+        }
+        @media (max-width: 576px) {
+          .logo {
+            height: 90px;
+          }
+        }
+      </style>
+      <!-- <button class="logout-btn">Logout</button> -->
+      <button id="logout-btn" class="logout-btn">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
     <div class="container"
         style="max-width: 950px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);">
 
-        <a href="./index.html" style="
-      display: inline-flex;
-      align-items: center;
-      font-size: 14px;
-      font-weight: 500;
-      color: #333;
-      background-color: #f8f9fa;
-      border: 1px solid #ced4da;
-      padding: 8px 14px;
-      border-radius: 6px;
-      text-decoration: none;
-      margin-bottom: 24px;
-      transition: background-color 0.2s ease;
-      gap: 8px;
-    " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <path d="M15 18l-6-6 6-6" />
-            </svg>
-            Dashboard
-        </a>
+             <a
+        href="index.html"
+        style="
+          display: inline-flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 500;
+          color: #333;
+          background-color: #f8f9fa;
+          border: 1px solid #ced4da;
+          padding: 8px 14px;
+          border-radius: 6px;
+          text-decoration: none;
+          margin-bottom: 24px;
+          transition: background-color 0.2s ease;
+          gap: 8px;
+        "
+        onmouseover="this.style.backgroundColor='#e9ecef'"
+        onmouseout="this.style.backgroundColor='#f8f9fa'"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="#333"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        Dashboard
+      </a>
 
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
+        <!-- <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
       display: block;
       margin: 0 auto 0px;
       height: 150px;
@@ -60,24 +134,24 @@
                     height: 90px;
                 }
             }
-        </style>
+        </style> -->
 
 
-        <h2 style="text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 30px;">NEW ORDER</h2>
+        <h2 style="text-align: left; font-size: 26px; font-weight: 700; margin-bottom: 30px; color: #333;">New Order</h2>
 
         <div class="order-header"
             style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; margin-bottom: 30px;">
-            <input type="date" id="order-date" class="responsive-input" readonly>
+            <input type="date" id="order-date" style="border-radius: 8px" class="responsive-input" readonly>
 
             <div class="custom-customer-select input-container">
                 <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off"
-                    class="responsive-input" />
+                    class="responsive-input" style="border-radius: 8px"/>
                 <ul id="customer-suggestions" class="dropdown-list"></ul>
             </div>
 
             <select id="customer-select" style="display: none;"></select>
 
-            <select id="address-select" class="responsive-input">
+            <select id="address-select" class="responsive-input" style="border-radius: 8px">
                 <option value="">Select Address</option>
             </select>
 
@@ -86,7 +160,7 @@
         <div class="tabs" style="margin-bottom: 30px;">
             <!-- Detailed Order Section -->
             <div class="tab" onclick="toggleTab('detailed-order-content' ,1 )"
-                style="padding: 12px; background: #0b2a59; color: white; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">
+                style="padding: 12px; background: linear-gradient(135deg, #28a745, #218838); color: white; border-radius: 8px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">
                 Detailed Order <span class="arrow" style="float: right;">▼</span>
             </div>
             <div id="detailed-order-content" class="tab-content"
@@ -99,7 +173,7 @@
        display: block;
        margin: 0 auto;
        padding: 12px 24px;
-       background-color: #28a745;
+       background-color: #0b2a59;
        border: none;
        color: white;
        font-weight: 600;
@@ -107,7 +181,7 @@
        border-radius: 8px;
        cursor: pointer;
        transition: background-color 0.2s ease;
-     " onmouseover="this.style.backgroundColor='#218838'" onmouseout="this.style.backgroundColor='#28a745'">
+     " onmouseover="this.style.backgroundColor='#0b2a59'" onmouseout="this.style.backgroundColor='#0b2a59'">
                     Add Row
                 </button>
             </div>
@@ -115,7 +189,7 @@
 
             <!-- Combined Order Section -->
             <div class="tab" onclick="toggleTab('combined-order' , 1 )"
-                style="padding: 12px; background: #0b2a59; color: white; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">
+                style="padding: 12px; background: linear-gradient(135deg, #28a745, #218838); color: white; border-radius: 8px; cursor: pointer; font-weight: 500; margin-bottom: 8px;">
                 Combined Order <span class="arrow" style="float: right;">▼</span>
             </div>
             <div id="combined-order" class="tab-content" style="display: none; margin-bottom: 20px;">
@@ -125,7 +199,7 @@
                     display: block;
                     margin: 0 auto;
                     padding: 12px 24px;
-                    background-color: #28a745;
+                    background-color: #0b2a59;
                     border: none;
                     color: white;
                     font-weight: 600;
@@ -156,7 +230,7 @@
     padding: 10px;
     font-size: 14px;
     border: 1px solid #ccc;
-    border-radius: 6px;
+    border-radius: 8px;
     resize: vertical;
     min-height: 80px;
     font-family: 'Segoe UI', sans-serif;"></textarea>
@@ -189,7 +263,7 @@
             </div>
 
             <button id="submit-order" class="btn btn-primary"
-                style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">Submit
+                style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background: linear-gradient(90deg, #0b2a59, #1d4e89); color: white; border: none; border-radius: 8px; cursor: pointer;">Submit
                 New Order</button>
             <hr style="margin: 40px 0;" />
 
@@ -207,7 +281,7 @@
                     background-color: #f1f3f5;
                     color: #333;
                     border: 1px solid #ccc;
-                    border-radius: 6px;
+                    border-radius: 8px;
                     font-size: 15px;
                     cursor: pointer;
                 ">

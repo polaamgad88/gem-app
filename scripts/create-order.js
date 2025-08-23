@@ -15,25 +15,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const [brands, categories, products, customers] = await Promise.all([
       fetchList(
-        "https://order-app.gemegypt.net/api/products/brands/orders",
+        "http://localhost:5000/products/brands/orders",
         "brands",
         token
       ),
       fetchList(
-        "https://order-app.gemegypt.net/api/products/categories/orders",
+        "http://localhost:5000/products/categories/orders",
         "categories",
         token
       ),
-      fetchList(
-        "https://order-app.gemegypt.net/api/products/orders",
-        "data",
-        token
-      ),
-      fetchList(
-        "https://order-app.gemegypt.net/api/customers?all=true",
-        "customers",
-        token
-      ),
+      fetchList("http://localhost:5000/products/orders", "data", token),
+      fetchList("http://localhost:5000/customers?all=true", "customers", token),
     ]);
 
     // ✅ Make products globally accessible
@@ -56,8 +48,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   clearBtn.className = "btn btn-danger";
   clearBtn.id = "clear-order-btn";
   clearBtn.style = `
-  background-color: #fff;
-  color: #dc3545;
+  background-color: #dc3545;
+  color: #fff;
   border: 1px solid #dc3545;
   font-size: 14px;
   font-weight: 500;
@@ -76,8 +68,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     clearBtn.style.color = "#fff";
   };
   clearBtn.onmouseout = () => {
-    clearBtn.style.backgroundColor = "#fff";
-    clearBtn.style.color = "#dc3545";
+    clearBtn.style.backgroundColor = "#dc3545";
+    clearBtn.style.color = "#fff";
   };
   document
     .getElementById("submit-order")
@@ -94,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   fileInput.addEventListener("change", () => {
     fileNameSpan.textContent = fileInput.files[0]?.name || "No file chosen";
   });
-// The oldest uploaded file functionality is commented out
+  // The oldest uploaded file functionality is commented out
   // document
   //   .getElementById("upload-sheet-btn")
   //   .addEventListener("click", async () => {
@@ -121,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   //       Utils.UI.showLoader("loader");
 
   //       const res = await fetch(
-  //         "https://order-app.gemegypt.net/api/orders/upload-sheet",
+  //         "http://localhost:5000/orders/upload-sheet",
   //         {
   //           method: "POST",
   //           headers: {
@@ -341,7 +333,7 @@ function loadOrderFromSession() {
 
         try {
           const res = await fetch(
-            `https://order-app.gemegypt.net/api/products/orders?${params}`,
+            `http://localhost:5000/products/orders?${params}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -466,7 +458,7 @@ function setupEventListeners(token) {
       try {
         Utils.UI.showLoader("loader");
         const res = await fetch(
-          `https://order-app.gemegypt.net/api/customers/${id}/addresses`,
+          `http://localhost:5000/customers/${id}/addresses`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -734,7 +726,7 @@ function addOrderRow(container, brands, products) {
 
     try {
       const res = await fetch(
-        `https://order-app.gemegypt.net/api/product/order/search_by_barcode?${params}`,
+        `http://localhost:5000/product/order/search_by_barcode?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -819,7 +811,7 @@ function addOrderRow(container, brands, products) {
 
     try {
       const res = await fetch(
-        `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
+        `http://localhost:5000/products/categories/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`,
         {
@@ -888,10 +880,10 @@ function addCombinedRow(container, brands) {
     const token = localStorage.getItem("access_token");
 
     const url = selectedBrand
-      ? `https://order-app.gemegypt.net/api/products/categories/orders?brand=${encodeURIComponent(
+      ? `http://localhost:5000/products/categories/orders?brand=${encodeURIComponent(
           selectedBrand
         )}`
-      : `https://order-app.gemegypt.net/api/products/categories/orders`;
+      : `http://localhost:5000/products/categories/orders`;
 
     categorySelect.innerHTML = `<option value="">Loading categories...</option>`;
 
@@ -934,7 +926,7 @@ function addCombinedRow(container, brands) {
 
     try {
       const res = await fetch(
-        `https://order-app.gemegypt.net/api/products/orders?${query}`,
+        `http://localhost:5000/products/orders?${query}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -1078,7 +1070,7 @@ async function updateOrderPreview() {
   try {
     for (const [productId, quantity] of productQuantities.entries()) {
       const res = await fetch(
-        `https://order-app.gemegypt.net/api/product/order/find/${productId}`,
+        `http://localhost:5000/product/order/find/${productId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -1094,10 +1086,7 @@ async function updateOrderPreview() {
       const price = parseFloat(data.price || 0).toFixed(2);
       const total = (price * quantity).toFixed(2);
       const photoUrl = data.image_path
-        ? `https://order-app.gemegypt.net/api/images/${data.image_path.replace(
-            /^\/+/,
-            ""
-          )}`
+        ? `http://localhost:5000/images/${data.image_path.replace(/^\/+/, "")}`
         : "";
       const bar_code = data.bar_code;
       const card = document.createElement("div");
@@ -1170,7 +1159,7 @@ async function submitOrder(token) {
       const query = queryParts.join("&");
 
       const res = await fetch(
-        `https://order-app.gemegypt.net/api/products/orders?${query}`,
+        `http://localhost:5000/products/orders?${query}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -1207,17 +1196,14 @@ async function submitOrder(token) {
   try {
     Utils.UI.showLoader("loader");
 
-    const res = await fetch(
-      "https://order-app.gemegypt.net/api/orders/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    const res = await fetch("http://localhost:5000/orders/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
     Utils.UI.hideLoader("loader");
 
@@ -1294,7 +1280,7 @@ function saveNote() {
   }
 }
 
-// The newest uploaded file functionality 
+// The newest uploaded file functionality
 document
   .getElementById("order-sheet")
   .addEventListener("change", function (event) {
@@ -1318,7 +1304,7 @@ document
     formData.append("customer_id", customerId);
     formData.append("address_id", addressId);
 
-    fetch("https://order-app.gemegypt.net/api/orders/upload-sheet", {
+    fetch("http://localhost:5000/orders/upload-sheet", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,

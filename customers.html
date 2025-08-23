@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Customers</title>
@@ -11,81 +10,221 @@
     <script src="./scripts/utils.js" defer></script>
     <script src="./scripts/customers.js" defer></script>
 
-</head>
+    <style>
+      body {
+        margin: 0;
+        background-color: #f3f3f5;
+        font-family: "Segoe UI", sans-serif;
+      }
 
-<body>
+      .navbar {
+        width: 100%;
+        background-color: #0b2a59;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 30px;
+        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
 
+      .navbar .logout-btn {
+        background-color: #fff;
+        color: #0b2a59;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+      }
 
+      .container {
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
+        max-width: 960px;
+        width: 100%;
+        margin: 100px auto;
+      }
+
+      th {
+        background-color: #ffffff !important;
+        color: #0b2a59 !important;
+        font-weight: 600;
+        text-align: center;
+      }
+      .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        border: 1px solid #dee1e4;
+        padding: 8px;
+        text-align: center;
+      }
+    </style>
+      <script src="./scripts/utils.js"></script>
+    <script src="./scripts/delegate-landing.js"></script>
+  </head>
+
+  <body>
+    <div class="navbar">
+      <img
+        src="./assets/GEM Icon.jpg"
+        alt="gem logo"
+        class="logo"
+        style="
+          display: block;
+          margin: 0;
+          height: 100px;
+          max-height: 45px;
+          object-fit: contain;
+          border-radius: 10%;
+        "
+      />
+      <style>
+        .logo {
+          display: block;
+          margin: 0 auto 0px;
+          height: 137px;
+          max-height: 120px;
+          object-fit: contain;
+        }
+        @media (max-width: 576px) {
+          .logo {
+            height: 90px;
+          }
+        }
+      </style>
+      <!-- <button class="logout-btn">Logout</button> -->
+      <button id="logout-btn" class="logout-btn">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
     <div class="container">
-        <a href="index.html" style="
-                display: inline-flex;
-                align-items: center;
-                font-size: 14px;
-                font-weight: 500;
-                color: #333;
-                background-color: #f8f9fa;
-                border: 1px solid #ced4da;
-                padding: 8px 14px;
-                border-radius: 6px;
-                text-decoration: none;
-                margin-bottom: 24px;
-                transition: background-color 0.2s ease;
-                gap: 8px;
-              " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <path d="M15 18l-6-6 6-6" />
-            </svg>
-            Dashboard
-        </a>
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
+      <a
+        href="index.html"
+        style="
+          display: inline-flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 500;
+          color: #333;
+          background-color: #f8f9fa;
+          border: 1px solid #ced4da;
+          padding: 8px 14px;
+          border-radius: 6px;
+          text-decoration: none;
+          margin-bottom: 24px;
+          transition: background-color 0.2s ease;
+          gap: 8px;
+        "
+        onmouseover="this.style.backgroundColor='#e9ecef'"
+        onmouseout="this.style.backgroundColor='#f8f9fa'"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="#333"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        Dashboard
+      </a>
+      <!-- <img
+        src="./assets/GEM Group 2024.jpg"
+        alt="gem logo"
+        class="logo"
+        style="
           display: block;
           margin: 0 auto 0px;
           height: 150px;
           max-height: 140px;
           object-fit: contain;
-        " />
+        "
+      /> -->
 
-        <h2 style="text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 30px;">Customers</h2>
+      <h2
+        style="
+          text-align: left;
+          font-size: 26px;
+          font-weight: 700;
+          margin-bottom: 30px;
+          margin-left: 8px;
+        "
+      >
+        Customers
+      </h2>
 
-        <div class="search-actions-row">
-            <button id="add-customer-btn" class="btn btn-add full-width">Add Customer</button>
+      <div class="search-actions-row">
+        <button
+          id="add-customer-btn"
+          class="btn btn-add full-width"
+          style="
+            border-radius: 8px;
+            background: linear-gradient(145deg, #022048, #0b2a59);
+          "
+        >
+          Add Customer
+        </button>
 
-            <input id="customer-search" type="search" class="input-full" placeholder="Search by name or code..." />
+        <input
+          id="customer-search"
+          type="search"
+          class="input-full"
+          placeholder="Search by name or code..."
+          style="border-radius: 8px"
+        />
+      </div>
 
+      <!-- Table View -->
+      <div class="table-responsive" style="margin-top: 10px">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>code</th>
+              <th>Customer Name</th>
+              <th>Phone</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="customersTable">
+            <!-- Table content by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card View (Mobile) -->
+      <div class="card-view" style="display: none">
+        <div id="customerCards">
+          <!-- Card content by JS -->
         </div>
+      </div>
 
-
-
-
-        <!-- Table View -->
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>code</th>
-                        <th>Customer Name</th>
-                        <th>Phone</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="customersTable">
-                    <!-- Table content by JS -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Card View (Mobile) -->
-        <div class="card-view" style="display: none;">
-            <div id="customerCards">
-                <!-- Card content by JS -->
-            </div>
-        </div>
-
-        <!-- <div class="text-right mt-3">
+      <!-- <div class="text-right mt-3">
             <button id="add-customer-btn" class="btn btn-add"> Add Customer</button>
         </div> -->
     </div>
-</body>
-
+  </body>
 </html>

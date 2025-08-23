@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const last_name = last_name_parts.join(" ");
 
       const res = await fetch(
-        `https://order-app.gemegypt.net/api/customers/edit/${customerId}`,
+        `http://localhost:5000/customers/edit/${customerId}`,
         {
           method: "POST",
           headers: {
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const username =
         document.getElementById("Delegate-dropdown").selectedOptions[0].text;
 
-      const res = await fetch("https://order-app.gemegypt.net/api/customers/assign", {
+      const res = await fetch("http://localhost:5000/customers/assign", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -127,11 +127,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (currentEditAddressId) {
       // Edit mode
-      url = `https://order-app.gemegypt.net/api/customers/address/edit/${currentEditAddressId}`;
+      url = `http://localhost:5000/customers/address/edit/${currentEditAddressId}`;
       body.append("address", address);
     } else {
       // Create mode
-      url = `https://order-app.gemegypt.net/api/customers/address/create`;
+      url = `http://localhost:5000/customers/address/create`;
       body.append("customer_id", customerId);
       body.append("address", address);
     }
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 async function loadCustomerAddresses(customerId, token) {
   try {
     const res = await fetch(
-      `https://order-app.gemegypt.net/api/customers/${customerId}/addresses`,
+      `http://localhost:5000/customers/${customerId}/addresses`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -203,10 +203,10 @@ async function loadCustomerAddresses(customerId, token) {
 async function loadCustomerDetails(customerId, token) {
   try {
     const [custRes, ordersRes] = await Promise.all([
-      fetch(`https://order-app.gemegypt.net/api/customer/find/${customerId}`, {
+      fetch(`http://localhost:5000/customer/find/${customerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
-      fetch(`https://order-app.gemegypt.net/api/orders?customer_id=${customerId}`, {
+      fetch(`http://localhost:5000/orders?customer_id=${customerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
     ]);
@@ -243,7 +243,9 @@ async function loadCustomerDetails(customerId, token) {
           <td>${new Date(o.order_date).toISOString().slice(0, 10)}</td> 
           <td>${o.username}</td>
           <td>${o.status}</td>
-          <td class="price">EGP ${parseFloat(o.total_amount).toLocaleString()}</td>
+          <td class="price">EGP ${parseFloat(
+            o.total_amount
+          ).toLocaleString()}</td>
           <td><button class="view-btn" onclick="viewOrder(${
             o.order_id
           })">View</button></td>`;
@@ -254,11 +256,14 @@ async function loadCustomerDetails(customerId, token) {
         }
       });
 
-      document.getElementById("total-income-value").textContent = 
+    document.getElementById("total-income-value").textContent =
       total % 1 === 0
         ? `EGP ${total.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-        : `EGP ${total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}`;
-    
+        : `EGP ${total.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 2,
+          })}`;
+
     await loadCustomerAddresses(customerId, token);
 
     renderOrderCards(orders);
@@ -310,7 +315,7 @@ function toggleOrderViews() {
 
 async function setupAddDelegateDropdown(token) {
   try {
-    const res = await fetch("https://order-app.gemegypt.net/api/users", {
+    const res = await fetch("http://localhost:5000/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const users = (await res.json()).users;
@@ -347,7 +352,7 @@ async function removeDelegate(userId, username) {
   if (!confirm(`Are you sure you want to remove ${username}?`)) return;
 
   try {
-    const res = await fetch("https://order-app.gemegypt.net/api/customers/deassign", {
+    const res = await fetch("http://localhost:5000/customers/deassign", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -387,7 +392,7 @@ function deleteAddress(addressId) {
   const token = localStorage.getItem("access_token");
   if (!confirm("Are you sure you want to delete this address?")) return;
 
-  fetch(`https://order-app.gemegypt.net/api/customers/address/delete/${addressId}`, {
+  fetch(`http://localhost:5000/customers/address/delete/${addressId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,

@@ -28,7 +28,7 @@ let allUsers = [];
 
 async function loadUsers(token) {
   try {
-    const res = await fetch("https://order-app.gemegypt.net/api/users", {
+    const res = await fetch("http://localhost:5000/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -64,15 +64,12 @@ async function deleteUser(userId) {
   const token = localStorage.getItem("access_token");
 
   try {
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/users/delete/${userId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetch(`http://localhost:5000/users/delete/${userId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     const data = await res.json();
 
@@ -123,7 +120,7 @@ document
 
     // First: update info
     const infoRes = await fetch(
-      `https://order-app.gemegypt.net/api/users/edit_info/${userId}`,
+      `http://localhost:5000/users/edit_info/${userId}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -139,7 +136,7 @@ document
 
     // Second: update role
     const roleRes = await fetch(
-      `https://order-app.gemegypt.net/api/users/edit_role/${userId}`,
+      `http://localhost:5000/users/edit_role/${userId}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -151,19 +148,15 @@ document
     );
 
     // 🔄 Third: update assigned Manager
-    await fetch(
-      `https://order-app.gemegypt.net/api/users/change_manager/${userId}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: new URLSearchParams({
-          assigned_to_user_id:
-            document.getElementById("edit-assigned-to").value,
-        }),
-      }
-    );
+    await fetch(`http://localhost:5000/users/change_manager/${userId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: new URLSearchParams({
+        assigned_to_user_id: document.getElementById("edit-assigned-to").value,
+      }),
+    });
 
     const infoData = await infoRes.json();
     const roleData = await roleRes.json();
@@ -182,7 +175,7 @@ document
     const newPassword = document.getElementById("new-password").value;
 
     const res = await fetch(
-      `https://order-app.gemegypt.net/api/users/change_password/${userId}`,
+      `http://localhost:5000/users/change_password/${userId}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -199,7 +192,7 @@ async function toggleUserStatus(userId, newStatus) {
   const token = localStorage.getItem("access_token");
   try {
     const res = await fetch(
-      `https://order-app.gemegypt.net/api/users/set_active/${userId}/${newStatus}`,
+      `http://localhost:5000/users/set_active/${userId}/${newStatus}`,
       {
         method: "POST",
         headers: {
@@ -323,7 +316,9 @@ function renderUsers(users) {
     </button>
     <div class="dropdown-menu" id="user-dropdown-${user.user_id}">
       <button onclick="openEditModal(${user.user_id})">Edit</button>
-      <button onclick="openPasswordModal(${user.user_id})">Change Password</button>
+      <button onclick="openPasswordModal(${
+        user.user_id
+      })">Change Password</button>
       <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
         ${isActive ? "Deactivate" : "Activate"}
       </button>
@@ -340,9 +335,9 @@ function renderUsers(users) {
     document.addEventListener("click", function (e) {
       const isActionBtn = e.target.matches(".action-btn");
       const openMenus = document.querySelectorAll(".dropdown-menu");
-    
-      openMenus.forEach(menu => menu.style.display = "none");
-    
+
+      openMenus.forEach((menu) => (menu.style.display = "none"));
+
       if (isActionBtn) {
         e.stopPropagation();
         const id = e.target.getAttribute("data-dropdown-id");
@@ -350,7 +345,7 @@ function renderUsers(users) {
         if (menu) menu.style.display = "block";
       }
     });
-    
+
     tableBody.appendChild(tr);
 
     // === Card view ===
@@ -363,24 +358,24 @@ function renderUsers(users) {
       user.assigned_to_user_id || "—"
     }</p>
       <p><strong>Phone:</strong> ${user.phone || "—"}</p>
-      <div class="card-actions">
-        <button class="btn view-btn" onclick="openEditModal(${
-          user.user_id
-        })">Edit</button>
-        <button class="btn" onclick="openPasswordModal(${
-          user.user_id
-        })">Change Password</button>
-        <button class="btn toggle-btn" onclick="toggleUserStatus(${
-          user.user_id
-        }, ${isActive ? 0 : 1})">
-          ${isActive ? "Deactivate" : "Activate"}
-        </button>
-        ${
-          isAdmin
-            ? `<button class="btn delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
-            : ""
-        }
-      </div>
+     <div class="card-actions">
+  <div class="row-actions">
+    <button class="btn view-btn" onclick="openEditModal(${user.user_id})">Edit</button>
+    ${
+      isAdmin
+        ? `<button class="btn delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
+        : ""
+    }
+  </div>
+
+  <div class="row-actions">
+    <button class="btn" onclick="openPasswordModal(${user.user_id})">Change Password</button>
+    <button class="btn toggle-btn" onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
+      ${isActive ? "Deactivate" : "Activate"}
+    </button>
+  </div>
+</div>
+
     `;
     cardContainer.appendChild(card);
   });

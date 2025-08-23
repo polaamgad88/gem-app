@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     setupAdminButtons(admin, role);
     await verifyToken(token);
+
+    await checkTopUser(token, username);
   } catch (err) {
     console.error("Dashboard initialization error:", err);
     window.location.href = "login.html";
@@ -24,6 +26,26 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   setupLogoutButton();
 });
+
+async function checkTopUser(token, currentUser) {
+  try {
+    const res = await fetch("http://localhost:5000/top-user", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) return;
+    const data = await res.json();
+
+    if (data.top_user && data.top_user === currentUser) {
+      alert(`🎉 Congratulations ${currentUser}! You are the top performer with ${data.orders_count} orders!`);
+    }
+  } catch (err) {
+    console.error("Error fetching top user:", err);
+  }
+}
 
 // Helper function to set up admin buttons
 function setupAdminButtons(admin, role) {
@@ -57,7 +79,7 @@ function setupAdminButtons(admin, role) {
 
 // Helper function to verify token
 async function verifyToken(token) {
-  const response = await fetch("https://order-app.gemegypt.net/api/checklogin", {
+  const response = await fetch("http://localhost:5000/checklogin", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -82,7 +104,7 @@ function setupLogoutButton() {
           return;
         }
 
-        const logoutRes = await fetch("https://order-app.gemegypt.net/api/logout", {
+        const logoutRes = await fetch("http://localhost:5000/logout", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

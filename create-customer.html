@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Create Customer</title>
@@ -11,87 +10,102 @@
     <script src="./scripts/create-customer.js" defer></script>
     <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #0b2a59;
-            margin: 0;
-            padding: 0;
-            color: #333;
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: #0b2a59;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      .container {
+        max-width: 980px;
+        margin: 30px auto;
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
+      }
+
+      .logo {
+        display: block;
+        margin: 0 auto 20px;
+        height: 137px;
+        max-height: 140px;
+        object-fit: contain;
+      }
+
+      @media (max-width: 576px) {
+        .logo {
+          height: 90px;
         }
 
         .container {
-            max-width: 980px;
-            margin: 30px auto;
-            background: #fff;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+          max-width: 97%;
         }
-
-        .logo {
-            display: block;
-            margin: 0 auto 20px;
-            height: 137px;
-            max-height: 140px;
-            object-fit: contain;
-        }
-
-        @media (max-width: 576px) {
-            .logo {
-                height: 90px;
-            }
-
-            .container {
-                max-width: 97%;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <div class="container">
-        <a href="./customers.html" style="
-        display: inline-flex;
-        align-items: center;
-        font-size: 14px;
-        font-weight: 500;
-        color: #333;
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        padding: 8px 14px;
-        border-radius: 6px;
-        text-decoration: none;
-        margin-bottom: 24px;
-        transition: background-color 0.2s ease;
-        gap: 8px;
-      " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <path d="M15 18l-6-6 6-6" />
-            </svg>
-            Dashboard
-        </a>
-        <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
-        <h1>Create New Customer</h1>
+      <a
+        href="./customers.html"
+        style="
+          display: inline-flex;
+          align-items: center;
+          font-size: 14px;
+          font-weight: 500;
+          color: #333;
+          background-color: #f8f9fa;
+          border: 1px solid #ced4da;
+          padding: 8px 14px;
+          border-radius: 6px;
+          text-decoration: none;
+          margin-bottom: 24px;
+          transition: background-color 0.2s ease;
+          gap: 8px;
+        "
+        onmouseover="this.style.backgroundColor='#e9ecef'"
+        onmouseout="this.style.backgroundColor='#f8f9fa'"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="#333"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        Dashboard
+      </a>
+      <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" />
+      <h1>Create New Customer</h1>
 
-        <form id="create-customer-form">
-            <label>First Name:</label>
-            <input type="text" name="first_name" required />
+      <form id="create-customer-form">
+        <label>First Name:</label>
+        <input type="text" name="first_name" required />
 
-            <label>Last Name:</label>
-            <input type="text" name="last_name" required />
+        <label>Last Name:</label>
+        <input type="text" name="last_name" required />
 
-            <label>Email:</label>
-            <input type="email" name="email" />
+        <label>Email:</label>
+        <input type="email" name="email" />
 
-            <label>Phone:</label>
-            <input type="text" name="phone" />
+        <label>Phone:</label>
+        <input type="text" name="phone" />
 
-            <label>code:</label>
-            <input type="text" name="code" required />
+        <label>code:</label>
+        <input type="text" name="code" required />
 
-            <button type="submit" style="
+        <button
+          type="submit"
+          style="
             background-color: #007bff;
             color: white;
             padding: 10px;
@@ -100,15 +114,18 @@
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-          " onmouseover="this.style.backgroundColor='#28a745'" onmouseout="this.style.backgroundColor='#007bff'">Create
-                Customer</button>
-        </form>
+          "
+          onmouseover="this.style.backgroundColor='#28a745'"
+          onmouseout="this.style.backgroundColor='#007bff'"
+        >
+          Create Customer
+        </button>
+      </form>
 
-        <div id="success-message" class="success" style="display: none;">✅ Customer created successfully!</div>
-        <div id="error-message" class="error" style="display: none;"></div>
-
-
+      <div id="success-message" class="success" style="display: none">
+        ✅ Customer created successfully!
+      </div>
+      <div id="error-message" class="error" style="display: none"></div>
     </div>
-</body>
-
+  </body>
 </html>

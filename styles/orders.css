@@ -116,7 +116,8 @@ th[onclick] {
 }
 
 th[onclick]:hover {
-  background-color: var(--primary-light);
+  background-color: #0b2a59;
+  color: white;
 }
 
 .view-btn {

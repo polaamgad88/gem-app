@@ -87,7 +87,7 @@ async function fetchCustomers(token, page = 1, search = "") {
     if (search) query.append("search", search);
 
     const res = await fetch(
-      `https://order-app.gemegypt.net/api/customers?${query.toString()}`,
+      `http://localhost:5000/customers?${query.toString()}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

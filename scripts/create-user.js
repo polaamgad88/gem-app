@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function loadAssignableUsers(token) {
   try {
-    const res = await fetch("https://order-app.gemegypt.net/api/users", {
+    const res = await fetch("http://localhost:5000/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -73,7 +73,7 @@ async function handleCreateUser(token) {
   }
 
   try {
-    const res = await fetch("https://order-app.gemegypt.net/api/register", {
+    const res = await fetch("http://localhost:5000/register", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
