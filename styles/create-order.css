@@ -487,9 +487,9 @@ h3 {
   cursor: pointer;
 }
 
-#customer-suggestions li:hover {
+/* #customer-suggestions li:hover {
   background-color: var(--gray-100);
-}
+} */
 
 .barcode-suggestions.dropdown-list {
   position: relative;

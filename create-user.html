@@ -14,42 +14,10 @@
         font-family: "Segoe UI", sans-serif;
         background-color: #f3f3f5;
         margin: 0;
-        padding: 0;
+        padding: 20px;
         color: #333;
       }
-
-          .navbar {
-        width: 100%;
-        background-color: #0b2a59;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 30px;
-        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
-
-      .navbar .logout-btn {
-        background-color: #fff;
-        color: #0b2a59;
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        transition: background 0.3s ease;
-      }
-      .container {
-        max-width: 980px;
-        margin: 30px auto;
-        background: #fff;
-        border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
-      }
+   
 
       .logo {
         display: block;
@@ -64,83 +32,71 @@
           height: 90px;
         }
 
-        .container {
-          max-width: 97%;
-        }
+       
       }
+      /* Dark mode design */
+body.dark-mode {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode h2 {
+  color: #f5f5f5 !important;
+}
+
+body.dark-mode a {
+  color: #ddd !important;
+  background-color: #1e1e1e !important;
+  border: 1px solid #333 !important;
+}
+body.dark-mode a:hover {
+  background-color: #333 !important;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #1e1e1e !important;
+  color: #f5f5f5 !important;
+  border: 1px solid #444 !important;
+}
+
+body.dark-mode label {
+  color: #ccc !important;
+}
+body.dark-mode a {
+  color: #1e1e1e !important;
+  background-color: #fff !important;
+}
+body.dark-mode a:hover {
+  background-color: #f1f1f1 !important;
+}
+
     </style>
+     <script>
+  function applyTheme(mode) {
+    if (mode === "dark") {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }
+
+  window.addEventListener("message", (event) => {
+    if (event.data.theme) {
+      applyTheme(event.data.theme);
+      localStorage.setItem("theme", event.data.theme); 
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+  });
+</script>
   </head>
 
   <body>
-    <div class="navbar">
-      <img
-        src="./assets/GEM Icon.jpg"
-        alt="gem logo"
-        class="logo"
-        style="
-          display: block;
-          margin: 0;
-          height: 100px;
-          max-height: 45px;
-          object-fit: contain;
-          border-radius: 10%;
-        "
-      />
-      <style>
-        .logo {
-          display: block;
-          margin: 0 auto 0px;
-          height: 137px;
-          max-height: 120px;
-          object-fit: contain;
-        }
-        @media (max-width: 576px) {
-          .logo {
-            height: 90px;
-          }
-        }
-      </style>
-      <!-- <button class="logout-btn">Logout</button> -->
-      <button id="logout-btn" class="logout-btn">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
-    </div>
-    <div class="container">
-      <a
-        href="./users.html"
-        style="
-          display: inline-flex;
-          align-items: center;
-          font-size: 14px;
-          font-weight: 500;
-          color: #333;
-          background-color: #f8f9fa;
-          border: 1px solid #ced4da;
-          padding: 8px 14px;
-          border-radius: 6px;
-          text-decoration: none;
-          margin-bottom: 24px;
-          transition: background-color 0.2s ease;
-          gap: 8px;
-        "
-        onmouseover="this.style.backgroundColor='#e9ecef'"
-        onmouseout="this.style.backgroundColor='#f8f9fa'"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="#333"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          viewBox="0 0 24 24"
-        >
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-        Dashboard
-      </a>
       <h2 style="color: #333; text-align: center;margin-bottom: 20px;">Add User</h2>
 
       <form id="create-user-form">
@@ -172,6 +128,16 @@
             type="email"
             id="email"
             name="email"
+            required
+            style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
+          />
+        </div>
+          <div style="display: flex; flex-direction: column">
+          <label for="email" style="margin-bottom: 4px">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
             required
             style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
           />
@@ -258,6 +224,5 @@
           Add User
         </button>
       </form>
-    </div>
   </body>
 </html>

@@ -1,75 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edit Order</title>
-  <link rel="stylesheet" href="./styles/base.css" />
-  <link rel="stylesheet" href="./styles/edit-order.css" />
-  <script src="./scripts/utils.js" defer></script>
-  <script src="./scripts/edit-order.js" defer></script>
-</head>
-
-<body>
-
-
-  <div class="container">
-    <a href="index.html" style="
-        display: inline-flex;
-        align-items: center;
-        font-size: 14px;
-        font-weight: 500;
-        color: #333;
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        padding: 8px 14px;
-        border-radius: 6px;
-        text-decoration: none;
-        margin-bottom: 24px;
-        transition: background-color 0.2s ease;
-        gap: 8px;
-      " onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#333" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
-      Dashboard
-    </a>
-    <img src="./assets/GEM Group 2024.jpg" alt="gem logo" class="logo" style="
-          display: block;
-          margin: 0 auto 0px;
-          height: 150px;
-          max-height: 140px;
-          object-fit: contain;
-        " />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Order</title>
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/edit-order.css" />
+    <script src="./scripts/utils.js" defer></script>
+    <script src="./scripts/edit-order.js" defer></script>
     <style>
-      .logo {
-        display: block;
-        margin: 0 auto 0px;
-        height: 137px;
-        max-height: 140px;
-        object-fit: contain;
-      }
+.table-responsive table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  overflow: hidden; 
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
 
-      @media (max-width: 576px) {
-        .logo {
-          height: 90px;
-        }
-      }
+.table-responsive td {
+  border: 1px solid #dee2e6;
+  padding: 12px 14px;
+  text-align: center;
+  font-size: 14px;
+}
+
+
+.table-responsive tbody tr:nth-child(even) {
+  background-color: #f8f9fb;
+}
+
+body.dark-mode {
+  background-color: #121212; 
+  /* color: #ffffff;  */
+}
+
+
+body.dark-mode .info-box,
+body.dark-mode .customer-info,
+body.dark-mode .items-list,
+body.dark-mode .total {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  /* color: #ffffff; */
+}
+
+body.dark-mode .table-responsive table {
+   width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #444;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+body.dark-mode .table-responsive th {
+  background-color: #2a2a2a; 
+  color: #ffffff;
+  font-weight: bold;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #555;
+}
+body.dark-mode .table-responsive td {
+  border: 1px solid #444;
+  padding: 12px 14px;
+  text-align: center;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+body.dark-mode .table-responsive thead {
+  background-color: #0b2a59; 
+  color: #ffffff;
+}
+
+body.dark-mode .table-responsive tbody tr:nth-child(even) {
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .table-responsive tbody tr:nth-child(odd) {
+  background-color: #1e1e1e;
+}
+
+body.dark-mode .table-responsive tbody tr:hover {
+  background-color: #333333;
+  transition: background 0.2s ease-in-out;
+}
+body.dark-mode .card-view .item-card {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  color: #f5f5f5;
+}
+body.dark-mode h2 {
+  color: #fff !important;
+}
+body.dark-mode #total-price {
+  background-color: #1e1e1e !important;
+  color: #fff !important;
+  border: 1px solid #333;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+body.dark-mode textarea,
+body.dark-mode select,
+body.dark-mode input {
+  background-color: #2a2a2a !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+}
+body.dark-mode textarea::placeholder,
+body.dark-mode input::placeholder {
+  color: #aaa !important;
+}
+body.dark-mode .customer-info p {
+color: #fff !important;
+}
+body.dark-mode #order-state {
+  color: #fff !important;
+}
+
     </style>
+    <script>
+  function applyTheme(mode) {
+    if (mode === "dark") {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }
 
-    <h2 style="
-text-align: center;
-font-size: 28px;
-font-weight: 600;
-margin-bottom: 30px;
-color: #0b2a59;
-letter-spacing: 0.5px;
-">
-      Edit Order <span id="orderId" style="color: #28a745;"></span>
+  window.addEventListener("message", (event) => {
+    if (event.data.theme) {
+      applyTheme(event.data.theme);
+      localStorage.setItem("theme", event.data.theme); 
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+  });
+</script>
+  </head>
+
+  <body>
+    <h2
+      style="
+        text-align: center;
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 30px;
+        color: #0b2a59;
+        letter-spacing: 0.5px;
+      "
+    >
+      Edit Order <span id="orderId" style="color: #28a745"></span>
     </h2>
-
 
     <div class="order-info-grid">
       <div class="info-box">
@@ -92,7 +184,6 @@ letter-spacing: 0.5px;
         <div class="info-value" id="Delegate-name"></div>
       </div>
     </div>
-
 
     <!-- <div class="order-info">
             <div class="row">
@@ -119,18 +210,23 @@ letter-spacing: 0.5px;
       </p>
 
       <!-- ✅ Editable Note Section -->
-      <p style="margin-top: 10px;">
+      <p style="margin-top: 10px">
         <strong>Note:</strong><br />
-        <textarea id="customer-note" name="customer_note" placeholder="Add note for this order..." style="
-                width: 100%;
-                padding: 8px;
-                font-size: 14px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                resize: vertical;
-                min-height: 100px;
-                font-family: 'Segoe UI', sans-serif;
-              "></textarea>
+        <textarea
+          id="customer-note"
+          name="customer_note"
+          placeholder="Add note for this order..."
+          style="
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Segoe UI', sans-serif;
+          "
+        ></textarea>
       </p>
     </div>
 
@@ -163,36 +259,45 @@ letter-spacing: 0.5px;
         </div>
       </div>
 
-      <div style="display: flex; justify-content: center; margin-top: 16px;">
-        <button id="add-product-btn" class="confirm-btn" style="
-                  padding: 10px 20px;
-                  background-color: #0b2a59;
-                  color: white;
-                  font-size: 14px;
-                  font-weight: 500;
-                  border: none;
-                  border-radius: 6px;
-                  cursor: pointer;
-                  transition: background-color 0.2s ease;
-                " onmouseover="this.style.backgroundColor='#28a745';"
-          onmouseout="this.style.backgroundColor='#0b2a59';">
+      <div style="display: flex; justify-content: center; margin-top: 16px">
+        <button
+          id="add-product-btn"
+          class="confirm-btn"
+          style="
+            padding: 10px 20px;
+            background-color: #0b2a59;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+          "
+          onmouseover="this.style.backgroundColor='#28a745';"
+          onmouseout="this.style.backgroundColor='#0b2a59';"
+        >
           Add Product
         </button>
       </div>
-
     </div>
     <div class="total">
-      <h2 style="margin: 0; font-size: 20px; color: #0b2a59;">
-        <span id="total-price" style="background-color: #f8f9fb; color:#333; font-size: larger; font-weight: 500;">EGP
-          0</span>
+      <h2 style="margin: 0; font-size: 20px; color: #0b2a59">
+        <span
+          id="total-price"
+          style="
+            background-color: #f8f9fb;
+            color: #333;
+            font-size: larger;
+            font-weight: 500;
+          "
+          >EGP 0</span
+        >
       </h2>
     </div>
 
-
-    <div class="action-buttons" style="text-align: right;">
+    <div class="action-buttons" style="text-align: right">
       <button id="save-order" class="confirm-btn">Confirm Changes</button>
     </div>
-  </div>
-</body>
-
+  </body>
 </html>

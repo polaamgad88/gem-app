@@ -13,43 +13,9 @@
     <style>
       body {
         margin: 0;
-        background-color: #f3f3f5;
+        background-color: #f8f9fb;
         font-family: "Segoe UI", sans-serif;
-      }
-
-      .navbar {
-        width: 100%;
-        background-color: #0b2a59;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 30px;
-        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
-
-      .navbar .logout-btn {
-        background-color: #fff;
-        color: #0b2a59;
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        transition: background 0.3s ease;
-      }
-
-      .container {
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
-        max-width: 960px;
-        width: 100%;
-        margin: 100px auto;
+        padding: 20px;
       }
 
       th {
@@ -77,154 +43,156 @@
         padding: 8px;
         text-align: center;
       }
+      /* 🌙 Dark mode styles */
+      body.dark-mode {
+        background-color: #1e1e1e;
+        color: #f1f1f1;
+      }
+      body.dark-mode .container {
+        background-color: #1e1e1e;
+        color: #f1f1f1;
+      }
+      body.dark-mode a {
+        color: #ddd;
+      }
+
+      body.dark-mode th {
+        background-color: #333 !important;
+        color: #fff !important;
+      }
+
+      body.dark-mode td {
+        border-color: #555;
+        background-color: #2a2a2a;
+      }
+
+      body.dark-mode .btn-add {
+        background: linear-gradient(145deg, #022048, #0b2a59) !important;
+        color: #fff;
+      }
+
+      body.dark-mode input {
+        background-color: #333;
+        border: 1px solid #555;
+        color: #fff;
+      }
+
+      body.dark-mode .table {
+        border-color: #555;
+      }
+      body.dark-mode .table tbody {
+        color: #ddd;
+      }
+      /* 🌙 Dark mode - Mobile card view */
+      @media (max-width: 768px) {
+        body.dark-mode .card-view .card,
+        body.dark-mode #customerCards > div {
+          background-color: #2e2e2e !important;
+          color: #fff !important;
+          border: 1px solid #444 !important;
+          border-radius: 10px;
+          padding: 12px;
+          margin-bottom: 12px;
+        }
+
+        body.dark-mode .card-view .card p,
+        body.dark-mode #customerCards > div p {
+          color: #fff !important;
+        }
+
+        body.dark-mode .card-view .btn,
+        body.dark-mode #customerCards .btn {
+          background-color: #28a745 !important;
+          color: #fff !important;
+        }
+      }
     </style>
-      <script src="./scripts/utils.js"></script>
+    <script src="./scripts/utils.js"></script>
     <script src="./scripts/delegate-landing.js"></script>
+    <script>
+      function applyTheme(mode) {
+        if (mode === "dark") {
+          document.body.classList.add("dark-mode");
+        } else {
+          document.body.classList.remove("dark-mode");
+        }
+      }
+
+      window.addEventListener("message", (event) => {
+        if (event.data.theme) {
+          applyTheme(event.data.theme);
+          localStorage.setItem("theme", event.data.theme);
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+      });
+    </script>
   </head>
 
   <body>
-    <div class="navbar">
-      <img
-        src="./assets/GEM Icon.jpg"
-        alt="gem logo"
-        class="logo"
-        style="
-          display: block;
-          margin: 0;
-          height: 100px;
-          max-height: 45px;
-          object-fit: contain;
-          border-radius: 10%;
-        "
+    <h2
+      style="
+        text-align: left;
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 30px;
+        margin-left: 8px;
+      "
+    >
+      Customers
+    </h2>
+
+    <div class="search-actions-row">
+      <input
+        id="customer-search"
+        type="search"
+        class="input-full"
+        placeholder="Search by name or code..."
+        style="border-radius: 8px"
       />
-      <style>
-        .logo {
-          display: block;
-          margin: 0 auto 0px;
-          height: 137px;
-          max-height: 120px;
-          object-fit: contain;
-        }
-        @media (max-width: 576px) {
-          .logo {
-            height: 90px;
-          }
-        }
-      </style>
-      <!-- <button class="logout-btn">Logout</button> -->
-      <button id="logout-btn" class="logout-btn">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
+       <button
+        id="add-customer-btn"
+        class="btn btn-add full-width"
+        style="
+          border-radius: 8px;
+          background: linear-gradient(145deg, #022048, #0b2a59);
+        "
+      >
+        Add Customer
       </button>
     </div>
-    <div class="container">
-      <a
-        href="index.html"
-        style="
-          display: inline-flex;
-          align-items: center;
-          font-size: 14px;
-          font-weight: 500;
-          color: #333;
-          background-color: #f8f9fa;
-          border: 1px solid #ced4da;
-          padding: 8px 14px;
-          border-radius: 6px;
-          text-decoration: none;
-          margin-bottom: 24px;
-          transition: background-color 0.2s ease;
-          gap: 8px;
-        "
-        onmouseover="this.style.backgroundColor='#e9ecef'"
-        onmouseout="this.style.backgroundColor='#f8f9fa'"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="#333"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          viewBox="0 0 24 24"
-        >
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-        Dashboard
-      </a>
-      <!-- <img
-        src="./assets/GEM Group 2024.jpg"
-        alt="gem logo"
-        class="logo"
-        style="
-          display: block;
-          margin: 0 auto 0px;
-          height: 150px;
-          max-height: 140px;
-          object-fit: contain;
-        "
-      /> -->
 
-      <h2
-        style="
-          text-align: left;
-          font-size: 26px;
-          font-weight: 700;
-          margin-bottom: 30px;
-          margin-left: 8px;
-        "
-      >
-        Customers
-      </h2>
+    <!-- Table View -->
+    <div class="table-responsive" style="margin-top: 10px">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Customer Name</th>
+            <th>Phone</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="customersTable">
+          <!-- Table content by JS -->
+        </tbody>
+      </table>
+    </div>
 
-      <div class="search-actions-row">
-        <button
-          id="add-customer-btn"
-          class="btn btn-add full-width"
-          style="
-            border-radius: 8px;
-            background: linear-gradient(145deg, #022048, #0b2a59);
-          "
-        >
-          Add Customer
-        </button>
-
-        <input
-          id="customer-search"
-          type="search"
-          class="input-full"
-          placeholder="Search by name or code..."
-          style="border-radius: 8px"
-        />
+    <!-- Card View (Mobile) -->
+    <div class="card-view" style="display: none">
+      <div id="customerCards">
+        <!-- Card content by JS -->
       </div>
+    </div>
+    <!-- </div> -->
 
-      <!-- Table View -->
-      <div class="table-responsive" style="margin-top: 10px">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>code</th>
-              <th>Customer Name</th>
-              <th>Phone</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="customersTable">
-            <!-- Table content by JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Card View (Mobile) -->
-      <div class="card-view" style="display: none">
-        <div id="customerCards">
-          <!-- Card content by JS -->
-        </div>
-      </div>
-
-      <!-- <div class="text-right mt-3">
+    <!-- <div class="text-right mt-3">
             <button id="add-customer-btn" class="btn btn-add"> Add Customer</button>
         </div> -->
-    </div>
+    <!-- </div> -->
   </body>
 </html>

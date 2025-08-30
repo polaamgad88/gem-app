@@ -246,3 +246,18 @@ th {
         font-size: var(--font-size-lg);
     }
 }
+
+@media (max-width: 768px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pagination-controls {
+    order: 2; 
+  }
+
+  .card-view, .table-responsive {
+    order: 1;
+  }
+}

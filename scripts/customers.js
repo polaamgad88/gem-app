@@ -42,7 +42,13 @@ function renderPagination() {
     container = document.createElement("div");
     container.id = containerId;
     container.className = "pagination-controls";
-    document.querySelector(".container").appendChild(container);
+    // document.querySelector(".container").appendChild(container);
+    // document.querySelector(".table-responsive").after(container);
+      if (window.innerWidth <= 768) {
+    document.querySelector(".card-view").after(container);
+  } else {
+    document.querySelector(".table-responsive").after(container);
+  }
   }
 
   container.innerHTML = "";
@@ -148,3 +154,37 @@ function renderCustomers(customers) {
     cardContainer.appendChild(card);
   });
 }
+
+function initializeCustomersPage() {
+  const addBtn = document.getElementById("add-customer-btn");
+  const searchInput = document.getElementById("customer-search");
+
+  if (addBtn) {
+    addBtn.addEventListener("click", () => {
+      alert("Add Customer clicked!");
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      console.log("Searching for:", e.target.value);
+    });
+  }
+}
+
+function initializeCustomersPage() {
+  const tableBody = document.querySelector("#customers-table tbody");
+
+  const customers = [
+    { name: "Ali", email: "ali@test.com" },
+    { name: "Mona", email: "mona@test.com" }
+  ];
+
+  customers.forEach(c => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${c.name}</td><td>${c.email}</td>`;
+    tableBody.appendChild(row);
+  });
+}
+
+initializeCustomersPage();

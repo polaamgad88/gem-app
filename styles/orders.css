@@ -1,5 +1,5 @@
 /* Orders Page Styles */
-@import url('./base.css');
+@import url("./base.css");
 
 body {
   background-color: var(--gray-100);
@@ -68,8 +68,6 @@ h1 {
   color: white;
   border-color: #007bff;
 }
-
-
 
 label {
   margin-bottom: var(--spacing-xs);
@@ -187,7 +185,7 @@ th[onclick]:hover {
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, .6);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -200,7 +198,7 @@ th[onclick]:hover {
   border-radius: 8px;
   width: 90%;
   max-width: 420px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
@@ -219,14 +217,14 @@ th[onclick]:hover {
 }
 
 .form-group input {
-  margin-top: .4rem;
+  margin-top: 0.4rem;
 }
 
 .export-btn {
   background: var(--primary-color);
   color: #fff;
   border: none;
-  padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -280,7 +278,6 @@ tfoot td {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
@@ -338,5 +335,71 @@ tfoot td {
   .card-view .order-card-label {
     font-weight: bold;
     color: var(--gray-700);
+  }
+}
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .order-card {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .order-card-header span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: bold;
+  }
+
+  .filter-section form label,
+  .filter-section form input,
+  .filter-section form select {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  .order-card-body p {
+    display: flex;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .order-card-body p b {
+    min-width: 80px;
+    text-align: left;
+  }
+
+  .order-card-footer {
+    justify-content: flex-end;
+  }
+
+  .export-btn {
+    margin-bottom: 20px;
+  }
+
+  .order-card-footer .view-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    border-radius: 6px;
+    background: #28a745;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-controls {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 15px;
+  }
+
+  .order-cards {
+    grid-template-columns: 1fr;
   }
 }

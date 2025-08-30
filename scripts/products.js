@@ -209,7 +209,6 @@ td:nth-child(8) .action-container {
       min-width: 130px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       border-radius: 6px;
-      overflow: hidden;
       z-index: 100;
     }
 
@@ -245,10 +244,7 @@ td:nth-child(8) .action-container {
   <div class="action-container" style="display: flex; justify-content: center;align-items: center;">
     <button class="action-btn">⋮</button>
     <div class="dropdown-menu">
-      <button onclick="openProductDialog('edit', ${
-        product.product_id
-      })">Edit</button>  <div class="action-container" style="display: flex; justify-content: center;align-items: center;">
-    <button class="action-btn">⋮</button>
+        <div class="action-container" style="display: flex; justify-content: center;align-items: center;">
     <div class="dropdown-menu">
       <button onclick="openProductDialog('edit', ${
         product.product_id
@@ -892,3 +888,4 @@ function renderPagination(current, totalPages) {
   };
   container.appendChild(nextBtn);
 }
+

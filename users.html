@@ -12,34 +12,10 @@
     <style>
       body {
         font-family: "Segoe UI", sans-serif;
-        background-color: #f3f3f5;
+        background-color: #f8f9fb;
         margin: 0;
-        padding: 0;
+        padding: 20px;
         color: #333;
-      }
-      .navbar {
-        width: 100%;
-        background-color: #0b2a59;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 30px;
-        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
-
-      .navbar .logout-btn {
-        background-color: #fff;
-        color: #0b2a59;
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        transition: background 0.3s ease;
       }
 
       .container {
@@ -93,85 +69,136 @@
         padding: 8px;
         text-align: center;
       }
+      /* 🌙 Dark Mode */
+body.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+/* Container */
+body.dark-mode .container {
+  background: #1e1e1e;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Links (Back to Dashboard) */
+body.dark-mode a {
+  color: #ddd !important;
+  background-color: #1e1e1e !important;
+  border: 1px solid #333 !important;
+}
+body.dark-mode a:hover {
+  background-color: #2a2a2a !important;
+}
+
+/* Headings */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3 {
+  color: #fff !important;
+}
+
+/* Search Input */
+body.dark-mode input[type="search"],
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="number"],
+body.dark-mode input[type="password"],
+body.dark-mode select {
+  background-color: #2a2a2a;
+  color: #f1f1f1;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+
+
+body.dark-mode .table {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+}
+
+body.dark-mode th {
+  background-color: #2a2a2a !important;
+  color: #f8f9fa !important;
+}
+
+body.dark-mode td {
+  background-color: #1a1a1a;
+  color: #f1f1f1;
+  border: 1px solid #333;
+}
+
+body.dark-mode .modal-content {
+  background: #1e1e1e;
+  color: #f1f1f1;
+  border: 1px solid #444;
+}
+
+body.dark-mode .modal-content input,
+body.dark-mode .modal-content select {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: #f1f1f1;
+}
+body.dark-mode a {
+  color: #1e1e1e !important;
+  background-color: #fff !important;
+}
+body.dark-mode a:hover {
+  background-color: #f1f1f1 !important;
+}
+/* Dark mode - Mobile card view */
+@media (max-width: 768px) {
+  body.dark-mode .card-view #user-cards > div {
+    background-color: #2e2e2e !important; 
+    color: #fff !important;
+    border: 1px solid #444 !important;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  body.dark-mode .card-view #user-cards > div p,
+  body.dark-mode .card-view #user-cards > div span {
+    color: #fff !important;
+  }
+
+  body.dark-mode .card-view #user-cards .btn {
+    color: #000 !important;
+    border: none;
+  }
+}
+
+
     </style>
       <script src="./scripts/utils.js"></script>
     <script src="./scripts/delegate-landing.js"></script>
+    <script>
+  function applyTheme(mode) {
+    if (mode === "dark") {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }
+
+  window.addEventListener("message", (event) => {
+    if (event.data.theme) {
+      applyTheme(event.data.theme);
+      localStorage.setItem("theme", event.data.theme); 
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+  });
+</script>
   </head>
 
   <body>
-    <div class="navbar">
-      <img
-        src="./assets/GEM Icon.jpg"
-        alt="gem logo"
-        class="logo"
-        style="
-          display: block;
-          margin: 0;
-          height: 100px;
-          max-height: 45px;
-          object-fit: contain;
-          border-radius: 10%;
-        "
-      />
-      <style>
-        .logo {
-          display: block;
-          margin: 0 auto 0px;
-          height: 137px;
-          max-height: 120px;
-          object-fit: contain;
-        }
-        @media (max-width: 576px) {
-          .logo {
-            height: 90px;
-          }
-        }
-      </style>
-      <!-- <button class="logout-btn">Logout</button> -->
-      <button id="logout-btn" class="logout-btn">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
-    </div>
-    <!-- Back to Dashboard Link -->
-
-    <!-- Page Heading -->
-    <div class="container">
-      <a
-        href="index.html"
-        style="
-          display: inline-flex;
-          align-items: center;
-          font-size: 14px;
-          font-weight: 500;
-          color: #333;
-          background-color: #f8f9fa;
-          border: 1px solid #ced4da;
-          padding: 8px 14px;
-          border-radius: 6px;
-          text-decoration: none;
-          margin-bottom: 24px;
-          transition: background-color 0.2s ease;
-          gap: 8px;
-        "
-        onmouseover="this.style.backgroundColor='#e9ecef'"
-        onmouseout="this.style.backgroundColor='#f8f9fa'"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="#333"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          viewBox="0 0 24 24"
-        >
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-        Dashboard
-      </a>
-
       <h1
         style="
           text-align: left;
@@ -224,7 +251,7 @@
               width: 100%;
               padding: 8px 10px;
               font-size: 14px;
-              background: linear-gradient(135deg, #28a745, #218838);
+              background: linear-gradient(145deg, #022048, #0b2a59);
               color: #fff;
               border: 1px solid #ccc;
               border-radius: 8px;
@@ -322,6 +349,6 @@
           </div>
         </form>
       </div>
-    </div>
+    <!-- </div> -->
   </body>
 </html>

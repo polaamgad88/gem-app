@@ -12,44 +12,13 @@
     <style>
       body {
         font-family: "Segoe UI", sans-serif;
-        background-color: #f3f3f5;
+        background-color: #f8f9fb;
         margin: 0;
-        padding: 0;
+        padding: 20px;
         color: #333;
       }
-      .navbar {
-        width: 100%;
-        background-color: #0b2a59;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 30px;
-        box-shadow: 0 2px 6px rgba(7, 24, 215, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
 
-      .navbar .logout-btn {
-        background-color: #fff;
-        color: #0b2a59;
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        transition: background 0.3s ease;
-      }
-
-      .container {
-        max-width: 950px;
-        margin: 30px auto;
-        background: #fff;
-        border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
-      }
+    
 
       .logo {
         display: block;
@@ -221,11 +190,7 @@
       }
 
       @media (max-width: 768px) {
-        .container {
-          width: 90%;
-          padding: 20px;
-        }
-
+     
         .filters {
           flex-direction: column;
         }
@@ -245,119 +210,79 @@
         }
       }
       th {
-        background-color: #0b2a59;
-        color: white;
+        background-color: white !important;
+        color: #0b2a59 !important;
       }
+  body.dark-mode {
+        background-color: #1e1e1e;
+        color: #f1f1f1;
+      }
+
+body.dark-mode .card,
+body.dark-mode .table,
+body.dark-mode .table th,
+body.dark-mode input,
+body.dark-mode select {
+  background-color: #1e1e1e !important;
+  color: #f5f5f5 !important;
+  border-color: #333;
+}
+body.dark-mode .filter-group label {
+  color: #ddd;
+}
+@media (max-width: 768px) {
+  body.dark-mode .order-card,
+  body.dark-mode .customer-card {
+    background-color: #2e2e2e !important; 
+    color: #fff !important; 
+    border: 1px solid #444 !important;
+  }
+
+  body.dark-mode .order-card-body p,
+  body.dark-mode .customer-card-body p,
+  body.dark-mode .order-card-header span,
+  body.dark-mode .customer-card-header {
+    color: #fff !important;
+  }
+
+  body.dark-mode .order-card-footer .view-btn,
+  body.dark-mode .customer-card-footer .btn-view {
+    background-color: #28a745 !important; 
+    color: #fff !important;
+  }
+}
+
     </style>
     <script src="./scripts/utils.js"></script>
     <script src="./scripts/delegate-landing.js"></script>
+    <script>
+  function applyTheme(mode) {
+    if (mode === "dark") {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }
+
+  window.addEventListener("message", (event) => {
+    if (event.data.theme) {
+      applyTheme(event.data.theme);
+      localStorage.setItem("theme", event.data.theme); 
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+  });
+</script>
   </head>
 
   <body>
-    <div class="navbar">
-      <img
-        src="./assets/GEM Icon.jpg"
-        alt="gem logo"
-        class="logo"
-        style="
-          display: block;
-          margin: 0;
-          height: 100px;
-          max-height: 45px;
-          object-fit: contain;
-          border-radius: 10%;
-        "
-      />
-      <style>
-        .logo {
-          display: block;
-          margin: 0 auto 0px;
-          height: 137px;
-          max-height: 120px;
-          object-fit: contain;
-        }
-        @media (max-width: 576px) {
-          .logo {
-            height: 90px;
-          }
-        }
-      </style>
-      <!-- <button class="logout-btn">Logout</button> -->
-      <button id="logout-btn" class="logout-btn">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
-    </div>
-
     <div id="loader" style="display: none">
       <div class="loader"></div>
       <strong>Loading orders...</strong>
     </div>
-
-    <div class="container">
-      <a
-        href="index.html"
-        style="
-          display: inline-flex;
-          align-items: center;
-          font-size: 14px;
-          font-weight: 500;
-          color: #333;
-          background-color: #f8f9fa;
-          border: 1px solid #ced4da;
-          padding: 8px 14px;
-          border-radius: 6px;
-          text-decoration: none;
-          margin-bottom: 24px;
-          transition: background-color 0.2s ease;
-          gap: 8px;
-        "
-        onmouseover="this.style.backgroundColor='#e9ecef'"
-        onmouseout="this.style.backgroundColor='#f8f9fa'"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="#333"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          viewBox="0 0 24 24"
-        >
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-        Dashboard
-      </a>
-
-      <!-- <img
-        src="./assets/GEM Group 2024.jpg"
-        alt="gem logo"
-        class="logo"
-        style="
-          display: block;
-          margin: 0 auto 0px;
-          height: 150px;
-          max-height: 140px;
-          object-fit: contain;
-        "
-      />
-      <style>
-        .logo {
-          display: block;
-          margin: 0 auto 0px;
-          height: 137px;
-          max-height: 140px;
-          object-fit: contain;
-        }
-
-        @media (max-width: 576px) {
-          .logo {
-            height: 90px;
-          }
-        }
-      </style> -->
-
       <h2
         style="
           text-align: left;
@@ -438,7 +363,7 @@
         style="display: flex; justify-content: end; border-radius: 8px"
       >
         <!-- <label style="opacity: 0; color: #28a745">Export</label> -->
-        <button id="exportBtn" class="export-btn" title="Export to Excel">
+        <button id="exportBtn" class="export-btn" title="Export to Excel" style="background-color: #0b2a59;">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
             <path
               fill="#fff"
@@ -562,6 +487,5 @@
           </button>
         </form>
       </div>
-    </div>
   </body>
 </html>
