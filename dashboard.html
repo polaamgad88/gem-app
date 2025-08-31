@@ -214,6 +214,83 @@
           grid-column: span 4 !important;
         }
       }
+      .info-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .info-box h4 {
+        margin: 0;
+        font-size: 16px;
+        color: #555;
+      }
+      .info-box p {
+        margin: 8px 0 0;
+        font-size: 20px;
+        font-weight: bold;
+        color: #0b2a59;
+      }
+
+      /* 🌙 Dark Mode */
+      body.dark-mode .info-box {
+        background: #2a2a2a;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      }
+      body.dark-mode .info-box h4 {
+        color: #bbb;
+      }
+      body.dark-mode .info-box p {
+        color: #4da3ff;
+      }
+      .chart-controls select {
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 14px;
+}
+
+/* Dark mode */
+body.dark-mode .chart-controls select {
+  background: #3b3b4f;
+  color: #fff;
+  border: 1px solid #555;
+}
+.top-header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  /* margin: 14px; */
+}
+
+.add-order-btn {
+  padding: 8px 16px;
+  background: #0b2a59;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.add-order-btn:hover {
+  background: #133b80;
+}
+
+/* 🌙 Dark Mode */
+body.dark-mode .add-order-btn {
+  background: #4da3ff;
+  color: #111;
+}
+
+body.dark-mode .add-order-btn:hover {
+  background: #77b9ff;
+}
+
     </style>
     <script>
       let chart;
@@ -329,18 +406,22 @@
         const savedTheme = localStorage.getItem("theme") || "light";
         applyTheme(savedTheme);
       });
-       window.addEventListener("message", (event) => {
-    if (event.data.theme === "dark") {
-      document.body.classList.add("dark-mode");
-    } else if (event.data.theme === "light") {
-      document.body.classList.remove("dark-mode");
-    }
-  });
+      window.addEventListener("message", (event) => {
+        if (event.data.theme === "dark") {
+          document.body.classList.add("dark-mode");
+        } else if (event.data.theme === "light") {
+          document.body.classList.remove("dark-mode");
+        }
+      });
     </script>
   </head>
 
   <body>
     <div class="dashboard">
+      <div class="info-box"></div>
+      <div class="info-box"></div>
+      <div class="info-box"></div>
+      <div class="info-box"></div>
       <div class="chart">
         <div class="chart-header">
           <div class="chart-title">
@@ -348,7 +429,11 @@
             <h3>Weekly Performance</h3>
           </div>
           <div class="chart-controls">
-           
+            <select id="dataType" onchange="changeDataset(this.value)">
+              <option value="sales">Sales</option>
+              <option value="leads">Orders</option>
+            </select>
+
             <div class="chart-buttons">
               <button
                 class="active"
@@ -368,17 +453,20 @@
         ></canvas>
       </div>
       <div class="top-delegates">
+          <div class="top-header">
         <h3 style="margin: 14px">Recent Orders - Top 10</h3>
-        <table border="1" cellpadding="6">
+         <button class="add-order-btn" onclick="window.location.href='create-order.html'">
+      Add Order
+    </button>
+  </div>
+        <table cellpadding="5">
           <thead>
-            <tr>
-              <!-- <th>Order ID</th>
+            <tr style="border-bottom: 2px solid #ccc;">
+             <th>Order ID</th>
               <th>Customer</th>
               <th>Status</th>
               <th>Amount</th>
-              <th>Date</th> -->
-              <th>Delegate</th>
-              <th>Count</th>
+              <th>Date</th> 
             </tr>
           </thead>
           <tbody id="delegatesTable"></tbody>
@@ -386,5 +474,6 @@
       </div>
     </div>
     <script src="./scripts/dashboard.js"></script>
+    <script src="./scripts/orders.js"></script>
   </body>
 </html>

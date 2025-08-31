@@ -33,7 +33,7 @@
         flex-direction: column;
         padding: 20px;
         border-right: 1px solid #ddd;
-        transition: width 0.3s ease, transform 0.3s ease;
+        transition: all 0.3s ease;
       }
       .sidebar.collapsed {
         transform: translateX(-100%);
@@ -235,12 +235,13 @@
           height: 100%;
           transform: translateX(-100%);
           z-index: 1000;
+          width: 250px;
+          padding: 20px;
         }
 
         .sidebar.active {
           transform: translateX(0);
         }
-
         .main {
           flex: 1;
           width: 100%;
@@ -261,21 +262,6 @@
     <script src="./scripts/utils.js"></script>
     <script src="./scripts/delegate-landing.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const menuBtn = document.querySelector(".topbar-title i.fa-bars");
-        const sidebar = document.querySelector(".sidebar");
-        const sidebarLinks = sidebar.querySelectorAll("a");
-
-        menuBtn.addEventListener("click", () => {
-          sidebar.classList.toggle("active");
-        });
-
-        sidebarLinks.forEach((link) => {
-          link.addEventListener("click", () => {
-            sidebar.classList.remove("active");
-          });
-        });
-      });
       document.addEventListener("DOMContentLoaded", () => {
         const toggleBtn = document.getElementById("theme-toggle");
         const body = document.body;
@@ -307,22 +293,37 @@
       document.addEventListener("DOMContentLoaded", () => {
         const menuBtn = document.querySelector(".topbar-title i.fa-bars");
         const sidebar = document.querySelector(".sidebar");
+        const sidebarLinks = sidebar.querySelectorAll("a");
 
         menuBtn.addEventListener("click", () => {
-          sidebar.classList.toggle("collapsed");
+          if (window.innerWidth <= 768) {
+            // Mobile toggle
+            sidebar.classList.toggle("active");
+          } else {
+            // Desktop collapse
+            sidebar.classList.toggle("collapsed");
+          }
+        });
+
+        sidebarLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+              sidebar.classList.remove("active");
+            }
+          });
         });
       });
+
       document.addEventListener("DOMContentLoaded", () => {
-  const navLinks = document.querySelectorAll(".nav-links a");
+        const navLinks = document.querySelectorAll(".nav-links a");
 
-  navLinks.forEach(link => {
-    link.addEventListener("click", () => {
-      navLinks.forEach(l => l.classList.remove("active"));
-      link.classList.add("active");
-    });
-  });
-});
-
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            navLinks.forEach((l) => l.classList.remove("active"));
+            link.classList.add("active");
+          });
+        });
+      });
     </script>
   </head>
 
@@ -349,6 +350,9 @@
         >
         <a href="./products.html"
           ><i class="fa-solid fa-box"></i> Manage Products</a
+        >
+        <a href="./customer-visit.html"
+          ><i class="fa-solid fa-box"></i> Customer Visit</a
         >
       </div>
     </div>

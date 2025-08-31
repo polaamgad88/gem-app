@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Customer Visit - Check In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      crossorigin
+    />
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/customer-visit.css" />
+    <!-- <script src="./scripts/utils.js" defer></script> -->
+    <script src="./scripts/customer-visit.js" defer></script>
+    <!-- <script src="./scripts/delegate-landing.js"></script> -->
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .container {
+        display: grid;
+        gap: 16px;
+        max-width: 700px;
+        margin: auto;
+      }
+      .input-container {
+        position: relative;
+      }
+      #map {
+        height: 450px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      button {
+        padding: 10px 16px;
+        border: 1px solid #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #4caf50;
+        color: white;
+        font-size: 16px;
+        width: 100% !important;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      .dropdown-list {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100%;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+      }
+      .dropdown-list li {
+        padding: 8px;
+        cursor: pointer;
+      }
+      .dropdown-list li:hover {
+        background: #f0f0f0;
+      }
+      /* Dark Mode Styles */
+      body.dark-mode {
+        background: #1e1e1e;
+        color: #eee;
+      }
+
+      body.dark-mode input,
+      body.dark-mode select {
+        background: #1e1e1e;
+        color: #fff;
+        border: 1px solid #444;
+      }
+
+      body.dark-mode .dropdown-list {
+        background: #1e1e1e;
+        border: 1px solid #444;
+      }
+
+      body.dark-mode .dropdown-list li {
+        color: #fff;
+      }
+
+      body.dark-mode .dropdown-list li:hover {
+        background: #333;
+      }
+
+      body.dark-mode #map {
+        border: 1px solid #444;
+      }
+
+      body.dark-mode button {
+        background: #388e3c;
+        border: 1px solid #555;
+      }
+
+      body.dark-mode button:hover {
+        background: #2e7d32;
+      }
+      body.dark-mode select option {
+        color: #ccc;
+      }
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+        }
+
+        .container {
+          gap: 12px;
+          flex: 0 0 auto;
+        }
+
+        .top-inputs {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          width: 100%;
+        }
+
+        .top-inputs > div {
+          width: 100% !important;
+          flex: unset !important;
+        }
+
+        .input-container input,
+        .status-select select {
+          width: 100% !important;
+          height: 48px;
+          font-size: 16px;
+          padding: 0 12px;
+          border-radius: 8px;
+          box-sizing: border-box;
+        }
+        button {
+         width: 100% !important;
+        }
+        #map {
+          flex: 1;
+          height: auto;
+          min-height: 250px;
+        }
+      }
+         @media (min-width: 768px) {
+        .top-inputs {
+          flex-direction: row;
+        }
+        
+        .status-select {
+          flex: 0 0 200px;
+        }
+        
+        #checkInBtn {
+          width: auto;
+          padding: 12px 24px;
+        }
+      }
+    </style>
+    <script>
+      function applyTheme(mode) {
+        if (mode === "dark") {
+          document.body.classList.add("dark-mode");
+        } else {
+          document.body.classList.remove("dark-mode");
+        }
+      }
+
+      window.addEventListener("message", (event) => {
+        if (event.data.theme) {
+          applyTheme(event.data.theme);
+          localStorage.setItem("theme", event.data.theme);
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+      });
+    </script>
+  </head>
+  <body>
+    <div
+      style="display: flex; gap: 10px; margin-bottom: 15px"
+      class="top-inputs"
+    >
+      <!-- Customer Dropdown -->
+      <div
+        class="custom-customer-select input-container"
+        style="flex: 1; position: relative"
+      >
+        <input
+          type="text"
+          id="customer-search"
+          placeholder="Search Customer..."
+          autocomplete="off"
+          style="
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+          "
+        />
+        <ul
+          id="customer-suggestions"
+          class="dropdown-list"
+          style="
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+          "
+        ></ul>
+      </div>
+
+      <!-- Status Dropdown -->
+      <div class="status-select input-container" style="flex: 0.5">
+        <select
+          id="status-dropdown"
+          style="
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+          "
+        >
+          <option value="">Select Status...</option>
+          <option value="present">Making Order</option>
+          <option value="late">Delivering Order</option>
+          <option value="absent">Bill Collection</option>
+          <option value="absent">Receiving Returns</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Check In Button -->
+    <div
+      style="
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      "
+      class="check-in-container"
+    >
+      <button id="checkInBtn" style="margin: 20px">Check In</button>
+    </div>
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      crossorigin
+    ></script>
+
+    <script>
+      // Init map (default Cairo center)
+      const map = L.map("map").setView([30.0444, 31.2357], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+      let marker;
+
+      // Handle Check In button
+      document.getElementById("checkInBtn").addEventListener("click", () => {
+        if (!("geolocation" in navigator)) {
+          alert("Geolocation not supported");
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude: lat, longitude: lon } = pos.coords;
+
+            // Place marker
+            if (!marker) marker = L.marker([lat, lon]).addTo(map);
+            marker.setLatLng([lat, lon]);
+            map.setView([lat, lon], 17);
+          },
+          (err) => {
+            alert("Error getting location: " + err.message);
+          },
+          {
+            enableHighAccuracy: true,
+          }
+        );
+      });
+    </script>
+  </body>
+</html>
