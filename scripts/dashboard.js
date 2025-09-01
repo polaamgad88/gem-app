@@ -1,49 +1,104 @@
-// function getOrdersCountByDelegate(data, statusFilter = null) {
-//   const counts = {};
+let chart; 
+let currentType = "line";
 
-//   data.forEach(order => {
-//     if (statusFilter && order.status !== statusFilter) return;
+async function loadData(type = "amount") {
+  try {
+    let url =
+      type === "amount"
+        ? "http://localhost:5000/users/ranking?total_amount=true"
+        : "http://localhost:5000/users/ranking?total_number=true";
 
-//     if (!counts[order.delegate]) {
-//       counts[order.delegate] = 0;
-//     }
-//     counts[order.delegate]++;
-//   });
+    const res = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
+    });
 
-//   return counts;
-// }
+    const data = await res.json();
+    console.log("Data from API:", data);
 
+    const users = data.ranking || [];
 
-// function getTopDelegates(data, statusFilter = null) {
-//   const counts = getOrdersCountByDelegate(data, statusFilter);
+    const tbody = document.getElementById("delegatesTable");
+    tbody.innerHTML = "";
+    users.forEach((user) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${user.name}</td>
+        <td>${user.total_orders_amount || "-"}</td>
+         <td>${user.total_orders_all || "-"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-//   return Object.entries(counts) 
-//     .sort((a, b) => b[1] - a[1]) 
-//     .slice(0, 10); 
-// }
+    const labels = users.map((u) => u.name);
+    const dataset =
+      type === "amount"
+        ? users.map((u) => u.total_orders_amount)
+        : users.map((u) => u.total_orders_all);
 
+    if (!chart) {
+      const ctx = document.getElementById("delegatesChart").getContext("2d");
+      chart = new Chart(ctx, {
+        type: currentType, 
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Sales",
+              data: dataset,
+              borderColor: "#0b2a59",
+              backgroundColor:
+                currentType === "bar"
+                  ? "rgba(0,123,255,0.4)"
+                  : "rgba(0,123,255,0.1)",
+              borderWidth: 2,
+              tension: 0.4,
+              fill: currentType === "line",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+        },
+      });
+    } else {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = dataset;
+      chart.update();
+    }
+  } catch (err) {
+    console.error("Error fetching data:", err);
+  }
+}
 
+function changeChartType(type) {
+  currentType = type;
+  if (chart) {
+    chart.destroy(); 
+    chart = null;
+    loadData("amount"); 
+  }
+}
 
+document.addEventListener("DOMContentLoaded", () => {
+  loadData("amount");
 
-function getOrdersCountByDelegate(data, statusFilter = null) {
-  const counts = {};
-  data.forEach(order => {
-    if (statusFilter && order.status !== statusFilter) return;
-    counts[order.delegate] = (counts[order.delegate] || 0) + 1;
+  document.getElementById("dataType").addEventListener("change", (e) => {
+    if (e.target.value === "sales") {
+      loadData("amount");
+    } else {
+      loadData("orders");
+    }
   });
-  return counts;
-}
 
-function getTopDelegates(data, statusFilter = null) {
-  const counts = getOrdersCountByDelegate(data, statusFilter);
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
-}
-
-const topDelegates = getTopDelegates(orders, "done");
-const tableBody = document.getElementById("delegatesTable");
-topDelegates.forEach(([delegate, count]) => {
-  const row = `<tr><td>${delegate}</td><td>${count}</td></tr>`;
-  tableBody.innerHTML += row;
+  document
+    .getElementById("chartLine")
+    .addEventListener("click", () => changeChartType("line"));
+  document
+    .getElementById("chartBar")
+    .addEventListener("click", () => changeChartType("bar"));
 });
