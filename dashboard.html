@@ -59,7 +59,6 @@
         display: inline-block;
       }
 
-      /* right side controls */
       .chart-controls {
         display: flex;
         align-items: center;
@@ -99,7 +98,6 @@
         margin-top: 10px;
       }
 
-      /* top-delegates table */
       .top-delegates {
         grid-column: span 4;
         margin-top: 20px;
@@ -141,7 +139,6 @@
         color: #c00;
       }
 
-      /* 🌙 DARK MODE */
       body.dark-mode {
         background-color: #1e1e1e;
         color: #eee;
@@ -195,7 +192,6 @@
         color: #fff;
       }
 
-      /* 🌙 toggle button */
       .toggle-btn {
         position: fixed;
         top: 15px;
@@ -215,7 +211,6 @@
         }
       }
 
-      /* 🌙 Dark Mode */
       .chart-controls select {
         padding: 6px 12px;
         border-radius: 12px;
@@ -224,7 +219,6 @@
         font-size: 14px;
       }
 
-      /* Dark mode */
       body.dark-mode .chart-controls select {
         background: #3b3b4f;
         color: #fff;
@@ -252,7 +246,6 @@
         background: #133b80;
       }
 
-      /* 🌙 Dark Mode */
       body.dark-mode .add-order-btn {
         background: #4da3ff;
         color: #111;
@@ -261,6 +254,74 @@
       body.dark-mode .add-order-btn:hover {
         background: #77b9ff;
       }
+      .box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.box input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.box input:focus {
+  border-color: #007bff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+thead {
+  background: #f1f1f1;
+}
+
+th, td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+td button {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.box input:hover {
+ border-color: #007bff;
+}
+.box input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
+}
+body.dark-mode table thead {
+  background: #333333;   
+  color: #fff;         
+}
+body.dark-mode .box input {
+  background: #333333;   
+  color: #fff;         
+}
+.status {
+  display: inline-block;
+
+}
+
+
     </style>
     <!-- <script>
       let chart;
@@ -410,6 +471,101 @@
 
   <body>
     <div class="dashboard">
+      <div class="box" style="grid-column: span 4">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px">
+          <input
+            type="text"
+            placeholder="User"
+            style="
+              flex: 1;
+              padding: 8px;
+              border: 1px solid #ccc;
+              border-radius: 6px;
+            "
+          />
+          <input
+            type="text"
+            placeholder="Customer"
+            style="
+              flex: 1;
+              padding: 8px;
+              border: 1px solid #ccc;
+              border-radius: 6px;
+            "
+          />
+        </div>
+
+      <table style="width: 100%; border-collapse: collapse">
+  <thead>
+    <tr style="border-bottom: 2px solid #ccc">
+      <th>Status</th> <!-- ✅ العمود الجديد -->
+      <th>User</th>
+      <th>Date</th>
+      <th>Customer</th>
+      <th>Reason</th>
+      <th>Location</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🔴</td>
+      <td>Admin</td>
+      <td>2025-09-13</td>
+      <td>Customer A</td>
+      <td>Visit</td>
+      <td>Cairo</td>
+      <td><button onclick="openMapPopup()">View</button></td>
+    </tr>
+    <tr>
+      <td>🟡</td>
+      <td>User1</td>
+      <td>2025-09-12</td>
+      <td>Customer B</td>
+      <td>Delivery</td>
+      <td>Giza</td>
+      <td><button onclick="openMapPopup()">View</button></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>User2</td>
+      <td>2025-04-7</td>
+      <td>Customer C</td>
+      <td>Delivery</td>
+      <td>Tanta</td>
+      <td><button onclick="openMapPopup()">View</button></td>
+    </tr>
+    <tr>
+      <td>🔴</span></td>
+      <td>User3</td>
+      <td>2025-11-10</td>
+      <td>Customer D</td>
+      <td>Delivery</td>
+      <td>Cairo</td>
+      <td><button onclick="openMapPopup()">View</button></td>
+    </tr>
+    <tr>
+      <td>🟡</td>
+      <td>User4</td>
+      <td>2025-03-1</td>
+      <td>Customer E</td>
+      <td>Delivery</td>
+      <td>Giza</td>
+      <td><button onclick="openMapPopup()">View</button></td>
+    </tr>
+    <tr>
+      <td>🟢</td>
+      <td>User5</td>
+      <td>2025-08-6</td>
+      <td>Customer F</td>
+      <td>Delivery</td>
+      <td>Giza</td>
+      <td><button onclick="openMapPopup()">View</button></td>
+    </tr>
+  </tbody>
+</table>
+
+      </div>
       <div class="chart">
         <div class="chart-header">
           <div class="chart-title">
@@ -443,6 +599,42 @@
           style="max-height: 300px; margin-top: 20px"
         ></canvas>
       </div>
+      <div
+        id="mapModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.6);
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            width: 90%;
+            height: 80%;
+            position: relative;
+          "
+        >
+          <button
+            onclick="closeMapPopup()"
+            style="position: absolute; top: 10px; right: 10px"
+          >
+            X
+          </button>
+          <div
+            id="map"
+            style="width: 95%; height: 100%; border-radius: 8px"
+          ></div>
+        </div>
+      </div>
       <div class="top-delegates">
         <div class="top-header">
           <h3 style="margin: 14px">Recent Orders - Top 15</h3>
@@ -465,6 +657,50 @@
         </table>
       </div>
     </div>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="./scripts/dashboard.js"></script>
+    <script>
+      let map, visitMarker, locationMarker;
+
+      function openMapPopup() {
+        document.getElementById("mapModal").style.display = "flex";
+
+        setTimeout(() => {
+          if (!map) {
+            map = L.map("map").setView([30.03, 31.22], 15);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+              maxZoom: 19,
+            }).addTo(map);
+
+            visitMarker = L.marker([30.05, 31.23], {
+              icon: L.icon({
+                iconUrl:
+                  "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                iconSize: [32, 32],
+              }),
+            })
+              .addTo(map)
+              .bindPopup("Visit Point");
+
+            locationMarker = L.marker([30.03, 31.22], {
+              icon: L.icon({
+                iconUrl:
+                  "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                iconSize: [32, 32],
+              }),
+            })
+              .addTo(map)
+              .bindPopup("Location Point");
+          } else {
+            map.invalidateSize();
+          }
+        }, 200);
+      }
+
+      function closeMapPopup() {
+        document.getElementById("mapModal").style.display = "none";
+      }
+    </script>
   </body>
 </html>
