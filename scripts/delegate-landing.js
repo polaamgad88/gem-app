@@ -17,8 +17,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     setupAdminButtons(admin, role);
     await verifyToken(token);
-
-    await checkTopUser(token, username);
   } catch (err) {
     console.error("Dashboard initialization error:", err);
     window.location.href = "login.html";
@@ -26,27 +24,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   setupLogoutButton();
 });
-
-async function checkTopUser(token, currentUser) {
-  try {
-    const res = await fetch("http://localhost:5000/top-user", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) return;
-    const data = await res.json();
-
-    if (data.top_user && data.top_user === currentUser) {
-      alert(`🎉 Congratulations ${currentUser}! You are the top performer with ${data.orders_count} orders!`);
-    }
-  } catch (err) {
-    console.error("Error fetching top user:", err);
-  }
-}
-
 // Helper function to set up admin buttons
 function setupAdminButtons(admin, role) {
   const username = localStorage.getItem("username");

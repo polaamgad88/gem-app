@@ -69,6 +69,7 @@ body {
   flex: 1 1 30%;
   position: relative;
 }
+
 .barcode-suggestions.dropdown-list {
   position: relative;
   z-index: 100;
@@ -95,6 +96,7 @@ body {
 .barcode-suggestions.dropdown-list li:hover {
   background-color: var(--gray-100);
 }
+
 #customer-suggestions {
   position: absolute;
   top: 100%;
@@ -137,5 +139,191 @@ body {
     font-size: 14px;
     padding: 8px 12px;
     height: 40px;
+  }
+}
+
+/* Customer Visit Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.container {
+  display: grid;
+  gap: 16px;
+  max-width: 700px;
+  margin: auto;
+}
+
+.input-container {
+  position: relative;
+}
+
+#map {
+  height: 450px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+button {
+  padding: 10px 16px;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #4caf50;
+  color: white;
+  font-size: 16px;
+  width: 100% !important;
+}
+
+button:hover {
+  background: #45a049;
+}
+
+.dropdown-list {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-height: 300px;
+  /* Increased height for the dropdown */
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-sizing: border-box;
+}
+
+.dropdown-list li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-list li:hover {
+  background: #f0f0f0;
+}
+
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  background: #1e1e1e;
+  color: #eee;
+}
+
+body.dark-mode input,
+body.dark-mode select {
+  background: #1e1e1e;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+body.dark-mode .dropdown-list {
+  background: #1e1e1e;
+  border: 1px solid #444;
+}
+
+body.dark-mode .dropdown-list li {
+  color: #fff;
+}
+
+body.dark-mode .dropdown-list li:hover {
+  background: #333;
+}
+
+body.dark-mode #map {
+  border: 1px solid #444;
+}
+
+body.dark-mode button {
+  background: #388e3c;
+  border: 1px solid #555;
+}
+
+body.dark-mode button:hover {
+  background: #2e7d32;
+}
+
+body.dark-mode select option {
+  color: #ccc;
+}
+
+.address-dropdown {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .container {
+    gap: 12px;
+    flex: 0 0 auto;
+  }
+
+  .top-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .top-inputs>div {
+    width: 100% !important;
+    flex: unset !important;
+  }
+
+  .input-container input,
+  .status-select select {
+    width: 100% !important;
+    height: 48px;
+    font-size: 16px;
+    padding: 0 12px;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  button {
+    width: 100% !important;
+  }
+
+  #map {
+    flex: 1;
+    height: auto;
+    min-height: 250px;
+  }
+}
+
+@media (min-width: 768px) {
+  .top-inputs {
+    flex-direction: row;
+  }
+
+  .status-select {
+    flex: 0 0 200px;
+  }
+
+  #checkInBtn {
+    width: auto;
+    padding: 12px 24px;
   }
 }

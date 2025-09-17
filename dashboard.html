@@ -1,706 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Order Details</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      body {
-        background-color: #f5f6fa;
-        color: #222;
-        font-family: Arial, sans-serif;
-      }
 
-      .dashboard {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        grid-gap: 20px;
-        padding: 20px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visits Dashboard</title>
 
-      .box {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/dashboard.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-      .chart {
-        grid-column: span 3;
-        background: #fff;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        height: 350px;
-      }
+  <!-- Libraries (available to app.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
 
-      .chart-header {
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .chart-title {
-        display: flex;
-        flex-direction: column;
-      }
-      .chart-title span {
-        font-size: 14px;
-        color: #555;
-      }
-      .chart-title h3 {
-        margin: 0;
-        font-size: 18px;
-        color: black;
-        border-radius: 4px;
-        display: inline-block;
-      }
-
-      .chart-controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      select {
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        background: #fff;
-        font-size: 14px;
-      }
-
-      .chart-buttons {
-        display: flex;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        overflow: hidden;
-      }
-      .chart-buttons button {
-        padding: 6px 14px;
-        border: none;
-        background: #f1f1f1;
-        cursor: pointer;
-        font-size: 14px;
-        color: #333;
-      }
-      .chart-buttons button.active {
-        background: #0b2a59;
-        color: #fff;
-      }
-
-      .chart canvas {
-        width: 100% !important;
-        height: 250px !important;
-        margin-top: 10px;
-      }
-
-      .top-delegates {
-        grid-column: span 4;
-        margin-top: 20px;
-      }
-      .top-delegates h3 {
-        margin: 0 0 15px;
-        font-size: 18px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th,
-      td {
-        padding: 10px 12px;
-        text-align: left;
-        font-size: 14px;
-        border-bottom: 1px solid #eee;
-      }
-      th {
-        font-weight: bold;
-        color: #333;
-      }
-      td {
-        color: #555;
-      }
-      .status {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-      }
-      .paid {
-        background: rgba(11, 42, 89, 0.1);
-        color: #0b2a59;
-      }
-      .delayed {
-        background: rgba(255, 0, 0, 0.1);
-        color: #c00;
-      }
-
-      body.dark-mode {
-        background-color: #1e1e1e;
-        color: #eee;
-      }
-
-      body.dark-mode .box,
-      body.dark-mode .chart,
-      body.dark-mode .top-delegates {
-        background: #1e1e1e;
-        color: #eee;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-      }
-
-      body.dark-mode th {
-        color: #ddd;
-      }
-      body.dark-mode td {
-        color: #bbb;
-      }
-      body.dark-mode .status.paid {
-        background: rgba(11, 42, 89, 0.4);
-        color: #fff;
-      }
-      body.dark-mode .status.delayed {
-        background: rgba(255, 0, 0, 0.3);
-        color: #ffaaaa;
-      }
-
-      body.dark-mode .chart-title span {
-        color: #bbb;
-      }
-      body.dark-mode .chart-title h3 {
-        color: #fff;
-      }
-
-      body.dark-mode select {
-        background: #3b3b4f;
-        color: #fff;
-        border: 1px solid #555;
-      }
-
-      body.dark-mode .chart-buttons {
-        border: 1px solid #555;
-      }
-      body.dark-mode .chart-buttons button {
-        background: #3b3b4f;
-        color: #ddd;
-      }
-      body.dark-mode .chart-buttons button.active {
-        background: #0b2a59;
-        color: #fff;
-      }
-
-      .toggle-btn {
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        padding: 8px 14px;
-        background: #0b2a59;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-      }
-      @media (max-width: 768px) {
-        .chart,
-        .top-delegates {
-          grid-column: span 4 !important;
-        }
-      }
-
-      .chart-controls select {
-        padding: 6px 12px;
-        border-radius: 12px;
-        border: 1px solid #ccc;
-        background: #fff;
-        font-size: 14px;
-      }
-
-      body.dark-mode .chart-controls select {
-        background: #3b3b4f;
-        color: #fff;
-        border: 1px solid #555;
-      }
-      .top-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        /* margin: 14px; */
-      }
-
-      .add-order-btn {
-        padding: 8px 16px;
-        background: #0b2a59;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background 0.2s ease-in-out;
-      }
-
-      .add-order-btn:hover {
-        background: #133b80;
-      }
-
-      body.dark-mode .add-order-btn {
-        background: #4da3ff;
-        color: #111;
-      }
-
-      body.dark-mode .add-order-btn:hover {
-        background: #77b9ff;
-      }
-      .box {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  padding: 20px;
-  overflow-x: auto;
-}
-
-.box input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  transition: border 0.2s;
-}
-
-.box input:focus {
-  border-color: #007bff;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-thead {
-  background: #f1f1f1;
-}
-
-th, td {
-  padding: 12px 10px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-td button {
-  background: #28a745;
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.box input:hover {
- border-color: #007bff;
-}
-.box input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
-}
-body.dark-mode table thead {
-  background: #333333;   
-  color: #fff;         
-}
-body.dark-mode .box input {
-  background: #333333;   
-  color: #fff;         
-}
-.status {
-  display: inline-block;
-
-}
-
-
-    </style>
-    <!-- <script>
-      let chart;
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const ctx = document.getElementById("delegatesChart").getContext("2d");
-
-        chart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: [
-              "Jan",
-              "Feb",
-              "Mar",
-              "Apr",
-              "May",
-              "Jun",
-              "Jul",
-              "Aug",
-              "Sep",
-              "Oct",
-              "Nov",
-              "Dec",
-            ],
-            datasets: [
-              {
-                label: "Sales",
-                data: [30, 35, 29, 40, 46, 32, 28],
-                borderColor: "#0b2a59",
-                backgroundColor: "rgba(0,123,255,0.1)",
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-          },
-        });
-      });
-
-      function showChart(type) {
-        chart.destroy();
-        const ctx = document.getElementById("delegatesChart").getContext("2d");
-
-        chart = new Chart(ctx, {
-          type: type,
-          data: {
-            labels: [
-              "Jan",
-              "Feb",
-              "Mar",
-              "Apr",
-              "May",
-              "Jun",
-              "Jul",
-              "Aug",
-              "Sep",
-              "Oct",
-              "Nov",
-              "Dec",
-            ],
-
-            datasets: [
-              {
-                label: "Sales",
-                data: [30, 35, 29, 40, 46, 32, 28],
-                borderColor: "#0b2a59",
-                backgroundColor:
-                  type === "bar"
-                    ? "rgba(0,123,255,0.4)"
-                    : "rgba(0,123,255,0.1)",
-                borderWidth: 2,
-                tension: 0.4,
-                fill: type === "line",
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-          },
-        });
-
-        document
-          .querySelectorAll(".chart-buttons button")
-          .forEach((btn) => btn.classList.remove("active"));
-        document
-          .querySelector(`.chart-buttons button[data-type="${type}"]`)
-          .classList.add("active");
-      }
-
-      function applyTheme(mode) {
-        if (mode === "dark") {
-          document.body.classList.add("dark-mode");
-        } else {
-          document.body.classList.remove("dark-mode");
-        }
-      }
-
-      window.addEventListener("message", (event) => {
-        if (event.data.theme) {
-          applyTheme(event.data.theme);
-          localStorage.setItem("theme", event.data.theme);
-        }
-      });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        applyTheme(savedTheme);
-      });
-      window.addEventListener("message", (event) => {
-        if (event.data.theme === "dark") {
-          document.body.classList.add("dark-mode");
-        } else if (event.data.theme === "light") {
-          document.body.classList.remove("dark-mode");
-        }
-      });
-      
-    </script> -->
-    <script>
-      function applyTheme(mode) {
-        if (mode === "dark") {
-          document.body.classList.add("dark-mode");
-        } else {
-          document.body.classList.remove("dark-mode");
-        }
-      }
-
-      window.addEventListener("message", (event) => {
-        if (event.data.theme) {
-          applyTheme(event.data.theme);
-          localStorage.setItem("theme", event.data.theme);
-        }
-      });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        applyTheme(savedTheme);
-      });
-    </script>
-  </head>
-
-  <body>
-    <div class="dashboard">
-      <div class="box" style="grid-column: span 4">
-        <div style="display: flex; gap: 10px; margin-bottom: 15px">
-          <input
-            type="text"
-            placeholder="User"
-            style="
-              flex: 1;
-              padding: 8px;
-              border: 1px solid #ccc;
-              border-radius: 6px;
-            "
-          />
-          <input
-            type="text"
-            placeholder="Customer"
-            style="
-              flex: 1;
-              padding: 8px;
-              border: 1px solid #ccc;
-              border-radius: 6px;
-            "
-          />
-        </div>
-
-      <table style="width: 100%; border-collapse: collapse">
-  <thead>
-    <tr style="border-bottom: 2px solid #ccc">
-      <th>Status</th> <!-- ✅ العمود الجديد -->
-      <th>User</th>
-      <th>Date</th>
-      <th>Customer</th>
-      <th>Reason</th>
-      <th>Location</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>🔴</td>
-      <td>Admin</td>
-      <td>2025-09-13</td>
-      <td>Customer A</td>
-      <td>Visit</td>
-      <td>Cairo</td>
-      <td><button onclick="openMapPopup()">View</button></td>
-    </tr>
-    <tr>
-      <td>🟡</td>
-      <td>User1</td>
-      <td>2025-09-12</td>
-      <td>Customer B</td>
-      <td>Delivery</td>
-      <td>Giza</td>
-      <td><button onclick="openMapPopup()">View</button></td>
-    </tr>
-    <tr>
-      <td>🟢</td>
-      <td>User2</td>
-      <td>2025-04-7</td>
-      <td>Customer C</td>
-      <td>Delivery</td>
-      <td>Tanta</td>
-      <td><button onclick="openMapPopup()">View</button></td>
-    </tr>
-    <tr>
-      <td>🔴</span></td>
-      <td>User3</td>
-      <td>2025-11-10</td>
-      <td>Customer D</td>
-      <td>Delivery</td>
-      <td>Cairo</td>
-      <td><button onclick="openMapPopup()">View</button></td>
-    </tr>
-    <tr>
-      <td>🟡</td>
-      <td>User4</td>
-      <td>2025-03-1</td>
-      <td>Customer E</td>
-      <td>Delivery</td>
-      <td>Giza</td>
-      <td><button onclick="openMapPopup()">View</button></td>
-    </tr>
-    <tr>
-      <td>🟢</td>
-      <td>User5</td>
-      <td>2025-08-6</td>
-      <td>Customer F</td>
-      <td>Delivery</td>
-      <td>Giza</td>
-      <td><button onclick="openMapPopup()">View</button></td>
-    </tr>
-  </tbody>
-</table>
-
+<body>
+  <div class="dashboard">
+    <!-- Filters + Table -->
+    <div class="box" style="grid-column: span 4">
+      <div class="filters">
+        <input id="userFilter" type="text" placeholder="User ID" />
+        <input id="customerFilter" type="text" placeholder="Customer ID" />
+        <button id="applyFiltersBtn">Apply</button>
+        <button id="clearFiltersBtn" class="secondary">Clear</button>
       </div>
-      <div class="chart">
-        <div class="chart-header">
-          <div class="chart-title">
-            <span>Sales</span>
-            <h3>Weekly Performance</h3>
-          </div>
-          <div class="chart-controls">
-            <select id="dataType" onchange="changeDataset(this.value)">
-              <option value="sales">Sales</option>
-              <option value="leads">Orders</option>
-            </select>
 
-            <div class="chart-buttons">
-              <button
-                class="active"
-                data-type="line"
-                onclick="showChart('line')"
-                id="chartLine"
-              >
-                Line
-              </button>
-              <button data-type="bar" onclick="showChart('bar')" id="chartBar">
-                Bar
-              </button>
-            </div>
-          </div>
-        </div>
+      <table class="visits-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>User</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Reason</th>
+            <th>Location</th>
+            <th>Distance (m)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="visitsTbody">
+          <!-- populated by app.js -->
+        </tbody>
+      </table>
 
-        <canvas
-          id="delegatesChart"
-          style="max-height: 300px; margin-top: 20px"
-        ></canvas>
-      </div>
-      <div
-        id="mapModal"
-        style="
-          display: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.6);
-          justify-content: center;
-          align-items: center;
-        "
-      >
-        <div
-          style="
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            width: 90%;
-            height: 80%;
-            position: relative;
-          "
-        >
-          <button
-            onclick="closeMapPopup()"
-            style="position: absolute; top: 10px; right: 10px"
-          >
-            X
-          </button>
-          <div
-            id="map"
-            style="width: 95%; height: 100%; border-radius: 8px"
-          ></div>
-        </div>
-      </div>
-      <div class="top-delegates">
-        <div class="top-header">
-          <h3 style="margin: 14px">Recent Orders - Top 15</h3>
-          <button
-            class="add-order-btn"
-            onclick="window.location.href='create-order.html'"
-          >
-            Add Order
-          </button>
-        </div>
-        <table cellpadding="5">
-          <thead>
-            <tr style="border-bottom: 2px solid #ccc">
-              <th>Name</th>
-              <th>Total Amount</th>
-              <th>Total Orders</th>
-            </tr>
-          </thead>
-          <tbody id="delegatesTable"></tbody>
-        </table>
+      <div class="pagination">
+        <button id="prevPageBtn" class="secondary">Prev</button>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextPageBtn" class="secondary">Next</button>
       </div>
     </div>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="./scripts/dashboard.js"></script>
-    <script>
-      let map, visitMarker, locationMarker;
 
-      function openMapPopup() {
-        document.getElementById("mapModal").style.display = "flex";
+    <!-- Chart -->
+    <div class="chart">
+      <div class="chart-header">
+        <div class="chart-title">
+          <span>Sales</span>
+          <h3 id="chartTitle">Weekly Performance</h3>
+        </div>
+        <div class="chart-controls">
+          <select id="dataType">
+            <option value="sales">Sales</option>
+            <option value="orders">Orders</option>
+          </select>
 
-        setTimeout(() => {
-          if (!map) {
-            map = L.map("map").setView([30.03, 31.22], 15);
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-              maxZoom: 19,
-            }).addTo(map);
+          <div class="chart-buttons">
+            <button id="chartLine" data-type="line" class="active">
+              Line
+            </button>
+            <button id="chartBar" data-type="bar">Bar</button>
+          </div>
+        </div>
+      </div>
 
-            visitMarker = L.marker([30.05, 31.23], {
-              icon: L.icon({
-                iconUrl:
-                  "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-                iconSize: [32, 32],
-              }),
-            })
-              .addTo(map)
-              .bindPopup("Visit Point");
+      <canvas id="delegatesChart"></canvas>
+    </div>
 
-            locationMarker = L.marker([30.03, 31.22], {
-              icon: L.icon({
-                iconUrl:
-                  "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-                iconSize: [32, 32],
-              }),
-            })
-              .addTo(map)
-              .bindPopup("Location Point");
-          } else {
-            map.invalidateSize();
-          }
-        }, 200);
-      }
+    <!-- Top (example placeholder table populated from API or derived) -->
+    <div class="top-delegates">
+      <div class="top-header">
+        <h3>Recent Orders - Top 15</h3>
+        <button class="add-order-btn" id="addOrderBtn">Add Order</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Total Amount</th>
+            <th>Total Orders</th>
+          </tr>
+        </thead>
+        <tbody id="delegatesTable">
+          <!-- populated by app.js -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-      function closeMapPopup() {
-        document.getElementById("mapModal").style.display = "none";
-      }
-    </script>
-  </body>
+  <!-- Map Modal -->
+  <div id="mapModal" class="modal">
+    <div class="modal-content">
+      <button id="closeMapBtn" class="close-btn">×</button>
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <!-- App JS -->
+  <script src="scripts/dashboard.js"></script>
+</body>
+
 </html>

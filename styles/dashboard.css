@@ -1,0 +1,395 @@
+/* ===== Base ===== */
+:root {
+    --bg: #f5f6fa;
+    --text: #222;
+    --card: #ffffff;
+    --muted: #555;
+    --border: #ddd;
+    --accent: #0b2a59;
+    --shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+
+/* ===== Theme Toggle ===== */
+.toggle-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 1000;
+}
+
+/* ===== Layout ===== */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
+    padding: 20px;
+}
+
+.box,
+.chart,
+.top-delegates {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    overflow-x: auto;
+}
+
+/* ===== Filters ===== */
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filters input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    background: #fff;
+}
+
+.filters input:hover {
+    border-color: #007bff;
+}
+
+.filters input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+}
+
+.filters button {
+    padding: 10px 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.filters .secondary {
+    background: #e9eef3;
+    color: #333;
+}
+
+/* ===== Table ===== */
+.visits-table,
+.top-delegates table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.visits-table thead,
+.top-delegates thead {
+    background: #f1f1f1;
+}
+
+.visits-table th,
+.visits-table td,
+.top-delegates th,
+.top-delegates td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.visits-table td button {
+    background: #28a745;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.visits-table td button:hover {
+    opacity: 0.9;
+}
+
+/* ===== Pagination ===== */
+.pagination {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.pagination .secondary {
+    padding: 8px 12px;
+    background: #e9eef3;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.pagination #pageInfo {
+    min-width: 160px;
+    color: #666;
+}
+
+/* ===== Chart ===== */
+.chart {
+    grid-column: span 3;
+    background: #fff;
+    height: 350px;
+}
+
+.chart-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #eee;
+}
+
+.chart-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-title span {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.chart-title h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #000;
+}
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-controls select {
+    padding: 6px 12px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 14px;
+}
+
+.chart-buttons {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.chart-buttons button {
+    padding: 6px 14px;
+    border: none;
+    background: #f1f1f1;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.chart-buttons button.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+#delegatesChart {
+    width: 100% !important;
+    height: 250px !important;
+    margin-top: 20px;
+}
+
+/* ===== Top Delegates ===== */
+.top-delegates {
+    grid-column: span 4;
+}
+
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-order-btn {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.add-order-btn:hover {
+    background: #133b80;
+}
+
+/* ===== Modal & Map ===== */
+.modal {
+    display: none;
+    /* toggled via JS */
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .6);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    width: 90%;
+    height: 80%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #eee;
+    color: #333;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* ===== Dark Mode ===== */
+body.dark-mode {
+    --bg: #1e1e1e;
+    --text: #eee;
+    --card: #1e1e1e;
+    --muted: #bbb;
+    --border: #555;
+    color: var(--text);
+    background: var(--bg);
+}
+
+body.dark-mode .box,
+body.dark-mode .chart,
+body.dark-mode .top-delegates {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .visits-table thead,
+body.dark-mode .top-delegates thead {
+    background: #333333;
+    color: #fff;
+}
+
+body.dark-mode .filters input {
+    background: #333333;
+    color: #fff;
+    border: 1px solid var(--border);
+}
+
+body.dark-mode .filters .secondary,
+body.dark-mode .pagination .secondary {
+    background: #3b3b4f;
+    color: #ddd;
+}
+
+body.dark-mode .chart-title span {
+    color: var(--muted);
+}
+
+body.dark-mode .chart-title h3 {
+    color: #fff;
+}
+
+body.dark-mode .chart-controls select {
+    background: #3b3b4f;
+    color: #fff;
+    border: 1px solid var(--border);
+}
+
+body.dark-mode .chart-buttons {
+    border: 1px solid var(--border);
+}
+
+body.dark-mode .chart-buttons button {
+    background: #3b3b4f;
+    color: #ddd;
+}
+
+body.dark-mode .chart-buttons button.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+body.dark-mode .add-order-btn {
+    background: #4da3ff;
+    color: #111;
+}
+
+body.dark-mode .add-order-btn:hover {
+    background: #77b9ff;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+    .chart {
+        grid-column: span 4;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .chart,
+    .top-delegates {
+        grid-column: span 1 !important;
+    }
+
+    .filters {
+        flex-direction: column;
+    }
+}
