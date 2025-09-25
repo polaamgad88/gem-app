@@ -1,81 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Customer Visit - Check In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-  <meta charset="utf-8" />
-  <title>Customer Visit - Check In</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
-  <link rel="stylesheet" href="./styles/base.css" />
-  <link rel="stylesheet" href="./styles/customer-visit.css" />
-  <script src="./scripts/customer-visit.js" defer></script>
-  <script>
-    function applyTheme(mode) {
-      if (mode === "dark") {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      crossorigin
+    />
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/customer-visit.css" />
+    <script src="./scripts/customer-visit.js" defer></script>
+    <script>
+      function applyTheme(mode) {
+        if (mode === "dark") {
+          document.body.classList.add("dark-mode");
+        } else {
+          document.body.classList.remove("dark-mode");
+        }
       }
-    }
 
-    window.addEventListener("message", (event) => {
-      if (event.data.theme) {
-        applyTheme(event.data.theme);
-        localStorage.setItem("theme", event.data.theme);
-      }
-    });
+      window.addEventListener("message", (event) => {
+        if (event.data.theme) {
+          applyTheme(event.data.theme);
+          localStorage.setItem("theme", event.data.theme);
+        }
+      });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const savedTheme = localStorage.getItem("theme") || "light";
-      applyTheme(savedTheme);
-    });
-  </script>
-</head>
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+      });
+    </script>
+  </head>
 
-<body>
-  <div class="top-inputs">
-    <!-- Customer Dropdown -->
-    <div class="custom-customer-select input-container" style="flex: 1; position: relative">
-      <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off" />
-      <ul id="customer-suggestions" class="dropdown-list"></ul>
+  <body>
+    <div class="top-inputs">
+      <!-- Customer Dropdown -->
+      <div
+        class="custom-customer-select input-container"
+        style="flex: 1; position: relative"
+      >
+        <input
+          type="text"
+          id="customer-search"
+          placeholder="Search Customer..."
+          autocomplete="off"
+        />
+        <ul id="customer-suggestions" class="dropdown-list"></ul>
+      </div>
+
+      <!-- Status Dropdown -->
+      <div class="status-select input-container" style="flex: 0.5">
+        <select id="status-dropdown">
+          <option value="">Select Status...</option>
+          <option value="making_order">Making Order</option>
+          <option value="delivering_order">Delivering Order</option>
+          <option value="bill_collection">Bill Collection</option>
+          <option value="receiving_returns">Receiving Returns</option>
+        </select>
+      </div>
+      <!-- Customer Address -->
+      <div class="input-container">
+        <select id="customer-address" class="address-dropdown">
+          <option value="">Select Customer Address</option>
+        </select>
+      </div>
+
+      <!-- Note Field -->
+      <div class="input-container">
+        <textarea
+          id="note"
+          placeholder="Enter a note (optional)"
+          rows="4"
+        ></textarea>
+      </div>
+
+      <!-- Check In Button -->
+      <div class="check-in-container">
+        <button id="checkInBtn">Check In</button>
+      </div>
     </div>
 
-    <!-- Status Dropdown -->
-    <div class="status-select input-container" style="flex: 0.5">
-      <select id="status-dropdown">
-        <option value="">Select Status...</option>
-        <option value="making_order">Making Order</option>
-        <option value="delivering_order">Delivering Order</option>
-        <option value="bill_collection">Bill Collection</option>
-        <option value="receiving_returns">Receiving Returns</option>
-      </select>
-    </div>
-  </div>
+    <!-- Map -->
+    <div id="map"></div>
 
-  <!-- Customer Address -->
-  <div class="input-container">
-    <select id="customer-address" class="address-dropdown">
-      <option value="">Select Customer Address</option>
-    </select>
-  </div>
-
-  <!-- Note Field -->
-  <div class="input-container">
-    <textarea id="note" placeholder="Enter a note (optional)" rows="4"></textarea>
-  </div>
-
-  <!-- Check In Button -->
-  <div class="check-in-container">
-    <button id="checkInBtn">Check In</button>
-  </div>
-
-  <!-- Map -->
-  <div id="map"></div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
-</body>
-
+    <!-- Leaflet JS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      crossorigin
+    ></script>
+  </body>
 </html>
