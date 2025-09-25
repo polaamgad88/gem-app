@@ -1,253 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Users</title>
-    <link rel="stylesheet" href="./styles/base.css" />
-    <link rel="stylesheet" href="./styles/users.css" />
-    <script src="./scripts/utils.js"></script>
-    <script src="./scripts/users.js" defer></script>
-    <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
-    <style>
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background-color: #f8f9fb;
-        margin: 0;
-        padding: 20px;
-        color: #333;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users</title>
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/users.css" />
+  <script src="./scripts/utils.js"></script>
+  <script src="./scripts/users.js" defer></script>
+  <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f8f9fb;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
+    }
+
+    .logo {
+      display: block;
+      margin: 0 auto;
+      height: 137px;
+      max-height: 140px;
+      object-fit: contain;
+    }
+
+    @media (max-width: 576px) {
+      .logo {
+        height: 90px;
       }
 
       .container {
-        max-width: 980px;
-        margin: 30px auto;
-        background: #fff;
+        max-width: 97%;
+      }
+    }
+
+    th {
+      background-color: #ffffff !important;
+      color: #0b2a59 !important;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .table-responsive {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      border: 1px solid #dee1e4;
+      padding: 8px;
+      text-align: center;
+    }
+
+    /* 🌙 Dark Mode */
+    body.dark-mode {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+
+    /* Container */
+    body.dark-mode .container {
+      background: #1e1e1e;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Links (Back to Dashboard) */
+    body.dark-mode a {
+      color: #ddd !important;
+      background-color: #1e1e1e !important;
+      border: 1px solid #333 !important;
+    }
+
+    body.dark-mode a:hover {
+      background-color: #2a2a2a !important;
+    }
+
+    /* Headings */
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3 {
+      color: #fff !important;
+    }
+
+    /* Search Input */
+    body.dark-mode input[type="search"],
+    body.dark-mode input[type="text"],
+    body.dark-mode input[type="email"],
+    body.dark-mode input[type="number"],
+    body.dark-mode input[type="password"],
+    body.dark-mode select {
+      background-color: #2a2a2a;
+      color: #f1f1f1;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+
+
+    body.dark-mode .table {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+    }
+
+    body.dark-mode th {
+      background-color: #2a2a2a !important;
+      color: #f8f9fa !important;
+    }
+
+    body.dark-mode td {
+      background-color: #1a1a1a;
+      color: #f1f1f1;
+      border: 1px solid #333;
+    }
+
+    body.dark-mode .modal-content {
+      background: #1e1e1e;
+      color: #f1f1f1;
+      border: 1px solid #444;
+    }
+
+    body.dark-mode .modal-content input,
+    body.dark-mode .modal-content select {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      color: #f1f1f1;
+    }
+
+    body.dark-mode a {
+      color: #1e1e1e !important;
+      background-color: #fff !important;
+    }
+
+    body.dark-mode a:hover {
+      background-color: #f1f1f1 !important;
+    }
+
+    /* Dark mode - Mobile card view */
+    @media (max-width: 768px) {
+      body.dark-mode .card-view #user-cards>div {
+        background-color: #2e2e2e !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
         border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
+        padding: 12px;
+        margin-bottom: 12px;
       }
 
-      .logo {
-        display: block;
-        margin: 0 auto;
-        height: 137px;
-        max-height: 140px;
-        object-fit: contain;
+      body.dark-mode .card-view #user-cards>div p,
+      body.dark-mode .card-view #user-cards>div span {
+        color: #fff !important;
       }
 
-      @media (max-width: 576px) {
-        .logo {
-          height: 90px;
-        }
-
-        .container {
-          max-width: 97%;
-        }
+      body.dark-mode .card-view #user-cards .btn {
+        color: #000 !important;
+        border: none;
       }
-      th {
-        background-color: #ffffff !important;
-        color: #0b2a59 !important;
-        font-weight: 600;
-        text-align: center;
-      }
-      .table-responsive {
-        border-radius: 12px;
-        overflow: hidden;
-      }
-
-      .table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 12px;
-        overflow: hidden;
-      }
-
-      th,
-      td {
-        border: 1px solid #dee1e4;
-        padding: 8px;
-        text-align: center;
-      }
-      /* 🌙 Dark Mode */
-body.dark-mode {
-  background-color: #121212;
-  color: #f1f1f1;
-}
-
-/* Container */
-body.dark-mode .container {
-  background: #1e1e1e;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-}
-
-/* Links (Back to Dashboard) */
-body.dark-mode a {
-  color: #ddd !important;
-  background-color: #1e1e1e !important;
-  border: 1px solid #333 !important;
-}
-body.dark-mode a:hover {
-  background-color: #2a2a2a !important;
-}
-
-/* Headings */
-body.dark-mode h1,
-body.dark-mode h2,
-body.dark-mode h3 {
-  color: #fff !important;
-}
-
-/* Search Input */
-body.dark-mode input[type="search"],
-body.dark-mode input[type="text"],
-body.dark-mode input[type="email"],
-body.dark-mode input[type="number"],
-body.dark-mode input[type="password"],
-body.dark-mode select {
-  background-color: #2a2a2a;
-  color: #f1f1f1;
-  border: 1px solid #444;
-  border-radius: 8px;
-  padding: 8px;
-}
-
-
-
-body.dark-mode .table {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
-}
-
-body.dark-mode th {
-  background-color: #2a2a2a !important;
-  color: #f8f9fa !important;
-}
-
-body.dark-mode td {
-  background-color: #1a1a1a;
-  color: #f1f1f1;
-  border: 1px solid #333;
-}
-
-body.dark-mode .modal-content {
-  background: #1e1e1e;
-  color: #f1f1f1;
-  border: 1px solid #444;
-}
-
-body.dark-mode .modal-content input,
-body.dark-mode .modal-content select {
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  color: #f1f1f1;
-}
-body.dark-mode a {
-  color: #1e1e1e !important;
-  background-color: #fff !important;
-}
-body.dark-mode a:hover {
-  background-color: #f1f1f1 !important;
-}
-/* Dark mode - Mobile card view */
-@media (max-width: 768px) {
-  body.dark-mode .card-view #user-cards > div {
-    background-color: #2e2e2e !important; 
-    color: #fff !important;
-    border: 1px solid #444 !important;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 12px;
-  }
-
-  body.dark-mode .card-view #user-cards > div p,
-  body.dark-mode .card-view #user-cards > div span {
-    color: #fff !important;
-  }
-
-  body.dark-mode .card-view #user-cards .btn {
-    color: #000 !important;
-    border: none;
-  }
-}
-
-
-    </style>
-      <script src="./scripts/utils.js"></script>
-    <script src="./scripts/delegate-landing.js"></script>
-    <script>
-  function applyTheme(mode) {
-    if (mode === "dark") {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
     }
-  }
-
-  window.addEventListener("message", (event) => {
-    if (event.data.theme) {
-      applyTheme(event.data.theme);
-      localStorage.setItem("theme", event.data.theme); 
+  </style>
+  <script src="./scripts/utils.js"></script>
+  <script src="./scripts/delegate-landing.js"></script>
+  <script>
+    function applyTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
     }
-  });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    applyTheme(savedTheme);
-  });
-</script>
-  </head>
+    window.addEventListener("message", (event) => {
+      if (event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
 
-  <body>
-      <h1
-        style="
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      applyTheme(savedTheme);
+    });
+  </script>
+</head>
+
+<body>
+  <h1 style="
           text-align: left;
           font-size: 26px;
           font-weight: 700;
           margin-bottom: 30px;
           margin-left: 8px;
           color: #333;
-        "
-      >
-        Users
-      </h1>
+        ">
+    Users
+  </h1>
 
-      <div
-        style="
+  <div style="
           display: flex;
           gap: 12px;
           align-items: flex-end;
           font-family: sans-serif;
           margin-bottom: 16px;
-        "
-      >
-        <!-- Search Field -->
-        <div style="flex: 1">
-          <label
-            for="user-search"
-            style="font-size: 13px; margin-bottom: 4px; display: inline-block"
-            >Search by Username:</label
-          >
-          <input
-            type="search"
-            id="user-search"
-            placeholder="Type username..."
-            style="
+        ">
+    <!-- Search Field -->
+    <div style="flex: 1">
+      <label for="user-search" style="font-size: 13px; margin-bottom: 4px; display: inline-block">Search by
+        Username:</label>
+      <input type="search" id="user-search" placeholder="Type username..." style="
               width: 100%;
               padding: 8px 10px;
               font-size: 14px;
               border: 1px solid #ccc;
               border-radius: 8px;
               box-sizing: border-box;
-            "
-          />
-        </div>
+            " />
+    </div>
 
-        <!-- Add Button -->
-        <div style="flex: 1">
-          <button
-            id="create-user-btn"
-            style="
+    <!-- Add Button -->
+    <div style="flex: 1">
+      <button id="create-user-btn" style="
               width: 100%;
               padding: 8px 10px;
               font-size: 14px;
@@ -257,98 +249,84 @@ body.dark-mode a:hover {
               border-radius: 8px;
               cursor: pointer;
               transition: background-color 0.2s ease, color 0.2s ease;
-            "
-            onmouseover="this.style.backgroundColor='#f0f0f0'; this.style.color='#fff';"
-            onmouseout="this.style.backgroundColor='#28a745'; this.style.color='#fff';"
-          >
-            Add User
+            " onmouseover="this.style.backgroundColor='#f0f0f0'; this.style.color='#fff';"
+        onmouseout="this.style.backgroundColor='#28a745'; this.style.color='#fff';">
+        Add User
+      </button>
+    </div>
+  </div>
+
+  <!-- Table View -->
+  <div class="table-responsive" style="margin-top: 10px">
+    <!-- <hr style="border: none; height: 2px; background-color: #f3f4f5" /> -->
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Assigned To</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="users-table-body">
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Card View (for Mobile) -->
+  <div class="card-view" style="display: none">
+    <div id="user-cards"></div>
+  </div>
+  </div>
+
+  <div id="change-password-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Change Password</h2>
+      <form id="change-password-form">
+        <input type="hidden" id="password-user-id" />
+        <label>New Password: <input type="password" id="new-password" required /></label>
+        <div class="modal-actions">
+          <button type="submit" class="btn">Change</button>
+          <button type="button" class="btn cancel-btn" onclick="closePasswordModal()">
+            Cancel
           </button>
         </div>
-      </div>
-
-      <!-- Table View -->
-      <div class="table-responsive" style="margin-top: 10px">
-        <!-- <hr style="border: none; height: 2px; background-color: #f3f4f5" /> -->
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Role</th>
-              <th>Assigned To</th>
-              <th>Phone</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="users-table-body">
-            <!-- Filled by JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Card View (for Mobile) -->
-      <div class="card-view" style="display: none">
-        <div id="user-cards"></div>
-      </div>
+      </form>
     </div>
+  </div>
 
-    <div id="change-password-modal" class="modal hidden">
-      <div class="modal-content">
-        <h2>Change Password</h2>
-        <form id="change-password-form">
-          <input type="hidden" id="password-user-id" />
-          <label
-            >New Password: <input type="password" id="new-password" required
-          /></label>
-          <div class="modal-actions">
-            <button type="submit" class="btn">Change</button>
-            <button
-              type="button"
-              class="btn cancel-btn"
-              onclick="closePasswordModal()"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+  <div id="edit-user-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Edit User</h2>
+      <form id="edit-user-form">
+        <input type="hidden" id="edit-user-id" />
+        <label>Username: <input type="text" id="edit-username" /></label>
+        <label>Email: <input type="email" id="edit-email" /></label>
+        <label>Phone: <input type="text" id="edit-phone" /></label>
+        <label for="edit-role">Role:
+          <select id="edit-role">
+            <option value="Delegate">Delegate</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Manager">Manager</option>
+            <option value="Financial">Financial</option>
+          </select>
+        </label>
+        <label>Assigned To (User ID): <input type="number" id="edit-assigned-to" /></label>
+        <label><input type="checkbox" id="edit-admin" /> Admin</label>
+        <label><input type="checkbox" id="edit-driver" /> Driver</label>
+        <label><input type="checkbox" id="edit-storage" /> Storage</label>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn">Save</button>
+          <button type="button" class="btn cancel-btn" onclick="closeEditModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
-
-    <div id="edit-user-modal" class="modal hidden">
-      <div class="modal-content">
-        <h2>Edit User</h2>
-        <form id="edit-user-form">
-          <input type="hidden" id="edit-user-id" />
-          <label>Username: <input type="text" id="edit-username" /></label>
-          <label>Email: <input type="email" id="edit-email" /></label>
-          <label>Phone: <input type="text" id="edit-phone" /></label>
-          <label for="edit-role"
-            >Role:
-            <select id="edit-role">
-              <option value="Delegate">Delegate</option>
-              <option value="Supervisor">Supervisor</option>
-              <option value="Manager">Manager</option>
-              <option value="Financial">Financial</option>
-            </select>
-          </label>
-          <label
-            >Assigned To (User ID): <input type="number" id="edit-assigned-to"
-          /></label>
-          <label><input type="checkbox" id="edit-admin" /> Admin</label>
-          <label><input type="checkbox" id="edit-driver" /> Driver</label>
-          <label><input type="checkbox" id="edit-storage" /> Storage</label>
-
-          <div class="modal-actions">
-            <button type="submit" class="btn">Save</button>
-            <button
-              type="button"
-              class="btn cancel-btn"
-              onclick="closeEditModal()"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
     <!-- </div> -->
-  </body>
+</body>
+
 </html>

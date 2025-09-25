@@ -1,179 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create User</title>
-    <link rel="stylesheet" href="./styles/base.css" />
-    <link rel="stylesheet" href="./styles/create-user.css" />
-    <script src="./scripts/utils.js"></script>
-    <script src="./scripts/create-user.js" defer></script>
-    <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
-    <style>
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background-color: #f3f3f5;
-        margin: 0;
-        padding: 20px;
-        color: #333;
-      }
-   
 
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create User</title>
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/create-user.css" />
+  <script src="./scripts/utils.js"></script>
+  <script src="./scripts/create-user.js" defer></script>
+  <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f3f3f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      height: 137px;
+      max-height: 140px;
+      object-fit: contain;
+    }
+
+    @media (max-width: 576px) {
       .logo {
-        display: block;
-        margin: 0 auto 20px;
-        height: 137px;
-        max-height: 140px;
-        object-fit: contain;
+        height: 90px;
       }
 
-      @media (max-width: 576px) {
-        .logo {
-          height: 90px;
-        }
 
-       
+    }
+
+    /* Dark mode design */
+    body.dark-mode {
+      background-color: #121212 !important;
+      color: #e0e0e0 !important;
+    }
+
+    body.dark-mode h2 {
+      color: #f5f5f5 !important;
+    }
+
+    body.dark-mode a {
+      color: #ddd !important;
+      background-color: #1e1e1e !important;
+      border: 1px solid #333 !important;
+    }
+
+    body.dark-mode a:hover {
+      background-color: #333 !important;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background-color: #1e1e1e !important;
+      color: #f5f5f5 !important;
+      border: 1px solid #444 !important;
+    }
+
+    body.dark-mode label {
+      color: #ccc !important;
+    }
+
+    body.dark-mode a {
+      color: #1e1e1e !important;
+      background-color: #fff !important;
+    }
+
+    body.dark-mode a:hover {
+      background-color: #f1f1f1 !important;
+    }
+  </style>
+  <script>
+    function applyTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
       }
-      /* Dark mode design */
-body.dark-mode {
-  background-color: #121212 !important;
-  color: #e0e0e0 !important;
-}
-
-body.dark-mode h2 {
-  color: #f5f5f5 !important;
-}
-
-body.dark-mode a {
-  color: #ddd !important;
-  background-color: #1e1e1e !important;
-  border: 1px solid #333 !important;
-}
-body.dark-mode a:hover {
-  background-color: #333 !important;
-}
-
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-  background-color: #1e1e1e !important;
-  color: #f5f5f5 !important;
-  border: 1px solid #444 !important;
-}
-
-body.dark-mode label {
-  color: #ccc !important;
-}
-body.dark-mode a {
-  color: #1e1e1e !important;
-  background-color: #fff !important;
-}
-body.dark-mode a:hover {
-  background-color: #f1f1f1 !important;
-}
-
-    </style>
-     <script>
-  function applyTheme(mode) {
-    if (mode === "dark") {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
     }
-  }
 
-  window.addEventListener("message", (event) => {
-    if (event.data.theme) {
-      applyTheme(event.data.theme);
-      localStorage.setItem("theme", event.data.theme); 
-    }
-  });
+    window.addEventListener("message", (event) => {
+      if (event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    applyTheme(savedTheme);
-  });
-</script>
-  </head>
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      applyTheme(savedTheme);
+    });
+  </script>
+</head>
 
-  <body>
-      <h2 style="color: #333; text-align: center;margin-bottom: 20px;">Add User</h2>
+<body>
+  <h2 style="color: #333; text-align: center;margin-bottom: 20px;">Add User</h2>
 
-      <form id="create-user-form">
-        <div style="display: flex; flex-direction: column">
-          <label for="username" style="margin-bottom: 4px">Username:</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            required
-            style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
-          />
-        </div>
+  <form id="create-user-form">
+    <div style="display: flex; flex-direction: column">
+      <label for="username" style="margin-bottom: 4px">Username:</label>
+      <input type="text" id="username" name="username" required
+        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
+    </div>
 
-        <div style="display: flex; flex-direction: column">
-          <label for="phone" style="margin-bottom: 4px">Phone:</label>
-          <input
-            type="number"
-            id="phone"
-            name="phone"
-            required
-            style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
-          />
-        </div>
+    <div style="display: flex; flex-direction: column">
+      <label for="phone" style="margin-bottom: 4px">Phone:</label>
+      <input type="number" id="phone" name="phone" required
+        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
+    </div>
 
-        <div style="display: flex; flex-direction: column">
-          <label for="email" style="margin-bottom: 4px">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
-          />
-        </div>
-          <div style="display: flex; flex-direction: column">
-          <label for="email" style="margin-bottom: 4px">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
-          />
-        </div>
+    <div style="display: flex; flex-direction: column">
+      <label for="email" style="margin-bottom: 4px">Email:</label>
+      <input type="email" id="email" name="email" required
+        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
+    </div>
+    <div style="display: flex; flex-direction: column">
+      <label for="email" style="margin-bottom: 4px">Password:</label>
+      <input type="password" id="password" name="password" required
+        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
+    </div>
 
-        <div style="display: flex; flex-direction: column">
-          <label for="role" style="margin-bottom: 4px">Role:</label>
-          <select
-            id="role"
-            name="role"
-            required
-            style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
-          >
-            <option value="">Select Role</option>
-            <option value="Delegate">Delegate</option>
-            <option value="Supervisor">Supervisor</option>
-            <option value="Manager">Manager</option>
-            <option value="Financial">Financial</option>
-          </select>
-        </div>
+    <div style="display: flex; flex-direction: column">
+      <label for="role" style="margin-bottom: 4px">Role:</label>
+      <select id="role" name="role" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px">
+        <option value="">Select Role</option>
+        <option value="Delegate">Delegate</option>
+        <option value="Supervisor">Supervisor</option>
+        <option value="Manager">Manager</option>
+        <option value="Financial">Financial</option>
+      </select>
+    </div>
 
-        <div style="display: flex; flex-direction: column">
-          <label for="assigned-to" style="margin-bottom: 4px"
-            >Assigned To (User):</label
-          >
-          <select
-            id="assigned-to"
-            name="assigned_to"
-            style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
-          >
-            <option value="">None</option>
-          </select>
-        </div>
+    <div style="display: flex; flex-direction: column">
+      <label for="assigned-to" style="margin-bottom: 4px">Assigned To (User):</label>
+      <select id="assigned-to" name="assigned_to" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px">
+        <option value="">None</option>
+      </select>
+    </div>
 
-        <div
-          style="
+    <div style="
             display: flex;
             align-items: center;
             gap: 10px;
@@ -181,13 +153,8 @@ body.dark-mode a:hover {
             font-family: sans-serif;
             font-size: 14px;
             position: relative;
-          "
-        >
-          <input
-            type="checkbox"
-            id="is-admin"
-            name="admin"
-            style="
+          ">
+      <input type="checkbox" id="is-admin" name="admin" style="
               width: 16px;
               height: 16px;
               accent-color: #28a745;
@@ -195,20 +162,13 @@ body.dark-mode a:hover {
               border: 1px solid #ccc;
               border-radius: 4px;
               appearance: auto;
-            "
-          />
-          <label
-            for="is-admin"
-            style="margin: 0; cursor: pointer; user-select: none"
-          >
-            Is Admin
-          </label>
-        </div>
+            " />
+      <label for="is-admin" style="margin: 0; cursor: pointer; user-select: none">
+        Is Admin
+      </label>
+    </div>
 
-        <button
-          type="submit"
-          class="btn btn-add"
-          style="
+    <button type="submit" class="btn btn-add" style="
             background: linear-gradient(135deg, #28a745, #218838);
             color: white;
             padding: 10px;
@@ -217,12 +177,10 @@ body.dark-mode a:hover {
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-          "
-          onmouseover="this.style.backgroundColor='#0b2a59'"
-          onmouseout="this.style.backgroundColor='#0b2a59'"
-        >
-          Add User
-        </button>
-      </form>
-  </body>
+          " onmouseover="this.style.backgroundColor='#0b2a59'" onmouseout="this.style.backgroundColor='#0b2a59'">
+      Add User
+    </button>
+  </form>
+</body>
+
 </html>

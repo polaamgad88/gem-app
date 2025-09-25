@@ -95,129 +95,132 @@
       }
 
     }
+
     /* Dark Mode */
-body.dark-mode {
-  background-color: #121212;
-  color: #e0e0e0;
-}
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
 
-body.dark-mode .container {
-  background-color: #1e1e1e;
-  color: #f5f5f5;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-}
+    body.dark-mode .container {
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+    }
 
-body.dark-mode h1,
-body.dark-mode h2 {
-  color: #90caf9; 
-}
+    body.dark-mode h1,
+    body.dark-mode h2 {
+      color: #90caf9;
+    }
 
-body.dark-mode .customer-info,
-body.dark-mode .order-info {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
-}
+    body.dark-mode .customer-info,
+    body.dark-mode .order-info {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+    }
 
-body.dark-mode .info-value,
-body.dark-mode #total-price,
-body.dark-mode .gray-box {
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  color: #f5f5f5;
-}
+    body.dark-mode .info-value,
+    body.dark-mode #total-price,
+    body.dark-mode .gray-box {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      color: #f5f5f5;
+    }
 
-body.dark-mode .table-responsive table {
-  background-color: #1e1e1e;
-  color: #f5f5f5;
-}
+    body.dark-mode .table-responsive table {
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+    }
 
-body.dark-mode .table-responsive th {
-  background-color: #2a2a2a;
-  color: #90caf9;
-}
+    body.dark-mode .table-responsive th {
+      background-color: #2a2a2a;
+      color: #90caf9;
+    }
 
-body.dark-mode .table-responsive td {
-  border: 1px solid #333;
-}
+    body.dark-mode .table-responsive td {
+      border: 1px solid #333;
+    }
 
-body.dark-mode .table-responsive tr:nth-child(even) {
-  background-color: #222;
-}
+    body.dark-mode .table-responsive tr:nth-child(even) {
+      background-color: #222;
+    }
 
-body.dark-mode .table-responsive tr:hover {
-  background-color: #2f2f2f;
-}
+    body.dark-mode .table-responsive tr:hover {
+      background-color: #2f2f2f;
+    }
 
-body.dark-mode .card-view .item-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
-  color: #f5f5f5;
-}
+    body.dark-mode .card-view .item-card {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      color: #f5f5f5;
+    }
 
-body.dark-mode .confirm-btn-outline {
-  background-color: #28a745;
-  border-color: #28a745;
-  color: white;
-}
-body.dark-mode .edit-btn-outline {
-  background-color: #3c4bee;
-  border-color: #3c4bee;
-  color: white;
-}
-body.dark-mode .refund-btn-outline {
-  background-color: #dc3545;
-  border-color: #dc3545;
-  color: white;
-}
-body.dark-mode label {
-  color: #ffffff;
-}
+    body.dark-mode .confirm-btn-outline {
+      background-color: #28a745;
+      border-color: #28a745;
+      color: white;
+    }
 
-body.dark-mode h2 {
-  color: #ffffff !important; 
-}
+    body.dark-mode .edit-btn-outline {
+      background-color: #3c4bee;
+      border-color: #3c4bee;
+      color: white;
+    }
 
+    body.dark-mode .refund-btn-outline {
+      background-color: #dc3545;
+      border-color: #dc3545;
+      color: white;
+    }
+
+    body.dark-mode label {
+      color: #ffffff;
+    }
+
+    body.dark-mode h2 {
+      color: #ffffff !important;
+    }
   </style>
-   <script>
-  function applyTheme(mode) {
-    if (mode === "dark") {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
+  <script>
+    function applyTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
     }
-  }
 
-  window.addEventListener("message", (event) => {
-    if (event.data.theme) {
-      applyTheme(event.data.theme);
-      localStorage.setItem("theme", event.data.theme); 
-    }
-  });
+    window.addEventListener("message", (event) => {
+      if (event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    applyTheme(savedTheme);
-  });
-</script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      applyTheme(savedTheme);
+    });
+  </script>
 </head>
 
 <body>
-    <style>
-      .logo {
-        display: block;
-        margin: 0 auto 0px;
-        height: 137px;
-        max-height: 140px;
-        object-fit: contain;
-      }
+  <style>
+    .logo {
+      display: block;
+      margin: 0 auto 0px;
+      height: 137px;
+      max-height: 140px;
+      object-fit: contain;
+    }
 
-      @media (max-width: 576px) {
-        .logo {
-          height: 90px;
-        }
+    @media (max-width: 576px) {
+      .logo {
+        height: 90px;
       }
-    </style>
-    <h2 style="
+    }
+  </style>
+  <h2 style="
 text-align: center;
 font-size: 28px;
 font-weight: 600;
@@ -225,105 +228,105 @@ margin-bottom: 30px;
 color: #0b2a59;
 letter-spacing: 0.5px;
 ">
-      Order Details <span id="orderId" style="color: #28a745;"></span>
-    </h2>
+    Order Details <span id="orderId" style="color: #28a745;"></span>
+  </h2>
 
-    <div class="order-info-grid">
-      <div class="info-box">
-        <!-- <label>Order ID</label> -->
-        <div class="info-value" id="order-id"></div>
-      </div>
-
-      <div class="info-box">
-        <!-- <label>Date</label> -->
-        <div class="info-value" id="order-date"></div>
-      </div>
-
-      <div class="info-box">
-        <!-- <label>Status</label> -->
-        <div class="info-value" id="order-state"></div>
-      </div>
-
-      <div class="info-box">
-        <!-- <label>Delegate Name</label> -->
-        <div class="info-value" id="Delegate-name"></div>
-      </div>
+  <div class="order-info-grid">
+    <div class="info-box">
+      <!-- <label>Order ID</label> -->
+      <div class="info-value" id="order-id"></div>
     </div>
 
-
-
-    <!-- Customer Information -->
-    <div class="customer-info">
-      <h2 class="section-title">Customer Information</h2>
-
-      <div class="info-boxes">
-        <div class="info-group">
-          <label>Name</label>
-          <div class="info-value" id="customer-name"></div>
-        </div>
-        <div class="info-group">
-          <label>ID</label>
-          <div class="info-value" id="customer-id"></div>
-        </div>
-        <div class="info-group">
-          <label>Address</label>
-          <div class="info-value" id="customer-address"></div>
-        </div>
-
-        <div class="info-group">
-          <label>Note</label>
-          <div class="info-value" id="customer-note" style="white-space: pre-wrap;"></div>
-        </div>
-      </div>
+    <div class="info-box">
+      <!-- <label>Date</label> -->
+      <div class="info-value" id="order-date"></div>
     </div>
 
+    <div class="info-box">
+      <!-- <label>Status</label> -->
+      <div class="info-value" id="order-state"></div>
+    </div>
+
+    <div class="info-box">
+      <!-- <label>Delegate Name</label> -->
+      <div class="info-value" id="Delegate-name"></div>
+    </div>
+  </div>
 
 
-    <!-- Ordered Items -->
-    <div class="items-list">
-      <h2>Ordered Items</h2>
 
-      <!-- Table view (for desktop) -->
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Item Name</th>
-              <th>Item Price</th>
-              <th>Quantity</th>
-              <th>Total Price</th>
-            </tr>
-          </thead>
-          <tbody id="items-table-body">
-            <!-- Items will be populated by JavaScript -->
-          </tbody>
-        </table>
+  <!-- Customer Information -->
+  <div class="customer-info">
+    <h2 class="section-title">Customer Information</h2>
+
+    <div class="info-boxes">
+      <div class="info-group">
+        <label>Name</label>
+        <div class="info-value" id="customer-name"></div>
+      </div>
+      <div class="info-group">
+        <label>ID</label>
+        <div class="info-value" id="customer-id"></div>
+      </div>
+      <div class="info-group">
+        <label>Address</label>
+        <div class="info-value" id="customer-address"></div>
       </div>
 
-      <!-- Card view (for mobile) -->
-      <div class="card-view">
-        <div id="items-card-view">
-          <!-- Cards will be populated by JavaScript -->
-        </div>
+      <div class="info-group">
+        <label>Note</label>
+        <div class="info-value" id="customer-note" style="white-space: pre-wrap;"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Total Price -->
-    <div class="total">
-      <p><strong>Total Amount:</strong></p>
-      <div class="gray-box" id="total-price"></div>
+
+
+  <!-- Ordered Items -->
+  <div class="items-list">
+    <h2>Ordered Items</h2>
+
+    <!-- Table view (for desktop) -->
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Item Name</th>
+            <th>Item Price</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
+        <tbody id="items-table-body">
+          <!-- Items will be populated by JavaScript -->
+        </tbody>
+      </table>
     </div>
 
-
-    <!-- Action Buttons -->
-    <div class="order-actions horizontal-buttons">
-      <button id="refund-order" class="refund-btn-outline">Refund</button>
-      <button id="edit-order" class="edit-btn-outline">Edit</button>
-
-      <button id="confirm-order" class="confirm-btn-outline">Confirm</button>
-
+    <!-- Card view (for mobile) -->
+    <div class="card-view">
+      <div id="items-card-view">
+        <!-- Cards will be populated by JavaScript -->
+      </div>
     </div>
+  </div>
+
+  <!-- Total Price -->
+  <div class="total">
+    <p><strong>Total Amount:</strong></p>
+    <div class="gray-box" id="total-price"></div>
+  </div>
+
+
+  <!-- Action Buttons -->
+  <div class="order-actions horizontal-buttons">
+    <button id="refund-order" class="refund-btn-outline">Refund</button>
+    <button id="edit-order" class="edit-btn-outline">Edit</button>
+
+    <button id="confirm-order" class="confirm-btn-outline">Confirm</button>
+
+  </div>
 
 </body>
 

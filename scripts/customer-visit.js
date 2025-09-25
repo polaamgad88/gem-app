@@ -167,16 +167,7 @@ checkInButton.addEventListener("click", () => {
       });
 
       const data = await response.json();
-      alert(
-        data.message +
-          "\n" +
-          (data.within_200m
-            ? "Within 200m of address."
-            : "Not within 200m of address.") +
-          "\nDistance: " +
-          (data.distance_m || "N/A") +
-          " meters"
-      );
+      alert(data.message);
     },
     (error) => {
       alert("Error getting location: " + error.message);

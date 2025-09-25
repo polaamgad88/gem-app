@@ -7,6 +7,7 @@ let map, plannedMarker, actualMarker, lineLayer;
 let chart;
 let currentType = "line";
 
+/* -------------------- helpers -------------------- */
 function authHeaders() {
   return JWT ? { Authorization: `Bearer ${JWT}` } : {};
 }
@@ -15,13 +16,9 @@ function applyTheme(mode) {
   else document.body.classList.remove("dark-mode");
 }
 function statusEmoji(distance, within200) {
-  console.log("Distance:", distance, "Within 200m:", within200);
-  if (within200 || distance < 200) {
-    return "🟢";
-  } else {
-    if (distance <= 300 && distance >= 200) return "🟡";
-    else if (distance > 300) return "🔴";
-  }
+  if (within200 || distance < 200) return "🟢";
+  if (distance <= 300 && distance >= 200) return "🟡";
+  return "🔴";
 }
 function fmtDate(iso) {
   const d = new Date(iso);
@@ -39,9 +36,240 @@ function reasonLabel(r) {
   };
   return m[r] || r;
 }
+function debounce(fn, ms = 200) {
+  let t;
+  return (...a) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...a), ms);
+  };
+}
+function valueLooksLikeId(v = "") {
+  return /^\d+$/.test((v || "").trim());
+}
+function valueLooksLikeIdNumOrStoredId(inputEl) {
+  if (!inputEl) return "";
+  if (inputEl.dataset.id) return inputEl.dataset.id;
+  if (valueLooksLikeId(inputEl.value)) return inputEl.value.trim();
+  return "";
+}
+
+function createMenu() {
+  const el = document.createElement("div");
+  el.className = "autocomplete-menu";
+  el.style.display = "none";
+  document.body.appendChild(el);
+  return el;
+}
+function placeMenu(menu, input) {
+  const r = input.getBoundingClientRect();
+  menu.style.left = `${r.left + window.scrollX}px`;
+  menu.style.top = `${r.bottom + window.scrollY + 4}px`;
+  menu.style.width = `${r.width}px`;
+}
+function makeAutocomplete(input, options) {
+  const menu = createMenu();
+  let items = [];
+  let activeIdx = -1;
+
+  function hide() {
+    menu.style.display = "none";
+    menu.innerHTML = "";
+    activeIdx = -1;
+  }
+  function show() {
+    placeMenu(menu, input);
+    menu.style.display = "block";
+  }
+  function render(list) {
+    items = list || [];
+    menu.innerHTML = "";
+    if (!items.length) {
+      hide();
+      return;
+    }
+    items.forEach((it, i) => {
+      const div = document.createElement("div");
+      div.className = "autocomplete-item" + (i === activeIdx ? " active" : "");
+      div.innerHTML = `
+        <span class="autocomplete-label">${it.label}</span>
+        ${
+          it.sublabel
+            ? `<span class="autocomplete-sublabel">${it.sublabel}</span>`
+            : ""
+        }
+      `;
+      div.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        pick(i);
+      });
+      menu.appendChild(div);
+    });
+    show();
+  }
+  function pick(i) {
+    const it = items[i];
+    if (!it) return;
+    input.value = it.label; // show only label (no id)
+    input.dataset.id = String(it.id); // keep id hidden
+    hide();
+    options.onPick?.(it);
+  }
+
+  async function update(term) {
+    try {
+      const data = await options.source(term);
+      render(data);
+    } catch {
+      hide();
+    }
+  }
+  const debouncedUpdate = debounce(update, 150);
+
+  input.addEventListener("focus", () => {
+    input.dataset.id = "";
+    placeMenu(menu, input);
+    update("");
+  });
+  input.addEventListener("input", (e) => {
+    input.dataset.id = "";
+    debouncedUpdate(e.target.value || "");
+  });
+  input.addEventListener("blur", () => setTimeout(hide, 120));
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (menu.style.display === "block") placeMenu(menu, input);
+    },
+    { passive: true }
+  );
+  window.addEventListener("resize", () => {
+    if (menu.style.display === "block") placeMenu(menu, input);
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (menu.style.display !== "block") return;
+    const max = items.length - 1;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIdx = Math.min(max, activeIdx + 1);
+      render(items);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIdx = Math.max(0, activeIdx - 1);
+      render(items);
+    } else if (e.key === "Enter") {
+      if (activeIdx >= 0) {
+        e.preventDefault();
+        pick(activeIdx);
+      }
+    } else if (e.key === "Escape") {
+      hide();
+    }
+  });
+
+  return { destroy: () => menu.remove() };
+}
+
+const usersCache = { loaded: false, list: [] };
+let customersCache = { loaded: false, list: [] };
+
+async function ensureUsers() {
+  if (usersCache.loaded) return usersCache.list;
+  const res = await fetch(`${API_BASE}/users`, { headers: authHeaders() });
+  usersCache.loaded = true;
+  if (!res.ok) {
+    usersCache.list = [];
+    return usersCache.list;
+  }
+  const data = await res.json();
+  usersCache.list =
+    (data.users || []).map((u) => ({
+      id: u.user_id,
+      name: u.username || `User #${u.user_id}`,
+      email: u.email || "",
+    })) || [];
+  return usersCache.list;
+}
+
+async function ensureCustomersAll() {
+  if (customersCache.loaded) return customersCache.list;
+  const url = new URL(`${API_BASE}/customers`);
+  url.searchParams.set("all", "true");
+  const res = await fetch(url, { headers: authHeaders() });
+  customersCache.loaded = true;
+  if (!res.ok) {
+    customersCache.list = [];
+    return customersCache.list;
+  }
+  const data = await res.json();
+  customersCache.list =
+    (data.customers || []).map((c) => {
+      const name =
+        [c.first_name, c.last_name].filter(Boolean).join(" ").trim() ||
+        "Customer";
+      const sub = c.code ? `Code: ${c.code}` : c.phone || "";
+      return { id: c.customer_id, name, sub };
+    }) || [];
+  return customersCache.list;
+}
+
+async function usersSource(term = "") {
+  const all = await ensureUsers();
+  const t = term.trim().toLowerCase();
+  const filtered = !t
+    ? all
+    : all.filter(
+        (u) =>
+          u.name.toLowerCase().includes(t) ||
+          (u.email && u.email.toLowerCase().includes(t)) ||
+          String(u.id).includes(t)
+      );
+  return filtered.slice(0, 300).map((u) => ({
+    id: u.id,
+    label: u.name,
+  }));
+}
+
+async function customersSource(term = "") {
+  const all = await ensureCustomersAll();
+  const t = term.trim().toLowerCase();
+  const filtered = !t
+    ? all
+    : all.filter(
+        (c) =>
+          c.name.toLowerCase().includes(t) ||
+          (c.sub && c.sub.toLowerCase().includes(t)) ||
+          String(c.id).includes(t)
+      );
+  return filtered.slice(0, 300).map((c) => ({
+    id: c.id,
+    label: c.name,
+    sublabel: c.sub || undefined,
+  }));
+}
+
+function wireAutocompleteFields() {
+  const userInput = document.getElementById("userFilter");
+  const custInput = document.getElementById("customerFilter");
+
+  makeAutocomplete(userInput, {
+    source: usersSource,
+    onPick: () => {},
+  });
+
+  makeAutocomplete(custInput, {
+    source: customersSource,
+    onPick: () => {},
+  });
+}
+
 function buildQuery() {
-  const userId = document.getElementById("userFilter").value.trim();
-  const customerId = document.getElementById("customerFilter").value.trim();
+  const userEl = document.getElementById("userFilter");
+  const custEl = document.getElementById("customerFilter");
+
+  const userId = valueLooksLikeIdNumOrStoredId(userEl);
+  const customerId = valueLooksLikeIdNumOrStoredId(custEl);
+
   const params = new URLSearchParams();
   if (userId) params.set("user_id", userId);
   if (customerId) params.set("customer_id", customerId);
@@ -122,9 +350,28 @@ async function loadVisits() {
   }
 }
 
+let _visitMap, _plannedMarker, _actualMarker, _lineLayer;
+
+function closeMapPopup() {
+  const modal = document.getElementById("mapModal");
+  if (modal) modal.classList.remove("show");
+}
+
+function numOrNaN(v) {
+  return v === null || v === undefined || v === "" ? NaN : Number(v);
+}
+
 function openMapPopup(payload) {
   const modal = document.getElementById("mapModal");
-  modal.style.display = "flex";
+  const mapEl = document.getElementById("map");
+  if (!modal || !mapEl) {
+    console.error("Map modal or map element not found");
+    return;
+  }
+
+  // Show modal first so Leaflet can size correctly
+  modal.classList.add("show");
+
   const {
     planned_latitude: pLat,
     planned_longitude: pLon,
@@ -135,78 +382,96 @@ function openMapPopup(payload) {
     distance_m,
     within_200m,
   } = payload || {};
-  const toFloat = (v) =>
-    v === null || v === undefined || v === "" ? NaN : Number(v);
 
-  const pLatN = toFloat(pLat);
-  const pLonN = toFloat(pLon);
-  const aLatN = toFloat(aLat);
-  const aLonN = toFloat(aLon);
-  setTimeout(() => {
-    const mapEl = document.getElementById("map");
-    if (!map) {
-      map = L.map(mapEl).setView([pLatN, pLonN], 15);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-      }).addTo(map);
-    } else {
-      map.invalidateSize();
-    }
-    if (plannedMarker) map.removeLayer(plannedMarker);
-    if (actualMarker) map.removeLayer(actualMarker);
-    if (lineLayer) map.removeLayer(lineLayer);
+  const pLatN = numOrNaN(pLat);
+  const pLonN = numOrNaN(pLon);
+  const aLatN = numOrNaN(aLat);
+  const aLonN = numOrNaN(aLon);
 
-    const markers = [];
+  const center =
+    !Number.isNaN(pLatN) && !Number.isNaN(pLonN)
+      ? [pLatN, pLonN]
+      : !Number.isNaN(aLatN) && !Number.isNaN(aLonN)
+      ? [aLatN, aLonN]
+      : [30.0444, 31.2357]; // Cairo fallback
 
-    if (typeof pLatN === "number" && typeof pLonN === "number") {
-      plannedMarker = L.marker([pLatN, pLonN], {
-        icon: L.icon({
-          iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-          iconSize: [32, 32],
-        }),
-      })
-        .addTo(map)
-        .bindPopup(
-          `<b>Planned</b><br>${customer_name || ""}<br>${address_text || ""}`
-        );
-      markers.push(plannedMarker);
-    } else console.log("error");
-    if (typeof aLatN === "number" && typeof aLonN === "number") {
-      actualMarker = L.marker([aLatN, aLonN], {
-        icon: L.icon({
-          iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-          iconSize: [32, 32],
-        }),
-      })
-        .addTo(map)
-        .bindPopup(
-          `<b>Actual</b><br>Distance: ${distance_m} m<br>Status: ${
-            within_200m ? "Within 200m" : "Outside 200m"
-          }`
-        );
-      markers.push(actualMarker);
-    }
-    if (plannedMarker && actualMarker) {
-      lineLayer = L.polyline(
-        [plannedMarker.getLatLng(), actualMarker.getLatLng()],
-        { weight: 3 }
-      ).addTo(map);
-      map.fitBounds(
-        L.featureGroup([plannedMarker, actualMarker]).getBounds().pad(0.5)
+  // Create or reuse the map
+  if (!_visitMap) {
+    _visitMap = L.map(mapEl).setView(center, 15);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+    }).addTo(_visitMap);
+  } else {
+    _visitMap.invalidateSize();
+    _visitMap.setView(center, 15);
+  }
+
+  // Clear old layers
+  if (_plannedMarker) _visitMap.removeLayer(_plannedMarker);
+  if (_actualMarker) _visitMap.removeLayer(_actualMarker);
+  if (_lineLayer) _visitMap.removeLayer(_lineLayer);
+
+  // Add markers if available
+  if (!Number.isNaN(pLatN) && !Number.isNaN(pLonN)) {
+    _plannedMarker = L.marker([pLatN, pLonN], {
+      icon: L.icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+        iconSize: [32, 32],
+      }),
+    })
+      .addTo(_visitMap)
+      .bindPopup(
+        `<b>Planned</b><br>${customer_name || ""}<br>${address_text || ""}`
       );
-      plannedMarker.openPopup();
-    } else if (plannedMarker) {
-      map.setView(plannedMarker.getLatLng(), 15);
-      plannedMarker.openPopup();
-    } else if (actualMarker) {
-      map.setView(actualMarker.getLatLng(), 15);
-      actualMarker.openPopup();
-    }
-  }, 150);
+  } else {
+    _plannedMarker = null;
+  }
+
+  if (!Number.isNaN(aLatN) && !Number.isNaN(aLonN)) {
+    _actualMarker = L.marker([aLatN, aLonN], {
+      icon: L.icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+        iconSize: [32, 32],
+      }),
+    })
+      .addTo(_visitMap)
+      .bindPopup(
+        `<b>Actual</b><br>Distance: ${distance_m ?? "-"} m<br>Status: ${
+          within_200m ? "Within 200m" : "Outside 200m"
+        }`
+      );
+  } else {
+    _actualMarker = null;
+  }
+
+  if (_plannedMarker && _actualMarker) {
+    _lineLayer = L.polyline(
+      [_plannedMarker.getLatLng(), _actualMarker.getLatLng()],
+      { weight: 3 }
+    ).addTo(_visitMap);
+    _visitMap.fitBounds(
+      L.featureGroup([_plannedMarker, _actualMarker]).getBounds().pad(0.5)
+    );
+    _plannedMarker.openPopup();
+  } else if (_plannedMarker) {
+    _visitMap.setView(_plannedMarker.getLatLng(), 15);
+    _plannedMarker.openPopup();
+  } else if (_actualMarker) {
+    _visitMap.setView(_actualMarker.getLatLng(), 15);
+    _actualMarker.openPopup();
+  } else {
+    L.popup()
+      .setLatLng(center)
+      .setContent("No coordinates for this visit.")
+      .openOn(_visitMap);
+  }
 }
-function closeMapPopup() {
-  document.getElementById("mapModal").style.display = "none";
-}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("closeMapBtn")
+    ?.addEventListener("click", closeMapPopup);
+});
 
 async function loadRankingData(mode = "amount") {
   try {
@@ -224,21 +489,27 @@ async function loadRankingData(mode = "amount") {
     const data = await res.json();
     const users = data.ranking || [];
     const tbody = document.getElementById("delegatesTable");
-    tbody.innerHTML = "";
-    users.forEach((u) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${u.name}</td><td>${
-        u.total_orders_amount ?? "-"
-      }</td><td>${u.total_orders_all ?? "-"}</td>`;
-      tbody.appendChild(tr);
-    });
+    if (tbody) {
+      tbody.innerHTML = "";
+      users.forEach((u) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${u.name}</td><td>${
+          u.total_orders_amount ?? "-"
+        }</td><td>${u.total_orders_all ?? "-"}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
     const labels = users.map((u) => u.name);
     const dataset =
       mode === "amount"
         ? users.map((u) => u.total_orders_amount)
         : users.map((u) => u.total_orders_all);
+
+    const canvas = document.getElementById("delegatesChart");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
     if (!chart) {
-      const ctx = document.getElementById("delegatesChart").getContext("2d");
       chart = new Chart(ctx, {
         type: currentType,
         data: {
@@ -278,38 +549,58 @@ function changeChartType(type) {
   if (chart) {
     chart.destroy();
     chart = null;
-    const v = document.getElementById("dataType")?.value || "visits";
-    loadRankingData(v === "sales" || v === "visits" ? "amount" : "orders");
+    const val = document.getElementById("dataType")?.value || "sales";
+    loadRankingData(val === "sales" ? "amount" : "orders");
   }
 }
+window.showChart = changeChartType;
+window.changeDataset = (val) =>
+  loadRankingData(val === "sales" ? "amount" : "orders");
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  wireAutocompleteFields();
   loadVisits();
-  loadRankingData("amount");
+  await loadRankingData("amount");
 
-  document.getElementById("applyFiltersBtn").addEventListener("click", () => {
+  const applyBtn = document.getElementById("applyFiltersBtn");
+  const clearBtn = document.getElementById("clearFiltersBtn");
+  const prevBtn = document.getElementById("prevPageBtn");
+  const nextBtn = document.getElementById("nextPageBtn");
+
+  applyBtn?.addEventListener("click", () => {
     currentPage = 1;
     loadVisits();
   });
-  document.getElementById("clearFiltersBtn").addEventListener("click", () => {
-    document.getElementById("userFilter").value = "";
-    document.getElementById("customerFilter").value = "";
+
+  clearBtn?.addEventListener("click", () => {
+    const uf = document.getElementById("userFilter");
+    const cf = document.getElementById("customerFilter");
+    if (uf) {
+      uf.value = "";
+      uf.dataset.id = "";
+    }
+    if (cf) {
+      cf.value = "";
+      cf.dataset.id = "";
+    }
     currentPage = 1;
     loadVisits();
   });
-  document.getElementById("prevPageBtn").addEventListener("click", () => {
+
+  prevBtn?.addEventListener("click", () => {
     if (currentPage > 1) {
       currentPage--;
       loadVisits();
     }
   });
-  document.getElementById("nextPageBtn").addEventListener("click", () => {
+  nextBtn?.addEventListener("click", () => {
     currentPage++;
     loadVisits();
   });
+
   document
     .getElementById("closeMapBtn")
-    .addEventListener("click", closeMapPopup);
+    ?.addEventListener("click", closeMapPopup);
 
   const savedTheme = localStorage.getItem("theme");
   if (savedTheme === "dark") applyTheme("dark");
@@ -320,14 +611,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("dataType").addEventListener("change", (e) => {
+  document.getElementById("dataType")?.addEventListener("change", (e) => {
     const v = e.target.value;
-    loadRankingData(v === "sales" || v === "visits" ? "amount" : "orders");
+    loadRankingData(v === "sales" ? "amount" : "orders");
   });
   document
     .getElementById("chartLine")
-    .addEventListener("click", () => changeChartType("line"));
+    ?.addEventListener("click", () => changeChartType("line"));
   document
     .getElementById("chartBar")
-    .addEventListener("click", () => changeChartType("bar"));
+    ?.addEventListener("click", () => changeChartType("bar"));
 });

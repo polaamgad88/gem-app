@@ -4,24 +4,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visits Dashboard</title>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="styles/dashboard.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-  <!-- Libraries (available to app.js) -->
+  <title>Order Details</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="./styles/dashboard.css" />
 </head>
 
 <body>
   <div class="dashboard">
-    <!-- Filters + Table -->
     <div class="box" style="grid-column: span 4">
       <div class="filters">
-        <input id="userFilter" type="text" placeholder="User ID" />
-        <input id="customerFilter" type="text" placeholder="Customer ID" />
+        <input id="userFilter" type="text" placeholder="User name or ID" list="usersList" />
+        <datalist id="usersList"></datalist>
+
+        <input id="customerFilter" type="text" placeholder="Customer name or ID" list="customersList" />
+        <datalist id="customersList"></datalist>
+
         <button id="applyFiltersBtn">Apply</button>
         <button id="clearFiltersBtn" class="secondary">Clear</button>
       </div>
@@ -50,53 +49,50 @@
         <button id="nextPageBtn" class="secondary">Next</button>
       </div>
     </div>
-
-    <!-- Chart -->
     <div class="chart">
       <div class="chart-header">
         <div class="chart-title">
           <span>Sales</span>
-          <h3 id="chartTitle">Weekly Performance</h3>
+          <h3>Weekly Performance</h3>
         </div>
         <div class="chart-controls">
-          <select id="dataType">
+          <select id="dataType" onchange="changeDataset(this.value)">
             <option value="sales">Sales</option>
-            <option value="orders">Orders</option>
+            <option value="leads">Orders</option>
           </select>
 
           <div class="chart-buttons">
-            <button id="chartLine" data-type="line" class="active">
+            <button class="active" data-type="line" onclick="showChart('line')" id="chartLine">
               Line
             </button>
-            <button id="chartBar" data-type="bar">Bar</button>
+            <button data-type="bar" onclick="showChart('bar')" id="chartBar">
+              Bar
+            </button>
           </div>
         </div>
       </div>
 
-      <canvas id="delegatesChart"></canvas>
+      <canvas id="delegatesChart" style="max-height: 300px; margin-top: 20px"></canvas>
     </div>
-
-    <!-- Top (example placeholder table populated from API or derived) -->
     <div class="top-delegates">
       <div class="top-header">
-        <h3>Recent Orders - Top 15</h3>
-        <button class="add-order-btn" id="addOrderBtn">Add Order</button>
+        <h3 style="margin: 14px">Recent Orders - Top 15</h3>
+        <button class="add-order-btn" onclick="window.location.href='create-order.html'">
+          Add Order
+        </button>
       </div>
-      <table>
+      <table cellpadding="5">
         <thead>
-          <tr>
+          <tr style="border-bottom: 2px solid #ccc">
             <th>Name</th>
             <th>Total Amount</th>
             <th>Total Orders</th>
           </tr>
         </thead>
-        <tbody id="delegatesTable">
-          <!-- populated by app.js -->
-        </tbody>
+        <tbody id="delegatesTable"></tbody>
       </table>
     </div>
   </div>
-
   <!-- Map Modal -->
   <div id="mapModal" class="modal">
     <div class="modal-content">
@@ -105,8 +101,7 @@
     </div>
   </div>
 
-  <!-- App JS -->
-  <script src="scripts/dashboard.js"></script>
+  <script src="./scripts/dashboard.js"></script>
 </body>
 
 </html>

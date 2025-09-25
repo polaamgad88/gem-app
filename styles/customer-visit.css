@@ -213,49 +213,6 @@ textarea {
   box-sizing: border-box;
 }
 
-/* Dark Mode Styles */
-body.dark-mode {
-  background: #1e1e1e;
-  color: #eee;
-}
-
-body.dark-mode input,
-body.dark-mode select {
-  background: #1e1e1e;
-  color: #fff;
-  border: 1px solid #444;
-}
-
-body.dark-mode .dropdown-list {
-  background: #1e1e1e;
-  border: 1px solid #444;
-}
-
-body.dark-mode .dropdown-list li {
-  color: #fff;
-}
-
-body.dark-mode .dropdown-list li:hover {
-  background: #333;
-}
-
-body.dark-mode #map {
-  border: 1px solid #444;
-}
-
-body.dark-mode button {
-  background: #388e3c;
-  border: 1px solid #555;
-}
-
-body.dark-mode button:hover {
-  background: #2e7d32;
-}
-
-body.dark-mode select option {
-  color: #ccc;
-}
-
 .address-dropdown {
   width: 100%;
   padding: 8px;
@@ -325,5 +282,97 @@ body.dark-mode select option {
   #checkInBtn {
     width: auto;
     padding: 12px 24px;
+  }
+}
+
+/* 🌙 Dark Mode — Customer Visit (Check-In) */
+body.dark-mode {
+  background-color: #121212;
+  color: #e7e7ea;
+}
+
+/* Card/container */
+body.dark-mode .container {
+  background: #151923;
+  color: #e7e7ea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .6);
+  border: 1px solid #2a3142;
+}
+
+/* Inputs, selects, textarea */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .address-dropdown {
+  background: #1f2430;
+  color: #e7e7ea;
+  border: 1px solid #2a3142;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #9aa3b2;
+}
+
+/* “Type-ahead” dropdowns */
+body.dark-mode .dropdown-list,
+body.dark-mode #customer-suggestions {
+  background: #151923;
+  color: #e7e7ea;
+  border: 1px solid #2a3142;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+}
+
+body.dark-mode .dropdown-list li:hover,
+body.dark-mode #customer-suggestions li:hover {
+  background: #1d2432;
+}
+
+/* Buttons (keep your green, just tune contrast a bit) */
+body.dark-mode button {
+  background: #2e7d32;
+  /* darker green for dark bg */
+  border-color: #2e7d32;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+}
+
+body.dark-mode button:hover {
+  background: #256b28;
+}
+
+/* Map container + Leaflet controls */
+body.dark-mode #map {
+  border-color: #2a3142;
+  background: #0f1220;
+  /* behind tiles while loading */
+}
+
+/* Zoom buttons */
+body.dark-mode .leaflet-bar a {
+  background: #232a3b;
+  color: #e7e7ea;
+  border-color: #2a3142;
+}
+
+body.dark-mode .leaflet-bar a:hover {
+  background: #2a3142;
+}
+
+/* Popups */
+body.dark-mode .leaflet-popup-content-wrapper,
+body.dark-mode .leaflet-popup-tip {
+  background: #1f2430;
+  color: #e7e7ea;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .5);
+  border: 1px solid #2a3142;
+}
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+
+  body.dark-mode .top-inputs>div,
+  body.dark-mode .input-container {
+    background: transparent;
   }
 }

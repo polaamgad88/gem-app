@@ -2,149 +2,154 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>New Order</title>
-    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
-    <link rel="stylesheet" href="./styles/base.css" />
-    <link rel="stylesheet" href="./styles/create-order.css" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-   <style>
-   </style>
-    <script src="./scripts/utils.js" defer></script>
-    <script src="./scripts/create-order.js" defer></script>
-     <script src="./scripts/delegate-landing.js"></script>
-     <style>
-body.dark-mode {
-  background-color: #121212 !important;
-  color: #e0e0e0 !important;
-}
-
-/* body.dark-mode a, */
-body.dark-mode button,
-body.dark-mode .btn {
-  background-color: #1f1f1f !important;
-  color: #e0e0e0 !important;
-  border-color: #444 !important;
-}
-
-
-body.dark-mode .tab-content,
-body.dark-mode .card,
-body.dark-mode .order-summary,
-body.dark-mode .order-preview,
-body.dark-mode .order-preview-container {
-  background-color: #121212 !important;
-  color: #e0e0e0 !important;
-  border: 1px solid #333 !important;
-}
-body.dark-mode .order-summary span {
-    color: black !important;
-}
-
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-  background-color: #2a2a2a !important;
-  color: #fff !important;
-  border: 1px solid #555 !important;
-}
-
-/* Headings */
-body.dark-mode h2,
-body.dark-mode h3,
-body.dark-mode .summary-label {
-  color: #ffffff !important;
-}
-
-/* Special Buttons (Add Row, Submit, Upload) */
-body.dark-mode .add-row-btn {
-  background: linear-gradient(145deg, #333, #222) !important;
-  color: #eee !important;
-}
-body.dark-mode #submit-order {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20) !important;
-  color: white !important;
-}
-body.dark-mode #upload-sheet-section label {
-  background-color: #2a2a2a !important;
-  border-color: #444 !important;
-  color: #e0e0e0 !important;
-}
-body.dark-mode .tab {
-  background: #2a2a2a !important;   
-  color: #ccc !important;         
-  border: 1px solid #444 !important;
-}
-
-body.dark-mode .tab-content {
-  background: #1e1e1e !important;  
-  color: #e0e0e0 !important;
-  border: 1px solid #333 !important;
-}
- body.dark-mode .custom-customer-select ul {
-    background-color: #2a2a2a !important;
-    color: #fff !important;
- }
-     </style>
-     <script>
-  function applyTheme(mode) {
-    if (mode === "dark") {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Order</title>
+  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/create-order.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+  </style>
+  <script src="./scripts/utils.js" defer></script>
+  <script src="./scripts/create-order.js" defer></script>
+  <script src="./scripts/delegate-landing.js"></script>
+  <style>
+    body.dark-mode {
+      background-color: #121212 !important;
+      color: #e0e0e0 !important;
     }
-  }
 
-  window.addEventListener("message", (event) => {
-    if (event.data.theme) {
-      applyTheme(event.data.theme);
-      localStorage.setItem("theme", event.data.theme); 
+    /* body.dark-mode a, */
+    body.dark-mode button,
+    body.dark-mode .btn {
+      background-color: #1f1f1f !important;
+      color: #e0e0e0 !important;
+      border-color: #444 !important;
     }
-  });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    applyTheme(savedTheme);
-  });
-</script>
+
+    body.dark-mode .tab-content,
+    body.dark-mode .card,
+    body.dark-mode .order-summary,
+    body.dark-mode .order-preview,
+    body.dark-mode .order-preview-container {
+      background-color: #121212 !important;
+      color: #e0e0e0 !important;
+      border: 1px solid #333 !important;
+    }
+
+    body.dark-mode .order-summary span {
+      color: black !important;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background-color: #2a2a2a !important;
+      color: #fff !important;
+      border: 1px solid #555 !important;
+    }
+
+    /* Headings */
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode .summary-label {
+      color: #ffffff !important;
+    }
+
+    /* Special Buttons (Add Row, Submit, Upload) */
+    body.dark-mode .add-row-btn {
+      background: linear-gradient(145deg, #333, #222) !important;
+      color: #eee !important;
+    }
+
+    body.dark-mode #submit-order {
+      background: linear-gradient(135deg, #2e7d32, #1b5e20) !important;
+      color: white !important;
+    }
+
+    body.dark-mode #upload-sheet-section label {
+      background-color: #2a2a2a !important;
+      border-color: #444 !important;
+      color: #e0e0e0 !important;
+    }
+
+    body.dark-mode .tab {
+      background: #2a2a2a !important;
+      color: #ccc !important;
+      border: 1px solid #444 !important;
+    }
+
+    body.dark-mode .tab-content {
+      background: #1e1e1e !important;
+      color: #e0e0e0 !important;
+      border: 1px solid #333 !important;
+    }
+
+    body.dark-mode .custom-customer-select ul {
+      background-color: #2a2a2a !important;
+      color: #fff !important;
+    }
+  </style>
+  <script>
+    function applyTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
+    }
+
+    window.addEventListener("message", (event) => {
+      if (event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      applyTheme(savedTheme);
+    });
+  </script>
 
 </head>
 
 <body style="font-family: 'Segoe UI', sans-serif; background-color: #f8f9fb; color: #333; margin: 0; padding: 20px;">
-        <h2 style="text-align: left; font-size: 26px; font-weight: 700; margin-bottom: 30px; color: #333;">New Order</h2>
+  <h2 style="text-align: left; font-size: 26px; font-weight: 700; margin-bottom: 30px; color: #333;">New Order</h2>
 
-        <div class="order-header"
-            style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; margin-bottom: 30px;">
-            <input type="date" id="order-date" style="border-radius: 8px" class="responsive-input" readonly>
+  <div class="order-header"
+    style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; margin-bottom: 30px;">
+    <input type="date" id="order-date" style="border-radius: 8px" class="responsive-input" readonly>
 
-            <div class="custom-customer-select input-container">
-                <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off"
-                    class="responsive-input" style="border-radius: 8px"/>
-                <ul id="customer-suggestions" class="dropdown-list"></ul>
-            </div>
+    <div class="custom-customer-select input-container">
+      <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off"
+        class="responsive-input" style="border-radius: 8px" />
+      <ul id="customer-suggestions" class="dropdown-list"></ul>
+    </div>
 
-            <select id="customer-select" style="display: none;"></select>
+    <select id="customer-select" style="display: none;"></select>
 
-            <select id="address-select" class="responsive-input" style="border-radius: 8px">
-                <option value="">Select Address</option>
-            </select>
+    <select id="address-select" class="responsive-input" style="border-radius: 8px">
+      <option value="">Select Address</option>
+    </select>
 
-        </div>
+  </div>
 
-        <div class="tabs" style="margin-bottom: 30px;">
-            <!-- Detailed Order Section -->
-            <div class="tab" onclick="toggleTab('detailed-order-content' ,1 )"
-                style="padding: 12px; background: #fff; color: #0b2a59; border-radius: 8px; cursor: pointer; font-weight: 500; margin-bottom: 8px;border: 2px solid #0b2a59;">
-                Detailed Order <span class="arrow" style="float: right;">▼</span>
-            </div>
-            <div id="detailed-order-content" class="tab-content"
-                style="display: none; margin-bottom: 40px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div class="tabs" style="margin-bottom: 30px;">
+    <!-- Detailed Order Section -->
+    <div class="tab" onclick="toggleTab('detailed-order-content' ,1 )"
+      style="padding: 12px; background: #fff; color: #0b2a59; border-radius: 8px; cursor: pointer; font-weight: 500; margin-bottom: 8px;border: 2px solid #0b2a59;">
+      Detailed Order <span class="arrow" style="float: right;">▼</span>
+    </div>
+    <div id="detailed-order-content" class="tab-content"
+      style="display: none; margin-bottom: 40px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
 
-                <div class="order-rows-scrollable order-rows-scrollable-detailed" id="detailed-order-rows"
-                    style="display: none; margin-bottom: 20px; background-color: #f9f9f9;"></div>
+      <div class="order-rows-scrollable order-rows-scrollable-detailed" id="detailed-order-rows"
+        style="display: none; margin-bottom: 20px; background-color: #f9f9f9;"></div>
 
-                <button class="add-row-btn" data-type="detailed" style="
+      <button class="add-row-btn" data-type="detailed" style="
        display: block;
        margin: 0 auto;
        padding: 12px 24px;
@@ -157,20 +162,20 @@ body.dark-mode .tab-content {
        cursor: pointer;
        transition: background-color 0.2s ease;
      " onmouseover="this.style.backgroundColor='#0b2a59'" onmouseout="this.style.backgroundColor='#0b2a59'">
-                    Add Row
-                </button>
-            </div>
+        Add Row
+      </button>
+    </div>
 
 
-            <!-- Combined Order Section -->
-            <div class="tab" onclick="toggleTab('combined-order' , 1 )"
-                style="padding: 12px; background: #fff; color: #0b2a59; border-radius: 8px; cursor: pointer; font-weight: 500; margin-bottom: 8px;border: 2px solid #0b2a59;">
-                Combined Order <span class="arrow" style="float: right;">▼</span>
-            </div>
-            <div id="combined-order" class="tab-content" style="display: none; margin-bottom: 20px;">
-                <div class="order-rows-scrollable order-rows-scrollable-combined" id="combined-order-rows"
-                    style="display: none; background-color: #f9f9f9;"></div>
-                <button class="add-row-btn" data-type="combined" style="
+    <!-- Combined Order Section -->
+    <div class="tab" onclick="toggleTab('combined-order' , 1 )"
+      style="padding: 12px; background: #fff; color: #0b2a59; border-radius: 8px; cursor: pointer; font-weight: 500; margin-bottom: 8px;border: 2px solid #0b2a59;">
+      Combined Order <span class="arrow" style="float: right;">▼</span>
+    </div>
+    <div id="combined-order" class="tab-content" style="display: none; margin-bottom: 20px;">
+      <div class="order-rows-scrollable order-rows-scrollable-combined" id="combined-order-rows"
+        style="display: none; background-color: #f9f9f9;"></div>
+      <button class="add-row-btn" data-type="combined" style="
                     display: block;
                     margin: 0 auto;
                     padding: 12px 24px;
@@ -183,24 +188,24 @@ body.dark-mode .tab-content {
                     cursor: pointer;
                     transition: background-color 0.2s ease;
                     ">Add Row</button>
-            </div>
-        </div>
+    </div>
+  </div>
 
-        <!-- Note Section -->
-        <div style="
+  <!-- Note Section -->
+  <div style="
   margin-bottom: 16px;
   font-family: 'Segoe UI', sans-serif;
   font-size: 14px;
 ">
-            <!-- Note Label -->
-            <!-- <label for="order-note" style="
+    <!-- Note Label -->
+    <!-- <label for="order-note" style="
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
   ">Note (optional):</label> -->
 
-            <!-- Note Textarea -->
-            <textarea id="order-note" name="order_note" placeholder="Add any special note..." style="
+    <!-- Note Textarea -->
+    <textarea id="order-note" name="order_note" placeholder="Add any special note..." style="
     width: 100%;
     padding: 10px;
     font-size: 14px;
@@ -210,48 +215,48 @@ body.dark-mode .tab-content {
     min-height: 80px;
     font-family: 'Segoe UI', sans-serif;"></textarea>
 
-            <div class="order-summary">
-                <div class="summary-box items-box" style="width: 40%;">
-                    <span class="summary-icon" aria-label="Total Items">📦</span>
-                    <span class="summary-label">Total Items:</span>
-                    <span id="total-items">0</span>
-                </div>
-                <div class="summary-box price-box">
-                    <span class="summary-icon" aria-label="Total Price">💰</span>
-                    <span class="summary-label">Total Price:</span>
-                    <span>EGP <span id="total-price">0.00</span></span>
-                </div>
-            </div>
+    <div class="order-summary">
+      <div class="summary-box items-box" style="width: 40%;">
+        <span class="summary-icon" aria-label="Total Items">📦</span>
+        <span class="summary-label">Total Items:</span>
+        <span id="total-items">0</span>
+      </div>
+      <div class="summary-box price-box">
+        <span class="summary-icon" aria-label="Total Price">💰</span>
+        <span class="summary-label">Total Price:</span>
+        <span>EGP <span id="total-price">0.00</span></span>
+      </div>
+    </div>
 
 
-            <div class="order-preview" style="margin-bottom: 30px;">
-                <div id="preview-loader" style="display: none;">
-                    <div class="loader"></div>
-                    <span>Loading preview...</span>
-                </div>
+    <div class="order-preview" style="margin-bottom: 30px;">
+      <div id="preview-loader" style="display: none;">
+        <div class="loader"></div>
+        <span>Loading preview...</span>
+      </div>
 
-                <h3 style="margin-bottom: 12px; text-align: center;">Order Preview</h3>
+      <h3 style="margin-bottom: 12px; text-align: center;">Order Preview</h3>
 
-                <div class="order-preview-container">
-                    <div id="order-preview-body" class="order-preview-cards"></div>
-                </div>
-            </div>
+      <div class="order-preview-container">
+        <div id="order-preview-body" class="order-preview-cards"></div>
+      </div>
+    </div>
 
-            <button id="submit-order" class="btn btn-primary"
-                style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background: linear-gradient(135deg, #28a745, #218838); color: white; border: none; border-radius: 8px; cursor: pointer;">Submit
-                New Order</button>
-            <hr style="margin: 40px 0;" />
+    <button id="submit-order" class="btn btn-primary"
+      style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background: linear-gradient(135deg, #28a745, #218838); color: white; border: none; border-radius: 8px; cursor: pointer;">Submit
+      New Order</button>
+    <hr style="margin: 40px 0;" />
 
-            <div style="text-align: center; margin-bottom: 12px;">
-                <h3 style="font-size: 20px; font-weight: 600; color: #0b2a59; margin-bottom: 6px;">
-                    OR Upload from Excel
-                </h3>
-                <p style="color: #666; font-size: 14px; margin-top: 0;">Import an order directly from a sheet</p>
-            </div>
+    <div style="text-align: center; margin-bottom: 12px;">
+      <h3 style="font-size: 20px; font-weight: 600; color: #0b2a59; margin-bottom: 6px;">
+        OR Upload from Excel
+      </h3>
+      <p style="color: #666; font-size: 14px; margin-top: 0;">Import an order directly from a sheet</p>
+    </div>
 
-            <div id="upload-sheet-section"
-                style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: center; margin-bottom: 30px;">
-                <label for="order-sheet" style="
+    <div id="upload-sheet-section"
+      style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: center; margin-bottom: 30px;">
+      <label for="order-sheet" style="
                     padding: 12px 20px;
                     background-color: #f1f3f5;
                     color: #333;
@@ -260,13 +265,13 @@ body.dark-mode .tab-content {
                     font-size: 15px;
                     cursor: pointer;
                 ">
-                    📄 Upload from Sheet
-                    <input type="file" id="order-sheet" accept=".xlsx,.xls" style="display: none;" />
-                </label>
-                <span id="selected-file-name" style="font-size: 14px; color: #555;">No file chosen</span>
+        📄 Upload from Sheet
+        <input type="file" id="order-sheet" accept=".xlsx,.xls" style="display: none;" />
+      </label>
+      <span id="selected-file-name" style="font-size: 14px; color: #555;">No file chosen</span>
 
-                
-            </div>
+
+    </div>
 
 </body>
 

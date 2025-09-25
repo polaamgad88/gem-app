@@ -1,237 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="./scripts/login.js" defer></script>
 
-    <title>Login | GEM App</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: "Segoe UI", Roboto, sans-serif;
-        background: linear-gradient(145deg, #022048, #0b2a59);
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        color: white;
-        overflow: hidden;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="./scripts/login.js" defer></script>
 
-      body::before {
-        content: "";
-        position: absolute;
-        bottom: -100px;
-        left: -100px;
-        width: 300px;
-        height: 300px;
-        background-color: #013a73;
-        border-radius: 50%;
-        z-index: 0;
-      }
+  <title>Login | GEM App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(145deg, #022048, #0b2a59);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      color: white;
+      overflow: hidden;
+    }
 
-      body::after {
-        content: "";
-        position: absolute;
-        bottom: -50px;
-        left: 100px;
-        width: 200px;
-        height: 200px;
-        background-color: #004080;
-        border-radius: 50%;
-        z-index: 0;
-      }
+    body::before {
+      content: "";
+      position: absolute;
+      bottom: -100px;
+      left: -100px;
+      width: 300px;
+      height: 300px;
+      background-color: #013a73;
+      border-radius: 50%;
+      z-index: 0;
+    }
 
-      .top-circle {
-        position: absolute;
-        top: -80px;
-        right: -80px;
-        width: 220px;
-        height: 220px;
-        background-color: #014f86;
-        border-radius: 50%;
-        z-index: 0;
-      }
+    body::after {
+      content: "";
+      position: absolute;
+      bottom: -50px;
+      left: 100px;
+      width: 200px;
+      height: 200px;
+      background-color: #004080;
+      border-radius: 50%;
+      z-index: 0;
+    }
 
-      .header-title {
-        text-align: center;
-        margin-bottom: 12px;
-        font-size: 28px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-      }
+    .top-circle {
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 220px;
+      height: 220px;
+      background-color: #014f86;
+      border-radius: 50%;
+      z-index: 0;
+    }
 
-      .header-sub {
-        text-align: center;
-        font-size: 15px;
-        color: #cfd8e2;
-        margin-bottom: 30px;
-      }
+    .header-title {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
 
-      .container {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
-        padding: 50px 32px;
-        width: 100%;
-        max-width: 420px;
-        box-sizing: border-box;
-        text-align: center;
-        color: #0b2a59;
-      }
+    .header-sub {
+      text-align: center;
+      font-size: 15px;
+      color: #cfd8e2;
+      margin-bottom: 30px;
+    }
 
-      .logo {
-        display: block;
-        margin: 0 auto 5px;
-        height: 150px;
-        object-fit: contain;
-      }
+    .container {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(150, 184, 234, 0.2);
+      padding: 50px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-sizing: border-box;
+      text-align: center;
+      color: #0b2a59;
+    }
 
-      h2 {
-        margin: 0 0 20px;
-        font-size: 20px;
-        font-weight: 600;
-      }
+    .logo {
+      display: block;
+      margin: 0 auto 5px;
+      height: 150px;
+      object-fit: contain;
+    }
 
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
-      .password-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-      }
+    h2 {
+      margin: 0 0 20px;
+      font-size: 20px;
+      font-weight: 600;
+    }
 
-      .password-container input {
-        width: 100%;
-        padding-right: 40px;
-      }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-      .password-container i {
-        position: absolute;
-        right: 12px;
-        cursor: pointer;
-        color: #0b2a59;
-        font-size: 18px;
-      }
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
 
-      input[type="text"],
-      input[type="password"] {
-        padding: 12px;
-        border: 1px solid #ccd6dd;
-        border-radius: 8px;
-        font-size: 15px;
-        transition: border-color 0.2s;
-        background-color: #f4f7fa;
-      }
+    .password-container input {
+      width: 100%;
+      padding-right: 40px;
+    }
 
-      input:focus {
-        border-color: #0056b3;
-        outline: none;
-        box-shadow: 0 0 6px rgba(0, 86, 179, 0.3);
-      }
+    .password-container i {
+      position: absolute;
+      right: 12px;
+      cursor: pointer;
+      color: #0b2a59;
+      font-size: 18px;
+    }
 
-      .btn-primary {
-        padding: 12px;
-        background-color: #0b2a59;
-        border: none;
-        border-radius: 8px;
-        color: white;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      }
+    input[type="text"],
+    input[type="password"] {
+      padding: 12px;
+      border: 1px solid #ccd6dd;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+      background-color: #f4f7fa;
+    }
 
-      /* .btn-primary:hover {
+    input:focus {
+      border-color: #0056b3;
+      outline: none;
+      box-shadow: 0 0 6px rgba(0, 86, 179, 0.3);
+    }
+
+    .btn-primary {
+      padding: 12px;
+      background-color: #0b2a59;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* .btn-primary:hover {
         background-color: whitesmoke;
         color: #0b2a59;
         border: 1px solid #0b2a59;
       } */
 
-      #theme-toggle {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: transparent;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
-        color: white;
+    #theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 16px;
+      font-size: 13px;
+      color: #cdd2d8;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 28px 20px;
+        margin: 0 12px;
+      }
+
+      .header-title {
+        font-size: 22px;
+      }
+
+      .logo {
+        height: 80px;
       }
 
       .footer {
-        position: absolute;
-        bottom: 16px;
-        font-size: 13px;
-        color: #cdd2d8;
+        font-size: 12px;
       }
+    }
 
-      @media (max-width: 480px) {
-        .container {
-          padding: 28px 20px;
-          margin: 0 12px;
-        }
-
-        .header-title {
-          font-size: 22px;
-        }
-
-        .logo {
-          height: 80px;
-        }
-
-        .footer {
-          font-size: 12px;
-        }
+    @media (max-width: 768px) {
+      .footer {
+        display: none;
       }
-      @media (max-width: 768px) {
-        .footer {
-          display: none;
-        }
-      }
-    </style>
-  </head>
+    }
+  </style>
+</head>
 
-  <body>
-    <div class="top-circle"></div>
-    <!-- <button id="theme-toggle" aria-label="Toggle dark mode">🌙</button> -->
+<body>
+  <div class="top-circle"></div>
+  <!-- <button id="theme-toggle" aria-label="Toggle dark mode">🌙</button> -->
 
-    <div class="header-title">Welcome to GEM Application</div>
-    <div class="header-sub">Please log in to continue</div>
+  <div class="header-title">Welcome to GEM Application</div>
+  <div class="header-sub">Please log in to continue</div>
 
-    <div class="container">
-      <img src="./assets/GEM Group 2024.jpg" alt="GEM Logo" class="logo" />
-      <!-- <h2>GEM Application</h2> -->
-      <form>
-        <input type="text" name="username" placeholder="Username" required />
-        <!-- <input type="password" name="password" placeholder="Password" required /> -->
-        <div class="password-container">
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Password"
-            required
-          />
-          <i class="fa-solid fa-eye" id="togglePassword"></i>
-        </div>
+  <div class="container">
+    <img src="./assets/GEM Group 2024.jpg" alt="GEM Logo" class="logo" />
+    <!-- <h2>GEM Application</h2> -->
+    <form>
+      <input type="text" name="username" placeholder="Username" required />
+      <!-- <input type="password" name="password" placeholder="Password" required /> -->
+      <div class="password-container">
+        <input type="password" id="password" name="password" placeholder="Password" required />
+        <i class="fa-solid fa-eye" id="togglePassword"></i>
+      </div>
 
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
-    </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+  </div>
 
-    <div class="footer">© 2025 GEM Group. All rights reserved.</div>
-  </body>
+  <div class="footer">© 2025 GEM Group. All rights reserved.</div>
+</body>
+
 </html>
