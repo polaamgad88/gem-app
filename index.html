@@ -347,7 +347,8 @@
       <a href="./create-order.html" class="add-order"><i class="fa-solid fa-plus"></i> Add New Order</a>
       <a href="./customers.html"><i class="fa-solid fa-users"></i> Manage Customers</a>
       <a href="./users.html"><i class="fa-solid fa-user-gear"></i> Manage Users</a>
-      <a href="./products.html"><i class="fa-solid fa-box"></i> Manage Products</a>
+      <a style="display: none;" id="products_page" href="./products.html"><i class="fa-solid fa-box"></i> Manage
+        Products</a>
       <a href="./customer-visit.html"><i class="fa-solid fa-location-dot"></i> Customer Visit</a>
     </div>
   </div>
@@ -359,19 +360,7 @@
         <span id="page-title">Company Dashboard</span>
       </h1>
       <div class="topbar-actions">
-        <!-- <div class="theme-dropdown">
-            <button class="btn-top btn-theme">
-              <i class="fa-solid fa-paintbrush"></i> Theme
-            </button>
-            <div
-              class="dropdown-content"
-              style="margin-top: 8px; margin-right: auto"
-            >
-              <a href="#" id="light-mode">Light</a>
-              <a href="#" id="dark-mode">Dark</a>
-            </div>
-          </div> -->
-        <!-- Theme Toggle Button -->
+
         <button id="theme-toggle" class="btn-top btn-theme">🌙 Dark</button>
 
         <a href="#" id="logout-btn" class="btn-logout">
@@ -379,10 +368,6 @@
         </a>
       </div>
     </div>
-    <!-- <div id="main-content" class="main-content">
-        <h2>Welcome to the Dashboard</h2>
-      </div> -->
-    <!-- <iframe id="main-frame" class="main-content" src="" frameborder="0"></iframe> -->
     <iframe id="main-frame" class="main-content" src="dashboard.html"></iframe>
   </div>
   <script src="./scripts/app.js"></script>

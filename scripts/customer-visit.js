@@ -18,7 +18,7 @@ let marker;
 async function fetchCustomers(query = "") {
   const token = localStorage.getItem("access_token"); // JWT Token for Authorization
   const response = await fetch(
-    `http://localhost:5000/customers?all=true&search=${query}`,
+    `https://order-app.gemegypt.net/api/customers?all=true&search=${query}`,
     {
       method: "GET",
       headers: {
@@ -72,7 +72,7 @@ customerSuggestions.addEventListener("click", (e) => {
 async function fillCustomerAddress(customerId) {
   const token = localStorage.getItem("access_token");
   const response = await fetch(
-    `http://localhost:5000/customers/${customerId}/addresses`, // Get customer addresses
+    `https://order-app.gemegypt.net/api/customers/${customerId}/addresses`, // Get customer addresses
     {
       method: "GET",
       headers: {
@@ -150,7 +150,7 @@ checkInButton.addEventListener("click", () => {
 
       // Call the backend to log the visit
       const token = localStorage.getItem("access_token");
-      const response = await fetch("http://localhost:5000/visits/checkin", {
+      const response = await fetch("https://order-app.gemegypt.net/api/visits/checkin", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

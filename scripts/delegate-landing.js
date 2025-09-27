@@ -51,17 +51,24 @@ function setupAdminButtons(admin, role) {
       const productsBtn = document.querySelector(".manage-products");
       if (productsBtn) productsBtn.style.display = "block";
     }
+    if (admin == 1) {
+      const productsBtn = document.getElementById("products_page");
+      if (productsBtn) productsBtn.style.display = "block";
+    }
   }
 }
 
 // Helper function to verify token
 async function verifyToken(token) {
-  const response = await fetch("http://localhost:5000/checklogin", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await fetch(
+    "https://order-app.gemegypt.net/api/checklogin",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   if (response.status !== 200) {
     // Token is invalid, revoked, or expired
@@ -81,12 +88,15 @@ function setupLogoutButton() {
           return;
         }
 
-        const logoutRes = await fetch("http://localhost:5000/logout", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const logoutRes = await fetch(
+          "https://order-app.gemegypt.net/api/logout",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (logoutRes.ok) {
           localStorage.clear();

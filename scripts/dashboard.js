@@ -1,11 +1,134 @@
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://order-app.gemegypt.net/api";
 const JWT = localStorage.getItem("access_token");
 
 let currentPage = 1;
 let currentLimit = 10;
 let map, plannedMarker, actualMarker, lineLayer;
-let chart;
-let currentType = "line";
+let rankingEndpointType = "unknown"; // "admin" | "view"
+let chart; // keep global
+let currentType = "bar"; // always bar now
+
+function rankingUrlFor(mode) {
+  const byAmount = mode === "amount";
+  if (rankingEndpointType === "admin") {
+    return byAmount
+      ? `${API_BASE}/users/ranking?total_amount=true`
+      : `${API_BASE}/users/ranking?total_number=true`;
+  }
+  return byAmount
+    ? `${API_BASE}/users/ranking_view?total_amount=true`
+    : `${API_BASE}/users/ranking_view?total_number=true`;
+}
+
+async function fetchWithAuth(url, opts = {}) {
+  return fetch(url, {
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    ...opts,
+  });
+}
+
+/** Probe which endpoint we can use (admin first, else view). Cached after first run. */
+async function ensureRankingEndpoint(mode = "amount") {
+  if (rankingEndpointType !== "unknown") return rankingEndpointType;
+
+  const probeAdmin =
+    mode === "amount"
+      ? `${API_BASE}/users/ranking?total_amount=true`
+      : `${API_BASE}/users/ranking?total_number=true`;
+
+  try {
+    const r = await fetchWithAuth(probeAdmin);
+    if (r.ok) {
+      rankingEndpointType = "admin";
+      return "admin";
+    }
+    if (r.status === 401 || r.status === 403) {
+      rankingEndpointType = "view";
+      return "view";
+    }
+
+    const probeView =
+      mode === "amount"
+        ? `${API_BASE}/users/ranking_view?total_amount=true`
+        : `${API_BASE}/users/ranking_view?total_number=true`;
+    const r2 = await fetchWithAuth(probeView);
+    rankingEndpointType = r2.ok ? "view" : "admin";
+    return rankingEndpointType;
+  } catch {
+    const probeView =
+      mode === "amount"
+        ? `${API_BASE}/users/ranking_view?total_amount=true`
+        : `${API_BASE}/users/ranking_view?total_number=true`;
+    try {
+      const r2 = await fetchWithAuth(probeView);
+      rankingEndpointType = r2.ok ? "view" : "admin";
+      return rankingEndpointType;
+    } catch {
+      rankingEndpointType = "admin";
+      return "admin";
+    }
+  }
+}
+async function loadPersonalSeries(mode = "amount") {
+  const chartContext = document.getElementById("chartContext");
+  const chartTitle = document.getElementById("chartTitle");
+  const chartSubtitle = document.getElementById("chartSubtitle");
+  const topCard = document.getElementById("topDelegatesCard");
+
+  try {
+    const res = await fetchWithAuth(
+      `${API_BASE}/users/ranking_view?personal=true`
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: "Error" }));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const series = Array.isArray(data?.series) ? data.series : [];
+
+    chartContext.textContent = "Personal · 12 months";
+    chartTitle.textContent = `${data.from_month ?? ""} → ${
+      data.to_month ?? ""
+    }`;
+    chartSubtitle.textContent =
+      mode === "amount" ? "Monthly total amount" : "Monthly total orders";
+
+    // hide Top-15 table in personal mode
+    topCard.classList.add("hidden");
+
+    const labels = series.map((s) => s.month);
+    const dataset =
+      mode === "amount"
+        ? series.map((s) => Number(s.amount ?? 0))
+        : series.map((s) => Number(s.orders ?? 0));
+
+    const ctx = document.getElementById("delegatesChart").getContext("2d");
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: mode === "amount" ? "Amount per Month" : "Orders per Month",
+            data: dataset,
+            borderColor: "#0b2a59",
+            backgroundColor: "rgba(0,123,255,0.4)",
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  } catch (err) {
+    console.error("Error fetching personal series:", err);
+  }
+}
 
 /* -------------------- helpers -------------------- */
 function authHeaders() {
@@ -467,83 +590,94 @@ function openMapPopup(payload) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  document
-    .getElementById("closeMapBtn")
-    ?.addEventListener("click", closeMapPopup);
-});
-
 async function loadRankingData(mode = "amount") {
+  const chartContext = document.getElementById("chartContext");
+  const chartTitle = document.getElementById("chartTitle");
+  const chartSubtitle = document.getElementById("chartSubtitle");
+  const topCard = document.getElementById("topDelegatesCard");
+  const thThisMonth = document.getElementById("thThisMonth");
+
   try {
-    const url =
-      mode === "amount"
-        ? `${API_BASE}/users/ranking?total_amount=true`
-        : `${API_BASE}/users/ranking?total_number=true`;
-    const res = await fetch(url, {
-      headers: { "Content-Type": "application/json", ...authHeaders() },
-    });
+    await ensureRankingEndpoint(mode);
+    const url = rankingUrlFor(mode);
+
+    const res = await fetchWithAuth(url);
     if (!res.ok) {
       const err = await res.json().catch(() => ({ message: "Error" }));
       throw new Error(err.message || `HTTP ${res.status}`);
     }
     const data = await res.json();
-    const users = data.ranking || [];
+    const users = Array.isArray(data?.ranking) ? data.ranking : [];
+
+    const isAdmin = rankingEndpointType === "admin";
+    chartContext.textContent = isAdmin
+      ? "Admin · Team Ranking"
+      : "My Team · Ranking";
+    chartTitle.textContent = "Top 15";
+    chartSubtitle.textContent =
+      mode === "amount"
+        ? "By total amount (all-time). Includes this month when available."
+        : "By total orders (all-time). Includes this month when available.";
+
+    topCard.classList.remove("hidden");
+    thThisMonth.classList.remove("hidden");
+
+    // table
     const tbody = document.getElementById("delegatesTable");
-    if (tbody) {
-      tbody.innerHTML = "";
-      users.forEach((u) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u.name}</td><td>${
-          u.total_orders_amount ?? "-"
-        }</td><td>${u.total_orders_all ?? "-"}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
+    tbody.innerHTML = "";
+    users.forEach((u) => {
+      const thisMonthVal =
+        (mode === "amount"
+          ? u.total_orders_amount_this_month
+          : u.total_orders_this_month) ?? "-";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${u.name}</td>
+        <td>${u.total_orders_amount ?? "-"}</td>
+        <td>${u.total_orders_all ?? "-"}</td>
+        <td>${thisMonthVal}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // chart (bar only)
     const labels = users.map((u) => u.name);
     const dataset =
       mode === "amount"
-        ? users.map((u) => u.total_orders_amount)
-        : users.map((u) => u.total_orders_all);
+        ? users.map((u) => Number(u.total_orders_amount ?? 0))
+        : users.map((u) => Number(u.total_orders_all ?? 0));
 
-    const canvas = document.getElementById("delegatesChart");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-
-    if (!chart) {
-      chart = new Chart(ctx, {
-        type: currentType,
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Sales",
-              data: dataset,
-              borderColor: "#0b2a59",
-              backgroundColor:
-                currentType === "bar"
-                  ? "rgba(0,123,255,0.4)"
-                  : "rgba(0,123,255,0.1)",
-              borderWidth: 2,
-              tension: 0.4,
-              fill: currentType === "line",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-        },
-      });
-    } else {
-      chart.data.labels = labels;
-      chart.data.datasets[0].data = dataset;
-      chart.update();
-    }
+    const ctx = document.getElementById("delegatesChart").getContext("2d");
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label:
+              mode === "amount"
+                ? "Total Amount (All-time)"
+                : "Total Orders (All-time)",
+            data: dataset,
+            borderColor: "#0b2a59",
+            backgroundColor: "rgba(0,123,255,0.4)",
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
   } catch (err) {
     console.error("Error fetching ranking data:", err);
   }
 }
+
 function changeChartType(type) {
   currentType = type;
   if (chart) {
@@ -558,9 +692,12 @@ window.changeDataset = (val) =>
   loadRankingData(val === "sales" ? "amount" : "orders");
 
 document.addEventListener("DOMContentLoaded", async () => {
+  document
+    .getElementById("closeMapBtn")
+    ?.addEventListener("click", closeMapPopup);
+
   wireAutocompleteFields();
   loadVisits();
-  await loadRankingData("amount");
 
   const applyBtn = document.getElementById("applyFiltersBtn");
   const clearBtn = document.getElementById("clearFiltersBtn");
@@ -598,10 +735,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadVisits();
   });
 
-  document
-    .getElementById("closeMapBtn")
-    ?.addEventListener("click", closeMapPopup);
-
+  // --- theme wiring (unchanged) ---
   const savedTheme = localStorage.getItem("theme");
   if (savedTheme === "dark") applyTheme("dark");
   window.addEventListener("message", (event) => {
@@ -611,14 +745,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  document.getElementById("dataType")?.addEventListener("change", (e) => {
-    const v = e.target.value;
-    loadRankingData(v === "sales" ? "amount" : "orders");
+  // --- ranking & chart wiring (UPDATED) ---
+  // detect whether admin endpoint is available
+  try {
+    await ensureRankingEndpoint("amount");
+  } catch {}
+  const isAdmin = rankingEndpointType === "admin";
+
+  const personalWrap = document.getElementById("personalWrap"); // label wrapper
+  const personalToggle = document.getElementById("personalToggle"); // checkbox
+  const dataTypeSelect = document.getElementById("dataType"); // Sales/Orders
+
+  // Show Personal toggle only for non-admins
+  if (!isAdmin) personalWrap?.classList.remove("hidden");
+  else personalWrap?.classList.add("hidden");
+
+  const initialMode = "amount";
+  if (isAdmin) {
+    await loadRankingData(initialMode);
+  } else {
+    if (personalToggle) personalToggle.checked = false;
+    await loadRankingData(initialMode);
+  }
+
+  dataTypeSelect?.addEventListener("change", async (e) => {
+    const mode = e.target.value === "sales" ? "amount" : "orders";
+    const personalOn = !isAdmin && personalToggle?.checked;
+    if (personalOn) {
+      await loadPersonalSeries(mode);
+    } else {
+      await loadRankingData(mode);
+    }
   });
-  document
-    .getElementById("chartLine")
-    ?.addEventListener("click", () => changeChartType("line"));
-  document
-    .getElementById("chartBar")
-    ?.addEventListener("click", () => changeChartType("bar"));
+
+  personalToggle?.addEventListener("change", async () => {
+    const mode = dataTypeSelect?.value === "sales" ? "amount" : "orders";
+    if (personalToggle.checked) {
+      await loadPersonalSeries(mode);
+    } else {
+      await loadRankingData(mode);
+    }
+  });
 });

@@ -28,7 +28,7 @@ let allUsers = [];
 
 async function loadUsers(token) {
   try {
-    const res = await fetch("http://localhost:5000/users", {
+    const res = await fetch("https://order-app.gemegypt.net/api/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -64,7 +64,7 @@ async function deleteUser(userId) {
   const token = localStorage.getItem("access_token");
 
   try {
-    const res = await fetch(`http://localhost:5000/users/delete/${userId}`, {
+    const res = await fetch(`https://order-app.gemegypt.net/api/users/delete/${userId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -120,7 +120,7 @@ document
 
     // First: update info
     const infoRes = await fetch(
-      `http://localhost:5000/users/edit_info/${userId}`,
+      `https://order-app.gemegypt.net/api/users/edit_info/${userId}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -136,7 +136,7 @@ document
 
     // Second: update role
     const roleRes = await fetch(
-      `http://localhost:5000/users/edit_role/${userId}`,
+      `https://order-app.gemegypt.net/api/users/edit_role/${userId}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -148,7 +148,7 @@ document
     );
 
     // 🔄 Third: update assigned Manager
-    await fetch(`http://localhost:5000/users/change_manager/${userId}`, {
+    await fetch(`https://order-app.gemegypt.net/api/users/change_manager/${userId}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -175,7 +175,7 @@ document
     const newPassword = document.getElementById("new-password").value;
 
     const res = await fetch(
-      `http://localhost:5000/users/change_password/${userId}`,
+      `https://order-app.gemegypt.net/api/users/change_password/${userId}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -192,7 +192,7 @@ async function toggleUserStatus(userId, newStatus) {
   const token = localStorage.getItem("access_token");
   try {
     const res = await fetch(
-      `http://localhost:5000/users/set_active/${userId}/${newStatus}`,
+      `https://order-app.gemegypt.net/api/users/set_active/${userId}/${newStatus}`,
       {
         method: "POST",
         headers: {
