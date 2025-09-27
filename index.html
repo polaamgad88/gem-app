@@ -321,7 +321,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const navLinks = document.querySelectorAll(".nav-links a");
-
       navLinks.forEach((link) => {
         link.addEventListener("click", () => {
           navLinks.forEach((l) => l.classList.remove("active"));
@@ -336,7 +335,9 @@
   <div class="sidebar">
     <img src="./assets/GEM Icon.jpg" alt="gem logo" class="logo" />
     <h2>Welcome, <span id="username"></span>👋</h2>
+    <span style="align-self: center;color: gray;">version 3.0.0</span>
     <hr style="margin: 10px 0" />
+
 
     <div class="nav-links">
       <a href="./dashboard.html">
@@ -360,9 +361,7 @@
         <span id="page-title">Company Dashboard</span>
       </h1>
       <div class="topbar-actions">
-
         <button id="theme-toggle" class="btn-top btn-theme">🌙 Dark</button>
-
         <a href="#" id="logout-btn" class="btn-logout">
           <i class="fa-solid fa-right-from-bracket"></i> Logout
         </a>
