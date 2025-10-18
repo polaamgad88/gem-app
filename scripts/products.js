@@ -128,7 +128,7 @@ async function fetchAndRenderProducts(token) {
       <td>${product.category}</td>
       <td>${Utils.Format.currency(product.price)}</td>
       <td>
-        <span class="${
+        <span style="color:black; font-weight: bold; font-size: 16px;" class="${
           product.availability == "Available"
             ? "available-badge"
             : "not-available-badge"
@@ -137,7 +137,7 @@ async function fetchAndRenderProducts(token) {
             product.availability === "Available"
               ? "🟢"
               : product.availability === "Limited"
-              ? "🟡"
+              ? "🟡" + (product.stock_quantity ? product.stock_quantity : "")
               : "🔴"
           }
           
@@ -888,4 +888,3 @@ function renderPagination(current, totalPages) {
   };
   container.appendChild(nextBtn);
 }
-

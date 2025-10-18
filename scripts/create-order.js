@@ -736,7 +736,13 @@ function addOrderRow(container, brands, products) {
 
       matches.forEach((product) => {
         const li = document.createElement("li");
-        li.textContent = `${product.product_name} (${product.bar_code})`;
+        li.innerHTML = `${product.product_name} (${product.bar_code}) ${
+          product.stock_quantity
+            ? " <span style='color: red;'>- Stock: " +
+              product.stock_quantity +
+              "</span>"
+            : ""
+        }`;
         li.dataset.productId = product.product_id;
         barcodeSuggestions.appendChild(li);
       });
@@ -764,7 +770,11 @@ function addOrderRow(container, brands, products) {
 
     filtered.forEach((p) => {
       const li = document.createElement("li");
-      li.textContent = `${p.product_name} (${p.bar_code})`;
+      li.innerHTML = `${p.product_name} (${p.bar_code})${
+        p.stock_quantity
+          ? "<span style='color: red;'>- Stock: " + p.stock_quantity + "</span>"
+          : ""
+      }`;
       li.dataset.productId = p.product_id;
       nameSuggestions.appendChild(li);
     });
@@ -787,7 +797,11 @@ function addOrderRow(container, brands, products) {
 
     filtered.forEach((p) => {
       const li = document.createElement("li");
-      li.textContent = `${p.product_name} (${p.bar_code})`;
+      li.innerHTML = `${p.product_name} (${p.bar_code}) ${
+        p.stock_quantity
+          ? "<span style='color: red;'>- Stock: " + p.stock_quantity + "</span>"
+          : ""
+      }`;
       li.dataset.productId = p.product_id;
       nameSuggestions.appendChild(li);
     });
@@ -1287,6 +1301,7 @@ document
     const file = event.target.files[0];
     const customerId = document.getElementById("customer-select").value;
     const addressId = document.getElementById("address-select").value;
+    const note = document.getElementById("order-note").value;
 
     if (!file) {
       alert("❌ Please choose an Excel file first.");
@@ -1303,6 +1318,7 @@ document
     formData.append("file", file);
     formData.append("customer_id", customerId);
     formData.append("address_id", addressId);
+    formData.append("note", note);
 
     fetch("https://order-app.gemegypt.net/api/orders/upload-sheet", {
       method: "POST",

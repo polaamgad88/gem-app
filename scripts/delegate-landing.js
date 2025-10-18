@@ -27,34 +27,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 // Helper function to set up admin buttons
 function setupAdminButtons(admin, role) {
   const username = localStorage.getItem("username");
-  if (username == "Monica.moshref") {
-    if (admin == 1) {
-      const productsBtn = document.querySelector(".manage-products");
-      if (productsBtn) productsBtn.style.display = "block";
-    }
-    const addOrderBtn = document.querySelector(".add-order");
-    if (addOrderBtn) addOrderBtn.style.display = "none";
-    const manageCustomersBtn = document.querySelector(".manage-customers");
-    if (manageCustomersBtn) manageCustomersBtn.style.display = "none";
-    const viewOrderBtn = document.querySelector(".view-orders");
-    if (viewOrderBtn) viewOrderBtn.style.display = "none";
-  } else {
-    if (admin == 1 || role !== "Delegate") {
-      const manageUserBtn = document.querySelector(".manage-user");
-      if (manageUserBtn) manageUserBtn.style.display = "block";
-    }
-    if (admin == 1 || role !== "Delegate") {
-      const manageUserBtn = document.querySelector(".manage-user");
-      if (manageUserBtn) manageUserBtn.style.display = "block";
-    }
-    if (admin == 1) {
-      const productsBtn = document.querySelector(".manage-products");
-      if (productsBtn) productsBtn.style.display = "block";
-    }
-    if (admin == 1) {
-      const productsBtn = document.getElementById("products_page");
-      if (productsBtn) productsBtn.style.display = "block";
-    }
+  if (admin == 1 || role !== "Delegate") {
+    const manageUserBtn = document.querySelector(".manage-user");
+    if (manageUserBtn) manageUserBtn.style.display = "block";
+  }
+  if (admin == 1 || role !== "Delegate") {
+    const manageUserBtn = document.querySelector(".manage-user");
+    if (manageUserBtn) manageUserBtn.style.display = "block";
+  }
+  if (admin == 1) {
+    const productsBtn = document.querySelector(".manage-products");
+    if (productsBtn) productsBtn.style.display = "block";
+  }
+  if (admin == 1) {
+    const productsBtn = document.getElementById("products_page");
+    if (productsBtn) productsBtn.style.display = "block";
   }
 }
 
