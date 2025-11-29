@@ -339,7 +339,6 @@
         position: fixed;
         inset: 0;
         display: none;
-        /* hidden by default */
         align-items: center;
         justify-content: center;
         background: rgba(0, 0, 0, .45);
@@ -354,7 +353,6 @@
         position: relative;
         width: min(1000px, 92vw);
         height: min(80vh, 720px);
-        /* gives #map a real height */
         background: #fff;
         border-radius: 12px;
         overflow: hidden;
@@ -371,4 +369,217 @@
         line-height: 1;
         cursor: pointer;
         z-index: 2;
+    }
+.viewBtn {
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: #28a745; 
+    color: white;
+    border: 1px solid #28a745;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.viewBtn:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+.pagination {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    margin-top: 25px; 
+    padding: 10px 0;
+}
+
+#pageInfo {
+    font-size: 16px;
+    font-weight: 600;
+    color: #343a40; 
+    margin: 0 15px; 
+    padding: 8px 12px; 
+    background-color: #e9ecef; 
+    border-radius: 4px;
+}
+
+.pagination button {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    background-color: #6c757d; 
+    color: white;
+    border: 1px solid #6c757d;
+}
+
+.pagination button:hover {
+    background-color: #5a6268; 
+    border-color: #545b62;
+}
+
+.pagination button:disabled {
+    background-color: #e9ecef; 
+    color: #adb5bd; 
+    border: 1px solid #e9ecef;
+    cursor: not-allowed; 
+    opacity: 0.7;
+}
+.map-notes-section.top {
+    padding-bottom: 15px; 
+    padding-top: 0; 
+}
+
+.note-input {
+    width: 100%; 
+    padding: 10px;
+    margin-bottom: 5px; 
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box; 
+}
+
+.note-helper-text {
+    font-size: 12px;
+    color: #6c757d; 
+    margin: 0; 
+}
+.map-notes-section.top {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px; 
+        padding: 10px 15px; 
+    margin-bottom: 15px; 
+    margin-top: 5px; 
+}
+
+.note-helper-text {
+    font-size: 14px; 
+    color: #6c757d; 
+    font-weight: 500;
+    margin: 0; 
+    padding: 0;
+    text-align: inherit; 
+}
+.filters {
+    display: flex;            
+    flex-wrap: wrap;          
+    gap: 40px;              
+    align-items: flex-end;    
+    
+    padding: 15px 20px;      
+    background-color: #ffffff; 
+    border-radius: 12px;       
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+    margin-bottom: 25px;      
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column; 
+    min-width: 200px;      
+}
+
+.filters label {
+    font-size: 14px;
+    font-weight: 600;       
+    color: #495057;         
+    margin-bottom: 5px;      
+}
+
+.filters select,
+.filters input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 16px;
+    color: #343a40;
+    border: 1px solid #ced4da;
+    border-radius: 8px; 
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #ffffff; 
+}
+
+.filters select:focus,
+.filters input[type="date"]:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.2); 
+}
+
+.filters button {
+    align-self: flex-end; 
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#applyFiltersBtn {
+    background-color: #28a745;
+    color: white;
+    border: 1px solid #28a745;
+}
+#applyFiltersBtn:hover {
+    background-color: #1e7e34;
+}
+  .export-btn {
+      padding: 2px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(3, 67, 2, 0.4);
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .export-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: #28a745;
+      /* green icon by default */
+      transition: fill 0.25s ease;
+      padding: 5px;
+    }
+
+    .export-btn:hover {
+      background-color: #28a745;
+      box-shadow: 0 4px 12px rgba(3, 67, 2, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .export-btn:hover svg {
+      fill: white;
+      /* white icon on hover */
+    }
+
+    @media (max-width: 768px) {
+      .export-wrapper {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .export-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* Mobile view stacks filters */
+    @media (max-width: 768px) {
+      .filters {
+        flex-direction: column;
+      }
+
+      .filter-group,
+      .export-btn {
+        flex: 1 1 100%;
+      }
     }
