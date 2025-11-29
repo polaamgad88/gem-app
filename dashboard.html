@@ -29,67 +29,69 @@
     .hidden {
       display: none !important;
     }
-.filters {
-    display: flex; 
-    gap: 15px; 
-    align-items: center; 
-    padding: 20px;
-    background-color: #f8f9fa; 
-    border-radius: 8px; 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-    margin-bottom: 20px; 
-}
 
-.filters input[type="text"] {
-    flex-grow: 1; 
-    padding: 10px 12px;
-    border: 1px solid #ced4da; 
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    min-width: 180px; 
-}
+    .filters {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
 
-.filters input[type="text"]:focus {
-    border-color: #092855; 
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
+    .filters input[type="text"] {
+      flex-grow: 1;
+      padding: 10px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      min-width: 180px;
+    }
 
-.filters button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 16px;
-    transition: background-color 0.3s, opacity 0.3s;
-    white-space: nowrap; 
-}
+    .filters input[type="text"]:focus {
+      border-color: #092855;
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
 
-#applyFiltersBtn {
-    background-color: #092855; 
-    color: white;
-}
+    .filters button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      transition: background-color 0.3s, opacity 0.3s;
+      white-space: nowrap;
+    }
 
-#applyFiltersBtn:hover {
-    background-color: #092855; 
-}
+    #applyFiltersBtn {
+      background-color: #092855;
+      color: white;
+    }
 
-#clearFiltersBtn.secondary {
-    background-color: #6c757d; 
-    color: white;
-}
+    #applyFiltersBtn:hover {
+      background-color: #092855;
+    }
 
-#clearFiltersBtn.secondary:hover {
-    background-color: #5a6268; 
-}
+    #clearFiltersBtn.secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    #clearFiltersBtn.secondary:hover {
+      background-color: #5a6268;
+    }
   </style>
 </head>
 
 <body>
   <div class="dashboard">
     <div class="box" style="grid-column: span 4">
+      <!-- Row 1: user + customer filters -->
       <div class="filters">
         <input id="userFilter" type="text" placeholder="User name or ID" list="usersList" />
         <datalist id="usersList"></datalist>
@@ -100,42 +102,54 @@
         <button id="applyFiltersBtn">Apply</button>
         <button id="clearFiltersBtn" class="secondary">Clear</button>
       </div>
-        <div class="filters" style="margin: 1px">
-          <div class="filter-group">
-      <label for="userFilter">Filter by Status:</label>
-      <select id="userFilter" style="border-radius: 8px">
-        <option value="all">All Users</option>
-      </select>
-    </div>
 
-    <div class="filter-group">
-      <label for="customerFilter">Filter by Reason:</label>
-      <select id="customerFilter" style="border-radius: 8px">
-        <option value="all">All Customers</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label for="dateStart">Order Date From:</label>
-      <input type="date" id="dateStart" style="border-radius: 8px" />
-    </div>
-
-    <div class="filter-group">
-      <label for="dateEnd">Order Date To:</label>
-      <input type="date" id="dateEnd" style="border-radius: 8px" />
-    </div>
+      <!-- Row 2: status + reason + date range -->
+      <div class="filters" style="margin: 1px">
+        <div class="filter-group">
+          <label for="statusFilter">Filter by Status:</label>
+          <select id="statusFilter" style="border-radius: 8px">
+            <option value="">All Status</option>
+            <option value="green">Green (&lt; 200 m)</option>
+            <option value="yellow">Yellow (200–300 m)</option>
+            <option value="red">Red (&gt; 300 m)</option>
+          </select>
         </div>
-    <div class="export-wrapper" style="display: flex; justify-content: end; border-radius: 8px">
-    <!-- <label style="opacity: 0; color: #28a745">Export</label> -->
-    <button id="exportBtn" class="export-btn" title="Export to Excel" style="background-color: #0b2a59;">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-        <path fill="#fff" d="M369.9 97.98L286 14.1C277.5 5.6 266.2 0 254.4 0H48C21.49 0 0 21.49 0 48v416c0 
+
+        <div class="filter-group">
+          <label for="reasonFilter">Filter by Reason:</label>
+          <select id="reasonFilter" style="border-radius: 8px">
+            <option value="">All Reasons</option>
+            <option value="making_order">Making Order</option>
+            <option value="delivering_order">Delivering Order</option>
+            <option value="bill_collection">Bill Collection</option>
+            <option value="receiving_returns">Receiving Returns</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="dateStart">Visit Date From:</label>
+          <input type="date" id="dateStart" style="border-radius: 8px" />
+        </div>
+
+        <div class="filter-group">
+          <label for="dateEnd">Visit Date To:</label>
+          <input type="date" id="dateEnd" style="border-radius: 8px" />
+        </div>
+      </div>
+
+      <!-- Export button -->
+      <div class="export-wrapper" style="display: flex; justify-content: end; border-radius: 8px">
+        <button id="exportBtn" class="export-btn" title="Export to Excel" style="background-color: #0b2a59;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <path fill="#fff" d="M369.9 97.98L286 14.1C277.5 5.6 266.2 0 254.4 0H48C21.49 0 0 21.49 0 48v416c0 
           26.5 21.49 48 48 48h288c26.5 0 48-21.5 48-48V131.6c0-12.7-5.1-24.9-14.1-33.62zM256 51.9 
           332.1 128H256V51.9zM231.1 352l-30.5-45.6-30.3 45.6H132.2l47.3-72-45.2-68h38.3l28.7 
           42.4 28.5-42.4h38l-45.2 68 47.4 72H231.1z" />
-      </svg>
-      <p style="color: #fff">DOWNLOAD</p>
-    </button>
-  </div>
+          </svg>
+          <p style="color: #fff">DOWNLOAD</p>
+        </button>
+      </div>
+
       <table class="visits-table">
         <thead>
           <tr>
@@ -206,18 +220,16 @@
   </div>
 
   <!-- Map Modal -->
- <div id="mapModal" class="modal">
+  <div id="mapModal" class="modal">
     <div class="modal-content">
-        <button id="closeMapBtn" class="close-btn">×</button>
-      
-        <div class="map-notes-section top">
-          
-            <p class="note-helper-text">Note...</p>
-        </div>
-        <div id="map"></div>
-      
+      <button id="closeMapBtn" class="close-btn">×</button>
+
+      <div class="map-notes-section top">
+        <p class="note-helper-text">Note...</p>
+      </div>
+      <div id="map"></div>
     </div>
-</div>
+  </div>
 
   <script src="./scripts/dashboard.js"></script>
 </body>
