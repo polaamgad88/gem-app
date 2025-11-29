@@ -69,6 +69,7 @@ async function ensureRankingEndpoint(mode = "amount") {
     }
   }
 }
+
 async function loadPersonalSeries(mode = "amount") {
   const chartContext = document.getElementById("chartContext");
   const chartTitle = document.getElementById("chartTitle");
@@ -386,9 +387,22 @@ function wireAutocompleteFields() {
   });
 }
 
+/**
+ * Build query string for /visits (list endpoint).
+ * Uses:
+ *   - userFilter (user_id)
+ *   - customerFilter (customer_id)
+ *   - statusFilter (status)
+ *   - reasonFilter (reason)
+ *   - dateStart/dateEnd (start_date / end_date)
+ */
 function buildQuery() {
   const userEl = document.getElementById("userFilter");
   const custEl = document.getElementById("customerFilter");
+  const statusEl = document.getElementById("statusFilter");
+  const reasonEl = document.getElementById("reasonFilter");
+  const dateStartEl = document.getElementById("dateStart");
+  const dateEndEl = document.getElementById("dateEnd");
 
   const userId = valueLooksLikeIdNumOrStoredId(userEl);
   const customerId = valueLooksLikeIdNumOrStoredId(custEl);
@@ -396,6 +410,22 @@ function buildQuery() {
   const params = new URLSearchParams();
   if (userId) params.set("user_id", userId);
   if (customerId) params.set("customer_id", customerId);
+
+  // status (green / yellow / red)
+  const statusVal = statusEl?.value || "";
+  if (statusVal) params.set("status", statusVal);
+
+  // reason (single allowed)
+  const reasonVal = reasonEl?.value || "";
+  if (reasonVal) params.set("reason", reasonVal);
+
+  // date range (YYYY-MM-DD)
+  const startVal = dateStartEl?.value || "";
+  const endVal = dateEndEl?.value || "";
+  if (startVal) params.set("start_date", startVal);
+  if (endVal) params.set("end_date", endVal);
+
+  // paging
   params.set("page", currentPage);
   params.set("limit", currentLimit);
   return params.toString();
@@ -411,6 +441,7 @@ async function fetchVisits() {
   }
   return res.json();
 }
+
 function renderVisits(data) {
   const tbody = document.getElementById("visitsTbody");
   tbody.innerHTML = "";
@@ -450,6 +481,7 @@ function renderVisits(data) {
   }
   renderPager(data);
 }
+
 function renderPager({ page, limit, total, count }) {
   const pi = document.getElementById("pageInfo");
   const totalPages = Math.max(
@@ -460,6 +492,7 @@ function renderPager({ page, limit, total, count }) {
   document.getElementById("prevPageBtn").disabled = page <= 1;
   document.getElementById("nextPageBtn").disabled = page >= totalPages;
 }
+
 async function loadVisits() {
   const tbody = document.getElementById("visitsTbody");
   tbody.innerHTML =
@@ -691,6 +724,110 @@ window.showChart = changeChartType;
 window.changeDataset = (val) =>
   loadRankingData(val === "sales" ? "amount" : "orders");
 
+/**
+ * Download Excel report using same filters:
+ *  - userFilter -> user_id (REQUIRED)
+ *  - statusFilter -> status
+ *  - reasonFilter -> reason
+ *  - dateStart/dateEnd -> start_date/end_date
+ *
+ *  Note: customerFilter is NOT used by backend report (report is per user).
+ */
+async function downloadVisitsReport() {
+  const userEl = document.getElementById("userFilter");
+  const statusEl = document.getElementById("statusFilter");
+  const reasonEl = document.getElementById("reasonFilter");
+  const dateStartEl = document.getElementById("dateStart");
+  const dateEndEl = document.getElementById("dateEnd");
+
+  // user_id is required for the report endpoint
+  const userId = valueLooksLikeIdNumOrStoredId(userEl);
+  if (!userId) {
+    alert("Please select a user to generate the visits report.");
+    return;
+  }
+
+  // Build query params (same filters as list)
+  const params = new URLSearchParams();
+  params.set("user_id", userId);
+
+  const statusVal = statusEl?.value || "";
+  if (statusVal) params.set("status", statusVal);
+
+  const reasonVal = reasonEl?.value || "";
+  if (reasonVal) params.set("reason", reasonVal);
+
+  const startVal = dateStartEl?.value || "";
+  const endVal = dateEndEl?.value || "";
+  if (startVal) params.set("start_date", startVal);
+  if (endVal) params.set("end_date", endVal);
+
+  const url = `${API_BASE}/visits/report/excel?${params.toString()}`;
+
+  try {
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try {
+        const errJson = await res.json();
+        if (errJson?.message) msg = errJson.message;
+      } catch {
+        // ignore JSON parse error, keep generic message
+      }
+      throw new Error(msg);
+    }
+
+    const blob = await res.blob();
+
+    // --- Try to use filename from backend (Content-Disposition) ---
+    // NOTE: For this to work, backend must set:
+    //   Access-Control-Expose-Headers: Content-Disposition
+    // or serve frontend from same origin as API.
+    let filename = "visits_report.xlsx"; // default fallback
+
+    const cd =
+      res.headers.get("Content-Disposition") ||
+      res.headers.get("content-disposition");
+
+    console.log("Content-Disposition header:", cd); // will be null if not exposed
+
+    if (cd) {
+      // 1) RFC 5987 style: filename*=UTF-8''...
+      let match = cd.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+      if (match && match[1]) {
+        try {
+          filename = decodeURIComponent(match[1]);
+        } catch {
+          filename = match[1];
+        }
+      } else {
+        // 2) Simple: filename="name.xlsx" or filename=name.xlsx
+        match = cd.match(/filename[^;=\n]*=\s*(?:\"([^\"]*)\"|([^;\n]*))/i);
+        if (match) {
+          filename = (match[1] || match[2] || filename).replace(/['"]/g, "");
+        }
+      }
+    } else {
+      // If header is not visible, build a useful fallback name on the frontend
+      const parts = [`user_${userId}`];
+      if (startVal) parts.push(`from_${startVal}`);
+      if (endVal) parts.push(`to_${endVal}`);
+      filename = `visits_report_${parts.join("_")}.xlsx`;
+    }
+
+    // Trigger download
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (err) {
+    console.error("Failed to download visits report:", err);
+    alert(err.message || "Failed to download visits report");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   document
     .getElementById("closeMapBtn")
@@ -703,6 +840,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const clearBtn = document.getElementById("clearFiltersBtn");
   const prevBtn = document.getElementById("prevPageBtn");
   const nextBtn = document.getElementById("nextPageBtn");
+  const exportBtn = document.getElementById("exportBtn");
 
   applyBtn?.addEventListener("click", () => {
     currentPage = 1;
@@ -712,6 +850,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   clearBtn?.addEventListener("click", () => {
     const uf = document.getElementById("userFilter");
     const cf = document.getElementById("customerFilter");
+    const sf = document.getElementById("statusFilter");
+    const rf = document.getElementById("reasonFilter");
+    const ds = document.getElementById("dateStart");
+    const de = document.getElementById("dateEnd");
+
     if (uf) {
       uf.value = "";
       uf.dataset.id = "";
@@ -720,6 +863,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       cf.value = "";
       cf.dataset.id = "";
     }
+    if (sf) sf.value = "";
+    if (rf) rf.value = "";
+    if (ds) ds.value = "";
+    if (de) de.value = "";
+
     currentPage = 1;
     loadVisits();
   });
@@ -735,7 +883,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadVisits();
   });
 
-  // --- theme wiring (unchanged) ---
+  exportBtn?.addEventListener("click", downloadVisitsReport);
+
   const savedTheme = localStorage.getItem("theme");
   if (savedTheme === "dark") applyTheme("dark");
   window.addEventListener("message", (event) => {
@@ -745,8 +894,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // --- ranking & chart wiring (UPDATED) ---
-  // detect whether admin endpoint is available
   try {
     await ensureRankingEndpoint("amount");
   } catch {}
