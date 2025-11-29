@@ -544,7 +544,6 @@
       width: 22px;
       height: 22px;
       fill: #28a745;
-      /* green icon by default */
       transition: fill 0.25s ease;
       padding: 5px;
     }
@@ -557,7 +556,6 @@
 
     .export-btn:hover svg {
       fill: white;
-      /* white icon on hover */
     }
 
     @media (max-width: 768px) {
@@ -572,7 +570,6 @@
       }
     }
 
-    /* Mobile view stacks filters */
     @media (max-width: 768px) {
       .filters {
         flex-direction: column;
@@ -583,3 +580,48 @@
         flex: 1 1 100%;
       }
     }
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+        gap: 15px; 
+        padding: 10px; 
+    }
+
+    .filters input[type="text"],
+    .filters select,
+    .filters input[type="date"] {
+        width: 100%;
+        min-width: unset; 
+        box-sizing: border-box;
+    }
+    .filters button {
+        width: 100%; 
+        margin-top: 5px; 
+    }
+    
+    .filter-group {
+        width: 100%; 
+        min-width: unset;
+        margin-bottom: 10px;
+    }
+    
+    .export-wrapper {
+        justify-content: center !important; 
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .export-btn {
+        width: 80%; 
+        padding: 10px;
+    }
+    .visits-table {
+        width: 100%;
+        display: block;
+        overflow-x: auto; 
+        white-space: nowrap; 
+    }
+    .pagination {
+        margin-top: 15px;
+    }
+}
