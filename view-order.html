@@ -219,6 +219,73 @@
         height: 90px;
       }
     }
+.items-list table tfoot {
+    font-weight: bold;
+    border-top: 2px solid #ccc; 
+}
+
+.items-list .summary-row {
+    background-color: #f7f7f7; 
+}
+
+.items-list .summary-label {
+    text-align: right; 
+    padding-right: 15px;
+    color: #333;
+}
+
+.items-list .summary-value {
+    color: #007bff; 
+}
+
+
+@media (max-width: 768px) {
+        .table-responsive {
+        width: 100%;
+        overflow-x: auto; 
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-responsive table {
+        min-width: 600px; 
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table-responsive table th, 
+    .table-responsive table td {
+        white-space: nowrap; 
+        font-size: 13px;
+    }
+
+    .table-responsive {
+        display: none; 
+    }
+    .card-view {
+        display: block; 
+    }
+}
+
+@media (min-width: 769px) {
+    .card-view {
+        display: none;
+    }
+    .table-responsive {
+        display: block;
+    }
+}
+.items-list .summary-label {
+    text-align: right; 
+    padding-right: 15px; 
+    color: #333;
+}
+
+.items-list .summary-value {
+    text-align: center; 
+    color: #007bff; 
+    font-weight: bold;
+}
   </style>
   <h2 style="
 text-align: center;
@@ -291,6 +358,7 @@ letter-spacing: 0.5px;
       <table>
         <thead>
           <tr>
+            <th>No.</th>
             <th>Image</th>
             <th>Item Name</th>
             <th>Item Price</th>
@@ -301,6 +369,18 @@ letter-spacing: 0.5px;
         <tbody id="items-table-body">
           <!-- Items will be populated by JavaScript -->
         </tbody>
+    
+
+<tfoot id="items-table-footer">
+    <tr class="summary-row">
+        <td colspan="4" class="summary-label">Total Quantity:</td> 
+        
+        <td id="totalQuantityCount" class="summary-value"></td> 
+        
+        <td class="summary-value"></td> 
+    </tr>
+</tfoot>
+  
       </table>
     </div>
 

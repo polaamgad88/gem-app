@@ -41,99 +41,206 @@ async function fetchOrderDetails(orderId, token) {
   return await res.json();
 }
 
-function populateOrderDetails(order) {
-  document.getElementById("orderId").textContent = `#${order.order_id}`;
-  document.getElementById("order-id").textContent = `#${order.order_id}`;
-  document.getElementById("order-date").textContent = Utils.Format.date(
-    order.order_date
-  );
+// function populateOrderDetails(order) {
+//   document.getElementById("orderId").textContent = `#${order.order_id}`;
+//   document.getElementById("order-id").textContent = `#${order.order_id}`;
+//   document.getElementById("order-date").textContent = Utils.Format.date(
+//     order.order_date
+//   );
 
-  const orderState = document.getElementById("order-state");
-  orderState.textContent = order.status;
-  // orderState.className = `state ${order.status.toLowerCase()}`;
+//   const orderState = document.getElementById("order-state");
+//   orderState.textContent = order.status;
+//   // orderState.className = `state ${order.status.toLowerCase()}`;
 
-  document.getElementById("order-state").textContent = order.status;
-  document.getElementById("Delegate-name").textContent = order.username;
-  document.getElementById("customer-name").textContent = order.customer_name;
-  document.getElementById(
-    "customer-id"
-  ).textContent = `CUST-${order.customer_id}`;
-  document.getElementById("customer-address").textContent = order.address;
-  if (order.note)
-    document.getElementById("customer-note").textContent = order.note;
-  else document.getElementById("customer-note").textContent = "NO NOTES";
+//   document.getElementById("order-state").textContent = order.status;
+//   document.getElementById("Delegate-name").textContent = order.username;
+//   document.getElementById("customer-name").textContent = order.customer_name;
+//   document.getElementById(
+//     "customer-id"
+//   ).textContent = `CUST-${order.customer_id}`;
+//   document.getElementById("customer-address").textContent = order.address;
+//   if (order.note)
+//     document.getElementById("customer-note").textContent = order.note;
+//   else document.getElementById("customer-note").textContent = "NO NOTES";
 
-  const itemsTableBody = document.getElementById("items-table-body");
-  const itemsCardView = document.getElementById("items-card-view");
-  itemsTableBody.innerHTML = "";
-  itemsCardView.innerHTML = "";
+//   const itemsTableBody = document.getElementById("items-table-body");
+//   const itemsCardView = document.getElementById("items-card-view");
+//   itemsTableBody.innerHTML = "";
+//   itemsCardView.innerHTML = "";
 
-  let total = 0;
+//   let total = 0;
+//   let totalQuantity = 0;
 
-  order.items.forEach((item) => {
-    const itemTotal = parseFloat(item.price) * item.quantity;
-    total += itemTotal;
+//   order.items.forEach((item,index) => {
+//     const itemTotal = parseFloat(item.price) * item.quantity;
+//     total += itemTotal;
+//     totalQuantity += parseInt(item.quantity || 0);
+//     const imageUrl = item.image_path
+//       ? `https://order-app.gemegypt.net/api/images/${item.image_path}`
+//       : "";
 
-    const imageUrl = item.image_path
-      ? `https://order-app.gemegypt.net/api/images/${item.image_path}`
-      : "";
+//     const barCodeLine = `<div style="font-size: 0.8em; color: gray;">${
+//       item.bar_code || "-"
+//     }</div>`;
 
-    const barCodeLine = `<div style="font-size: 0.8em; color: gray;">${
-      item.bar_code || "-"
-    }</div>`;
+//     // Table view row
+//     const row = document.createElement("tr");
+//     row.innerHTML = `
+//     <td>${index + 1}</td>
+//       <td>
+//         ${
+//           imageUrl
+//             ? `<img src="${imageUrl}" alt="${item.product_name}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">`
+//             : "No image"
+//         }
+//       </td>
+//       <td>
+//         ${item.product_name}
+//         ${barCodeLine}
+//       </td>
+//       <td>EGP ${parseFloat(item.price).toLocaleString()}</td>
+//       <td>${item.quantity}</td>
+//       <td>EGP ${itemTotal.toLocaleString()}</td>
+//     `;
+//     itemsTableBody.appendChild(row);
 
-    // Table view row
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>
-        ${
-          imageUrl
-            ? `<img src="${imageUrl}" alt="${item.product_name}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">`
-            : "No image"
-        }
-      </td>
-      <td>
-        ${item.product_name}
-        ${barCodeLine}
-      </td>
-      <td>EGP ${parseFloat(item.price).toLocaleString()}</td>
-      <td>${item.quantity}</td>
-      <td>EGP ${itemTotal.toLocaleString()}</td>
-    `;
-    itemsTableBody.appendChild(row);
-
-    // Card view
-    const card = document.createElement("div");
-    card.className = "item-card";
-    card.innerHTML = `
-      <div class="item-card-header">
-        ${
-          imageUrl
-            ? `<img src="${imageUrl}" alt="${item.product_name}">`
-            : "<div style='width:50px;height:50px;background:#eee;display:flex;align-items:center;justify-content:center;border-radius:4px;'>No img</div>"
-        }
-        <div>
-          <h3 style="margin:0">${item.product_name}</h3>
-          ${barCodeLine}
-        </div>
-      </div>
-      <div class="item-card-body">
-        <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
-          item.price
-        ).toLocaleString()}</p>
-        <p><span class="item-card-label">Quantity:</span> ${item.quantity}</p>
-        <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toLocaleString()}</p>
-      </div>
-    `;
-    itemsCardView.appendChild(card);
-  });
-
-  document.getElementById(
-    "total-price"
-  ).textContent = `EGP ${total.toLocaleString()}`;
-}
+//     // Card view
+//     const card = document.createElement("div");
+//     card.className = "item-card";
+//     card.innerHTML = `
+//       <div class="item-card-header">
+    
+//         ${
+//           imageUrl
+//             ? `<img src="${imageUrl}" alt="${item.product_name}">`
+//             : "<div style='width:50px;height:50px;background:#eee;display:flex;align-items:center;justify-content:center;border-radius:4px;'>No img</div>"
+//         }
+//         <div>
+//           <h3 style="margin:0">${item.product_name}</h3>
+//           ${barCodeLine}
+//         </div>
+//       </div>
+//       <div class="item-card-body">
+//         <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
+//           item.price
+//         ).toLocaleString()}</p>
+//         <p><span class="item-card-label">Quantity:</span> ${item.quantity}</p>
+//         <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toLocaleString()}</p>
+//       </div>
+//     `;
+//     itemsCardView.appendChild(card);
+//   });
+// if (totalQuantityElement) {
+//         totalQuantityElement.textContent = totalQuantity.toLocaleString();
+//     }
+//   document.getElementById(
+//     "total-price"
+//   ).textContent = `EGP ${total.toLocaleString()}`;
+// }
 
 // Helper function to set up action buttons
+
+
+function populateOrderDetails(order) {
+    document.getElementById("orderId").textContent = `#${order.order_id}`;
+    document.getElementById("order-id").textContent = `#${order.order_id}`;
+    document.getElementById("order-date").textContent = Utils.Format.date(
+        order.order_date
+    );
+
+    const orderState = document.getElementById("order-state");
+    orderState.textContent = order.status;
+    // orderState.className = `state ${order.status.toLowerCase()}`;
+
+    document.getElementById("order-state").textContent = order.status;
+    document.getElementById("Delegate-name").textContent = order.username;
+    document.getElementById("customer-name").textContent = order.customer_name;
+    document.getElementById(
+        "customer-id"
+    ).textContent = `CUST-${order.customer_id}`;
+    document.getElementById("customer-address").textContent = order.address;
+    if (order.note)
+        document.getElementById("customer-note").textContent = order.note;
+    else document.getElementById("customer-note").textContent = "NO NOTES";
+
+    const itemsTableBody = document.getElementById("items-table-body");
+    const itemsCardView = document.getElementById("items-card-view");
+
+    const totalQuantityElement = document.getElementById("totalQuantityCount"); 
+    
+    itemsTableBody.innerHTML = "";
+    itemsCardView.innerHTML = "";
+
+    let total = 0;
+    let totalQuantity = 0;
+
+    order.items.forEach((item, index) => {
+        const itemTotal = parseFloat(item.price) * item.quantity;
+        total += itemTotal;
+        totalQuantity += parseInt(item.quantity || 0); 
+
+        const imageUrl = item.image_path
+            ? `https://order-app.gemegypt.net/api/images/${item.image_path}`
+            : "";
+
+        const barCodeLine = `<div style="font-size: 0.8em; color: gray;">${
+            item.bar_code || "-"
+        }</div>`;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td>${index + 1}</td>
+            <td>
+                ${
+                    imageUrl
+                        ? `<img src="${imageUrl}" alt="${item.product_name}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">`
+                        : "No image"
+                }
+            </td>
+            <td>
+                ${item.product_name}
+                ${barCodeLine}
+            </td>
+            <td>EGP ${parseFloat(item.price).toLocaleString()}</td>
+            <td>${item.quantity}</td>
+            <td>EGP ${itemTotal.toLocaleString()}</td>
+        `;
+        itemsTableBody.appendChild(row);
+
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.innerHTML = `
+            <div class="item-card-header">
+            
+                ${
+                    imageUrl
+                        ? `<img src="${imageUrl}" alt="${item.product_name}">`
+                        : "<div style='width:50px;height:50px;background:#eee;display:flex;align-items:center;justify-content:center;border-radius:4px;'>No img</div>"
+                }
+                <div>
+                    <h3 style="margin:0">${item.product_name}</h3>
+                    ${barCodeLine}
+                </div>
+            </div>
+            <div class="item-card-body">
+                <p><span class="item-card-label">Price:</span> EGP ${parseFloat(
+                    item.price
+                ).toLocaleString()}</p>
+                <p><span class="item-card-label">Quantity:</span> ${item.quantity}</p>
+                <p><span class="item-card-label">Total:</span> EGP ${itemTotal.toLocaleString()}</p>
+            </div>
+        `;
+        itemsCardView.appendChild(card);
+    });
+
+    if (totalQuantityElement) {
+        totalQuantityElement.textContent = totalQuantity.toLocaleString();
+    }
+    
+    document.getElementById(
+        "total-price"
+    ).textContent = `EGP ${total.toLocaleString()}`;
+}
 function setupActionButtons(orderId, token) {
   document.getElementById("edit-order").addEventListener("click", () => {
     window.location.href = "edit-order.html?order_id=" + orderId;
@@ -211,3 +318,4 @@ function setupActionButtons(orderId, token) {
     });
   }
 }
+

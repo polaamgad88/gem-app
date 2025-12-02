@@ -215,6 +215,28 @@ async function toggleUserStatus(userId, newStatus) {
     alert("Failed to update status");
   }
 }
+function openAssignNumberModal(userId) {
+  document.getElementById("assign-user-id").value = userId;
+
+  const user = allUsers.find((u) => u.user_id === userId);
+  if (user) {
+    document.getElementById("local-number").value = user.local_number || "";
+    document.getElementById("abroad-number").value = user.abroad_number || "";
+  } else {
+    document.getElementById("local-number").value = "";
+    document.getElementById("abroad-number").value = "";
+  }
+
+  document
+    .getElementById("assign-number-modal")
+    .classList.remove("hidden");
+}
+
+function closeAssignNumberModal() {
+  document
+    .getElementById("assign-number-modal")
+    .classList.add("hidden");
+}
 
 function renderUsers(users) {
   const isAdmin = localStorage.getItem("is_admin") === "1";
@@ -237,6 +259,7 @@ function renderUsers(users) {
       <button onclick="openPasswordModal(${
         user.user_id
       })">Change Password</button>
+<button onclick="openAssignNumberModal(${user.user_id})">Assign Numbers</button>
       <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
         ${isActive ? "Deactivate" : "Activate"}
       </button>
@@ -253,6 +276,7 @@ function renderUsers(users) {
       <button onclick="openPasswordModal(${
         user.user_id
       })">Change Password</button>
+<button onclick="openAssignNumberModal(${user.user_id})">Assign Numbers</button>
       <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
         ${isActive ? "Deactivate" : "Activate"}
       </button>

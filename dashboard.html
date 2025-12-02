@@ -32,7 +32,7 @@
 
     .filters {
       display: flex;
-      gap: 15px;
+      gap: 20px;
       align-items: center;
       padding: 20px;
       background-color: #f8f9fa;
@@ -85,6 +85,43 @@
     #clearFiltersBtn.secondary:hover {
       background-color: #5a6268;
     }
+    #applyFiltersBtn {
+  border: none;      
+  outline: none;     
+  box-shadow: none;  
+}
+    /* Dark Mode - Filters */
+body.dark-mode .filters {
+  background-color: #1e1e1e; 
+}
+
+body.dark-mode .filters .filter-group label {
+  color: #ddd; 
+}
+
+body.dark-mode .filters .filter-group select,
+body.dark-mode .filters .filter-group input {
+  background-color: #333;  
+  color: #fff;            
+  border: 1px solid #555; 
+}
+
+body.dark-mode .filters .filter-group select:focus,
+body.dark-mode .filters .filter-group input:focus {
+  border-color: #1e1e1e; 
+  outline: none;
+}
+body.dark-mode #applyFiltersBtn {
+  border: none;      
+  outline: none;     
+  box-shadow: none;  
+}
+body.dark-mode #userFilter{
+  background-color: #333;
+}
+body.dark-mode #customerFilter{
+  background-color: #333;
+}
   </style>
 </head>
 
@@ -107,7 +144,7 @@
       <div class="filters" style="margin: 1px">
         <div class="filter-group">
           <label for="statusFilter">Filter by Status:</label>
-          <select id="statusFilter" style="border-radius: 8px">
+          <select id="statusFilter" style="border-radius: 8px; width: 240px;">
             <option value="">All Status</option>
             <option value="green">Green (&lt; 200 m)</option>
             <option value="yellow">Yellow (200–300 m)</option>
@@ -117,7 +154,7 @@
 
         <div class="filter-group">
           <label for="reasonFilter">Filter by Reason:</label>
-          <select id="reasonFilter" style="border-radius: 8px">
+          <select id="reasonFilter" style="border-radius: 8px; width: 240px;">
             <option value="">All Reasons</option>
             <option value="making_order">Making Order</option>
             <option value="delivering_order">Delivering Order</option>
@@ -126,14 +163,14 @@
           </select>
         </div>
 
-        <div class="filter-group">
+        <div class="filter-group" style="margin: 30px;">
           <label for="dateStart">Visit Date From:</label>
-          <input type="date" id="dateStart" style="border-radius: 8px" />
+          <input type="date" id="dateStart" style="border-radius: 8px; width: 200px;" />
         </div>
 
         <div class="filter-group">
           <label for="dateEnd">Visit Date To:</label>
-          <input type="date" id="dateEnd" style="border-radius: 8px" />
+          <input type="date" id="dateEnd" style="border-radius: 8px; width: 200px;" />
         </div>
       </div>
 

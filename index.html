@@ -1,375 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delegate Dashboard</title>
-  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <style>
-    html,
-    body {
-      height: 100%;
-      overflow: hidden;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f8f9fb;
-      color: #333;
-      display: flex;
-      height: 100vh;
-    }
-
-    .sidebar {
-      width: 250px;
-      background-color: #fff;
-      color: #0b2a59;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      border-right: 1px solid #ddd;
-      transition: all 0.3s ease;
-    }
-
-    .sidebar.collapsed {
-      transform: translateX(-100%);
-      width: 0;
-      padding: 0;
-      overflow: hidden;
-      border: none;
-    }
-
-    .logo {
-      width: 120px;
-      margin: 0 auto 10px;
-      display: block;
-      border-radius: 12px;
-    }
-
-    .sidebar h2 {
-      font-size: 16px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .nav-links {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      color: #192a56;
-      padding: 12px 15px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: background 0.3s ease;
-    }
-
-    .nav-links .add-order {
-      background-color: #28a745;
-      color: #fff;
-    }
-
-    .topbar {
-      height: 60px;
-      background: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      margin: 15px 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    .topbar-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: #333;
-      margin: 0;
-      font-weight: 600;
-    }
-
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .nav-links a.active {
-      background-color: #0b2a59;
-      color: #fff;
-    }
-
-    .btn-top {
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .btn-theme {
-      background: #eee;
-    }
-
-    .btn-logout {
-      background: #db2a3c;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      text-decoration: none;
-    }
-
-    /* Main content */
-    .main {
-      flex: 1;
-      /* display: flex;
-        flex-direction: column; */
-      margin-left: 5px;
-      transition: all 0.3s ease;
-    }
-
-    /* .sidebar.collapsed ~ .main {
-        margin-left: 0;
-      } */
-    .main-content {
-      flex: 1;
-      width: 100%;
-      height: calc(100vh - 80px);
-      border: none;
-    }
-
-    .main-content h2 {
-      font-size: 22px;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    body.dark-mode {
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .sidebar {
-      background-color: #1e1e1e;
-      color: #ddd;
-      border-right: 1px solid #444;
-    }
-
-    body.dark-mode .topbar {
-      background-color: #1e1e1e;
-      color: #fff;
-    }
-
-    body.dark-mode .topbar-title {
-      color: #ddd;
-    }
-
-    body.dark-mode .theme-dropdown .dropdown-content {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-    }
-
-    body.dark-mode .theme-dropdown .dropdown-content a {
-      color: #ddd;
-    }
-
-    body.dark-mode .theme-dropdown .dropdown-content a:hover {
-      background-color: #333;
-    }
-
-    body.dark-mode .nav-links a {
-      color: #ddd;
-    }
-
-    body.dark-mode .nav-links a:hover {
-      background-color: #333;
-    }
-
-    .theme-dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .theme-dropdown .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #fff;
-      min-width: 120px;
-      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-      z-index: 1;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .theme-dropdown .dropdown-content a {
-      color: #333;
-      padding: 10px 12px;
-      text-decoration: none;
-      display: block;
-    }
-
-    .theme-dropdown .dropdown-content a:hover {
-      background-color: #f1f1f1;
-    }
-
-    .theme-dropdown.show .dropdown-content {
-      display: block;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delegate Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      html,
+      body {
         height: 100%;
-        transform: translateX(-100%);
-        z-index: 1000;
+        overflow: hidden;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fb;
+        color: #333;
+        display: flex;
+        height: 100vh;
+      }
+
+      .sidebar {
         width: 250px;
+        background-color: #fff;
+        color: #0b2a59;
+        display: flex;
+        flex-direction: column;
         padding: 20px;
+        border-right: 1px solid #ddd;
+        transition: all 0.3s ease;
       }
 
-      .sidebar.active {
-        transform: translateX(0);
+      .sidebar.collapsed {
+        transform: translateX(-100%);
+        width: 0;
+        padding: 0;
+        overflow: hidden;
+        border: none;
       }
 
+      .logo {
+        width: 120px;
+        margin: 0 auto 10px;
+        display: block;
+        border-radius: 12px;
+      }
+
+      .sidebar h2 {
+        font-size: 16px;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: #192a56;
+        padding: 12px 15px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.3s ease;
+      }
+
+      .nav-links .add-order {
+        background-color: #28a745;
+        color: #fff;
+      }
+
+      .topbar {
+        height: 60px;
+        background: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        margin: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .topbar-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #333;
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .nav-links a.active {
+        background-color: #0b2a59;
+        color: #fff;
+      }
+
+      .btn-top {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .btn-theme {
+        background: #eee;
+      }
+
+      .btn-logout {
+        background: #db2a3c;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+      }
+
+      /* Main content */
       .main {
         flex: 1;
+        /* display: flex;
+        flex-direction: column; */
+        margin-left: 5px;
+        transition: all 0.3s ease;
+      }
+
+      /* .sidebar.collapsed ~ .main {
+        margin-left: 0;
+      } */
+      .main-content {
+        flex: 1;
         width: 100%;
+        height: calc(100vh - 80px);
+        border: none;
       }
 
-      .topbar-title i {
-        cursor: pointer;
+      .main-content h2 {
         font-size: 22px;
+        margin-bottom: 20px;
+        color: #333;
       }
-    }
 
-    @media (max-width: 768px) {
-      .topbar-title span {
+      body.dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      body.dark-mode .sidebar {
+        background-color: #1e1e1e;
+        color: #ddd;
+        border-right: 1px solid #444;
+      }
+
+      body.dark-mode .topbar {
+        background-color: #1e1e1e;
+        color: #fff;
+      }
+
+      body.dark-mode .topbar-title {
+        color: #ddd;
+      }
+
+      body.dark-mode .theme-dropdown .dropdown-content {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+      }
+
+      body.dark-mode .theme-dropdown .dropdown-content a {
+        color: #ddd;
+      }
+
+      body.dark-mode .theme-dropdown .dropdown-content a:hover {
+        background-color: #333;
+      }
+
+      body.dark-mode .nav-links a {
+        color: #ddd;
+      }
+
+      body.dark-mode .nav-links a:hover {
+        background-color: #333;
+      }
+
+      .theme-dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .theme-dropdown .dropdown-content {
         display: none;
+        position: absolute;
+        background-color: #fff;
+        min-width: 120px;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        border-radius: 8px;
+        overflow: hidden;
       }
-    }
-  </style>
 
-  <script src="./scripts/utils.js"></script>
-  <script src="./scripts/delegate-landing.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleBtn = document.getElementById("theme-toggle");
-      const body = document.body;
-      const iframe = document.getElementById("main-frame");
+      .theme-dropdown .dropdown-content a {
+        color: #333;
+        padding: 10px 12px;
+        text-decoration: none;
+        display: block;
+      }
 
-      function updateButton() {
-        if (body.classList.contains("dark-mode")) {
-          toggleBtn.textContent = "☀️ Light";
-        } else {
-          toggleBtn.textContent = "🌙 Dark";
+      .theme-dropdown .dropdown-content a:hover {
+        background-color: #f1f1f1;
+      }
+
+      .theme-dropdown.show .dropdown-content {
+        display: block;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          transform: translateX(-100%);
+          z-index: 1000;
+          width: 250px;
+          padding: 20px;
+        }
+
+        .sidebar.active {
+          transform: translateX(0);
+        }
+
+        .main {
+          flex: 1;
+          width: 100%;
+        }
+
+        .topbar-title i {
+          cursor: pointer;
+          font-size: 22px;
         }
       }
 
-      if (localStorage.getItem("theme") === "dark") {
-        body.classList.add("dark-mode");
+      @media (max-width: 768px) {
+        .topbar-title span {
+          display: none;
+        }
       }
+    </style>
 
-      updateButton();
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/delegate-landing.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggleBtn = document.getElementById("theme-toggle");
+        const body = document.body;
+        const iframe = document.getElementById("main-frame");
 
-      toggleBtn.addEventListener("click", () => {
-        body.classList.toggle("dark-mode");
-        const theme = body.classList.contains("dark-mode") ? "dark" : "light";
-        localStorage.setItem("theme", theme);
+        function updateButton() {
+          if (body.classList.contains("dark-mode")) {
+            toggleBtn.textContent = "☀️ Light";
+          } else {
+            toggleBtn.textContent = "🌙 Dark";
+          }
+        }
+
+        if (localStorage.getItem("theme") === "dark") {
+          body.classList.add("dark-mode");
+        }
+
         updateButton();
 
-        iframe.contentWindow.postMessage({ theme }, "*");
-      });
-    });
-    document.addEventListener("DOMContentLoaded", () => {
-      const menuBtn = document.querySelector(".topbar-title i.fa-bars");
-      const sidebar = document.querySelector(".sidebar");
-      const sidebarLinks = sidebar.querySelectorAll("a");
+        toggleBtn.addEventListener("click", () => {
+          body.classList.toggle("dark-mode");
+          const theme = body.classList.contains("dark-mode") ? "dark" : "light";
+          localStorage.setItem("theme", theme);
+          updateButton();
 
-      menuBtn.addEventListener("click", () => {
-        if (window.innerWidth <= 768) {
-          // Mobile toggle
-          sidebar.classList.toggle("active");
-        } else {
-          // Desktop collapse
-          sidebar.classList.toggle("collapsed");
-        }
+          iframe.contentWindow.postMessage({ theme }, "*");
+        });
       });
+      document.addEventListener("DOMContentLoaded", () => {
+        const menuBtn = document.querySelector(".topbar-title i.fa-bars");
+        const sidebar = document.querySelector(".sidebar");
+        const sidebarLinks = sidebar.querySelectorAll("a");
 
-      sidebarLinks.forEach((link) => {
-        link.addEventListener("click", () => {
+        menuBtn.addEventListener("click", () => {
           if (window.innerWidth <= 768) {
-            sidebar.classList.remove("active");
+            // Mobile toggle
+            sidebar.classList.toggle("active");
+          } else {
+            // Desktop collapse
+            sidebar.classList.toggle("collapsed");
           }
         });
-      });
-    });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const navLinks = document.querySelectorAll(".nav-links a");
-      navLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-          navLinks.forEach((l) => l.classList.remove("active"));
-          link.classList.add("active");
+        sidebarLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+              sidebar.classList.remove("active");
+            }
+          });
         });
       });
-    });
-  </script>
-</head>
 
-<body>
-  <div class="sidebar">
-    <img src="./assets/GEM Icon.jpg" alt="gem logo" class="logo" />
-    <h2>Welcome, <span id="username"></span>👋</h2>
-    <span style="align-self: center;color: gray;">version 3.1.1</span>
-    <hr style="margin: 10px 0" />
+      document.addEventListener("DOMContentLoaded", () => {
+        const navLinks = document.querySelectorAll(".nav-links a");
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            navLinks.forEach((l) => l.classList.remove("active"));
+            link.classList.add("active");
+          });
+        });
+      });
+    </script>
+  </head>
 
+  <body>
+    <div class="sidebar">
+      <img src="./assets/GEM Icon.jpg" alt="gem logo" class="logo" />
+      <h2>Welcome, <span id="username"></span>👋</h2>
+      <span style="align-self: center; color: gray">version 3.1.1</span>
+      <hr style="margin: 10px 0" />
 
-    <div class="nav-links">
-      <a href="./dashboard.html">
-        <i class="fa-solid fa-chart-pie"></i>
-        Overview
-      </a>
-      <a href="./orders.html"><i class="fa-solid fa-list"></i> View Orders</a>
-      <a href="./create-order.html" class="add-order"><i class="fa-solid fa-plus"></i> Add New Order</a>
-      <a href="./customers.html"><i class="fa-solid fa-users"></i> Manage Customers</a>
-      <a href="./users.html"><i class="fa-solid fa-user-gear"></i> Manage Users</a>
-      <a style="display: none;" id="products_page" href="./products.html"><i class="fa-solid fa-box"></i> Manage
-        Products</a>
-      <a href="./customer-visit.html"><i class="fa-solid fa-location-dot"></i> Customer Visit</a>
-    </div>
-  </div>
-
-  <div class="main">
-    <div class="topbar">
-      <h1 class="topbar-title">
-        <i class="fa-solid fa-bars"></i>
-        <span id="page-title">Company Dashboard</span>
-      </h1>
-      <div class="topbar-actions">
-        <button id="theme-toggle" class="btn-top btn-theme">🌙 Dark</button>
-        <a href="#" id="logout-btn" class="btn-logout">
-          <i class="fa-solid fa-right-from-bracket"></i> Logout
+      <div class="nav-links">
+        <a href="./dashboard.html">
+          <i class="fa-solid fa-chart-pie"></i>
+          Overview
         </a>
+        <a href="reports.html"> <i class="fa fa-chart-line"></i> Reports </a>
+        <a href="./orders.html"><i class="fa-solid fa-list"></i> View Orders</a>
+        <a href="./create-order.html" class="add-order"
+          ><i class="fa-solid fa-plus"></i> Add New Order</a
+        >
+        <a href="./customers.html"
+          ><i class="fa-solid fa-users"></i> Manage Customers</a
+        >
+        <a href="./users.html"
+          ><i class="fa-solid fa-user-gear"></i> Manage Users</a
+        >
+        <a style="display: none" id="products_page" href="./products.html"
+          ><i class="fa-solid fa-box"></i> Manage Products</a
+        >
+        <a href="./customer-visit.html"
+          ><i class="fa-solid fa-location-dot"></i> Customer Visit</a
+        >
       </div>
     </div>
-    <iframe id="main-frame" class="main-content" src="dashboard.html"></iframe>
-  </div>
-  <script src="./scripts/app.js"></script>
-</body>
 
+    <div class="main">
+      <div class="topbar">
+        <h1 class="topbar-title">
+          <i class="fa-solid fa-bars"></i>
+          <span id="page-title">Company Dashboard</span>
+        </h1>
+        <div class="topbar-actions">
+          <button id="theme-toggle" class="btn-top btn-theme">🌙 Dark</button>
+          <a href="#" id="logout-btn" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </a>
+        </div>
+      </div>
+      <iframe
+        id="main-frame"
+        class="main-content"
+        src="dashboard.html"
+      ></iframe>
+    </div>
+    <script src="./scripts/app.js"></script>
+  </body>
 </html>
