@@ -376,3 +376,7 @@ body.dark-mode .leaflet-popup-tip {
     background: transparent;
   }
 }
+.input-container-bill-collection {
+  display: none;
+  margin-top: 10px;
+}
