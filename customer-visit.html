@@ -69,6 +69,25 @@
           <option value="">Select Customer Address</option>
         </select>
       </div>
+<div class="input-container-bill-collection" id="billDiv">
+  <input
+    id="bill-amount"
+    type="number"
+    placeholder="Enter bill amount"
+  />
+</div>
+<script>
+  const statusDropdown = document.getElementById("status-dropdown");
+  const billDiv = document.getElementById("billDiv");
+
+  statusDropdown.addEventListener("change", function () {
+    if (this.value === "bill_collection") {
+      billDiv.style.display = "block";
+    } else {
+      billDiv.style.display = "none";
+    }
+  });
+</script>
 
       <!-- Note Field -->
       <div class="input-container">

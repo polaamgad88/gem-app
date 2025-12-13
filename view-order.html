@@ -1,429 +1,421 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Details</title>
-  <link rel="stylesheet" href="./styles/base.css">
-  <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
-  <link rel="stylesheet" href="./styles/view-order.css">
-  <script src="./scripts/utils.js" defer></script>
-  <script src="./scripts/view-order.js" defer></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f8f9fb;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-
-    @media (max-width: 576px) {
-      .logo {
-        height: 90px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Details</title>
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
+    <link rel="stylesheet" href="./styles/view-order.css" />
+    <script src="./scripts/utils.js" defer></script>
+    <script src="./scripts/view-order.js" defer></script>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: #f8f9fb;
+        margin: 0;
+        padding: 20px;
+        color: #333;
       }
-    }
 
-    h1 {
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 20px;
-      color: #0b2a59;
-    }
+      @media (max-width: 576px) {
+        .logo {
+          height: 90px;
+        }
+      }
 
-    .order-info-grid {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-    }
+      h1 {
+        text-align: center;
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #0b2a59;
+      }
 
-    .info-box {
-      flex: 1 1 22%;
-      display: flex;
-      flex-direction: column;
-    }
+      .order-info-grid {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
 
-    .info-box label {
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 6px;
-      color: #333;
-    }
+      .info-box {
+        flex: 1 1 22%;
+        display: flex;
+        flex-direction: column;
+      }
 
-    .info-value {
-      background-color: #f2f3f5;
-      padding: 12px 14px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-    }
+      .info-box label {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: #333;
+      }
 
-    .section-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
+      .info-value {
+        background-color: #f2f3f5;
+        padding: 12px 14px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+      }
 
-    .info-boxes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+      .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
 
-    .info-group {
-      flex: 1 1 30%;
-      display: flex;
-      flex-direction: column;
-    }
+      .info-boxes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
 
-    .info-group label {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: #333;
-    }
-
-    @media (max-width: 768px) {
       .info-group {
-        flex: 1 1 100%;
+        flex: 1 1 30%;
+        display: flex;
+        flex-direction: column;
       }
 
-    }
-
-    /* Dark Mode */
-    body.dark-mode {
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .container {
-      background-color: #1e1e1e;
-      color: #f5f5f5;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-    }
-
-    body.dark-mode h1,
-    body.dark-mode h2 {
-      color: #90caf9;
-    }
-
-    body.dark-mode .customer-info,
-    body.dark-mode .order-info {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-    }
-
-    body.dark-mode .info-value,
-    body.dark-mode #total-price,
-    body.dark-mode .gray-box {
-      background-color: #2a2a2a;
-      border: 1px solid #444;
-      color: #f5f5f5;
-    }
-
-    body.dark-mode .table-responsive table {
-      background-color: #1e1e1e;
-      color: #f5f5f5;
-    }
-
-    body.dark-mode .table-responsive th {
-      background-color: #2a2a2a;
-      color: #90caf9;
-    }
-
-    body.dark-mode .table-responsive td {
-      border: 1px solid #333;
-    }
-
-    body.dark-mode .table-responsive tr:nth-child(even) {
-      background-color: #222;
-    }
-
-    body.dark-mode .table-responsive tr:hover {
-      background-color: #2f2f2f;
-    }
-
-    body.dark-mode .card-view .item-card {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-      color: #f5f5f5;
-    }
-
-    body.dark-mode .confirm-btn-outline {
-      background-color: #28a745;
-      border-color: #28a745;
-      color: white;
-    }
-
-    body.dark-mode .edit-btn-outline {
-      background-color: #3c4bee;
-      border-color: #3c4bee;
-      color: white;
-    }
-
-    body.dark-mode .refund-btn-outline {
-      background-color: #dc3545;
-      border-color: #dc3545;
-      color: white;
-    }
-
-    body.dark-mode label {
-      color: #ffffff;
-    }
-
-    body.dark-mode h2 {
-      color: #ffffff !important;
-    }
-  </style>
-  <script>
-    function applyTheme(mode) {
-      if (mode === "dark") {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
+      .info-group label {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #333;
       }
-    }
 
-    window.addEventListener("message", (event) => {
-      if (event.data.theme) {
-        applyTheme(event.data.theme);
-        localStorage.setItem("theme", event.data.theme);
+      @media (max-width: 768px) {
+        .info-group {
+          flex: 1 1 100%;
+        }
       }
-    });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const savedTheme = localStorage.getItem("theme") || "light";
-      applyTheme(savedTheme);
-    });
-  </script>
-</head>
+      /* Dark Mode */
+      body.dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
 
-<body>
-  <style>
-    .logo {
-      display: block;
-      margin: 0 auto 0px;
-      height: 137px;
-      max-height: 140px;
-      object-fit: contain;
-    }
+      body.dark-mode .container {
+        background-color: #1e1e1e;
+        color: #f5f5f5;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
 
-    @media (max-width: 576px) {
+      body.dark-mode h1,
+      body.dark-mode h2 {
+        color: #90caf9;
+      }
+
+      body.dark-mode .customer-info,
+      body.dark-mode .order-info {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+      }
+
+      body.dark-mode .info-value,
+      body.dark-mode #total-price,
+      body.dark-mode .gray-box {
+        background-color: #2a2a2a;
+        border: 1px solid #444;
+        color: #f5f5f5;
+      }
+
+      body.dark-mode .table-responsive table {
+        background-color: #1e1e1e;
+        color: #f5f5f5;
+      }
+
+      body.dark-mode .table-responsive th {
+        background-color: #2a2a2a;
+        color: #90caf9;
+      }
+
+      body.dark-mode .table-responsive td {
+        border: 1px solid #333;
+      }
+
+      body.dark-mode .table-responsive tr:nth-child(even) {
+        background-color: #222;
+      }
+
+      body.dark-mode .table-responsive tr:hover {
+        background-color: #2f2f2f;
+      }
+
+      body.dark-mode .card-view .item-card {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        color: #f5f5f5;
+      }
+
+      body.dark-mode .confirm-btn-outline {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+      }
+
+      body.dark-mode .edit-btn-outline {
+        background-color: #3c4bee;
+        border-color: #3c4bee;
+        color: white;
+      }
+
+      body.dark-mode .refund-btn-outline {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+      }
+
+      body.dark-mode label {
+        color: #ffffff;
+      }
+
+      body.dark-mode h2 {
+        color: #ffffff !important;
+      }
+    </style>
+    <script>
+      function applyTheme(mode) {
+        if (mode === "dark") {
+          document.body.classList.add("dark-mode");
+        } else {
+          document.body.classList.remove("dark-mode");
+        }
+      }
+
+      window.addEventListener("message", (event) => {
+        if (event.data.theme) {
+          applyTheme(event.data.theme);
+          localStorage.setItem("theme", event.data.theme);
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+      });
+    </script>
+  </head>
+
+  <body>
+    <style>
       .logo {
-        height: 90px;
-      }
-    }
-.items-list table tfoot {
-    font-weight: bold;
-    border-top: 2px solid #ccc; 
-}
-
-.items-list .summary-row {
-    background-color: #f7f7f7; 
-}
-
-.items-list .summary-label {
-    text-align: right; 
-    padding-right: 15px;
-    color: #333;
-}
-
-.items-list .summary-value {
-    color: #007bff; 
-}
-
-
-@media (max-width: 768px) {
-        .table-responsive {
-        width: 100%;
-        overflow-x: auto; 
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .table-responsive table {
-        min-width: 600px; 
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .table-responsive table th, 
-    .table-responsive table td {
-        white-space: nowrap; 
-        font-size: 13px;
-    }
-
-    .table-responsive {
-        display: none; 
-    }
-    .card-view {
-        display: block; 
-    }
-}
-
-@media (min-width: 769px) {
-    .card-view {
-        display: none;
-    }
-    .table-responsive {
         display: block;
-    }
-}
-.items-list .summary-label {
-    text-align: right; 
-    padding-right: 15px; 
-    color: #333;
-}
+        margin: 0 auto 0px;
+        height: 137px;
+        max-height: 140px;
+        object-fit: contain;
+      }
 
-.items-list .summary-value {
-    text-align: center; 
-    color: #007bff; 
-    font-weight: bold;
-}
-@media (max-width: 768px) {
-  .order-actions {
-    flex-direction: column;
-    gap: 10px;
-  }
+      @media (max-width: 576px) {
+        .logo {
+          height: 90px;
+        }
+      }
+      .items-list table tfoot {
+        font-weight: bold;
+        border-top: 2px solid #ccc;
+      }
 
-  .order-actions button {
-    width: 100%;
-  }
-}
-@media (max-width: 576px) {
-  .order-actions {
-    padding-bottom: 50px;
-  }
-}
+      .items-list .summary-row {
+        background-color: #f7f7f7;
+      }
 
-  </style>
-  <h2 style="
-text-align: center;
-font-size: 28px;
-font-weight: 600;
-margin-bottom: 30px;
-color: #0b2a59;
-letter-spacing: 0.5px;
-">
-    Order Details <span id="orderId" style="color: #28a745;"></span>
-  </h2>
+      .items-list .summary-label {
+        text-align: right;
+        padding-right: 15px;
+        color: #333;
+      }
 
-  <div class="order-info-grid">
-    <div class="info-box">
-      <!-- <label>Order ID</label> -->
-      <div class="info-value" id="order-id"></div>
-    </div>
+      .items-list .summary-value {
+        color: #007bff;
+      }
 
-    <div class="info-box">
-      <!-- <label>Date</label> -->
-      <div class="info-value" id="order-date"></div>
-    </div>
+      @media (max-width: 768px) {
+        .table-responsive {
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+          -webkit-overflow-scrolling: touch;
+        }
 
-    <div class="info-box">
-      <!-- <label>Status</label> -->
-      <div class="info-value" id="order-state"></div>
-    </div>
+        .table-responsive table {
+          min-width: 600px;
+          width: 100%;
+          border-collapse: collapse;
+        }
 
-    <div class="info-box">
-      <!-- <label>Delegate Name</label> -->
-      <div class="info-value" id="Delegate-name"></div>
-    </div>
-  </div>
+        .table-responsive table th,
+        .table-responsive table td {
+          white-space: nowrap;
+          font-size: 13px;
+        }
 
+        .table-responsive {
+          display: none;
+        }
+        .card-view {
+          display: block;
+        }
+      }
 
+      @media (min-width: 769px) {
+        .card-view {
+          display: none;
+        }
+        .table-responsive {
+          display: block;
+        }
+      }
+      .items-list .summary-label {
+        text-align: right;
+        padding-right: 15px;
+        color: #333;
+      }
 
-  <!-- Customer Information -->
-  <div class="customer-info">
-    <h2 class="section-title">Customer Information</h2>
+      .items-list .summary-value {
+        text-align: center;
+        color: #007bff;
+        font-weight: bold;
+      }
+      @media (max-width: 768px) {
+        .order-actions {
+          flex-direction: column;
+          gap: 10px;
+        }
 
-    <div class="info-boxes">
-      <div class="info-group">
-        <label>Name</label>
-        <div class="info-value" id="customer-name"></div>
+        .order-actions button {
+          width: 100%;
+        }
+      }
+      @media (max-width: 576px) {
+        .order-actions {
+          padding-bottom: 50px;
+        }
+      }
+    </style>
+    <h2
+      style="
+        text-align: center;
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 30px;
+        color: #0b2a59;
+        letter-spacing: 0.5px;
+      "
+    >
+      Order Details <span id="orderId" style="color: #28a745"></span>
+    </h2>
+
+    <div class="order-info-grid">
+      <div class="info-box">
+        <!-- <label>Order ID</label> -->
+        <div class="info-value" id="order-id"></div>
       </div>
-      <div class="info-group">
-        <label>ID</label>
-        <div class="info-value" id="customer-id"></div>
-      </div>
-      <div class="info-group">
-        <label>Address</label>
-        <div class="info-value" id="customer-address"></div>
+
+      <div class="info-box">
+        <!-- <label>Date</label> -->
+        <div class="info-value" id="order-date"></div>
       </div>
 
-      <div class="info-group">
-        <label>Note</label>
-        <div class="info-value" id="customer-note" style="white-space: pre-wrap;"></div>
+      <div class="info-box">
+        <!-- <label>Status</label> -->
+        <div class="info-value" id="order-state"></div>
       </div>
-    </div>
-  </div>
 
-
-
-  <!-- Ordered Items -->
-  <div class="items-list">
-    <h2>Ordered Items</h2>
-
-    <!-- Table view (for desktop) -->
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Image</th>
-            <th>Item Name</th>
-            <th>Item Price</th>
-            <th>Quantity</th>
-            <th>Total Price</th>
-          </tr>
-        </thead>
-        <tbody id="items-table-body">
-          <!-- Items will be populated by JavaScript -->
-        </tbody>
-    
-
-<tfoot id="items-table-footer">
-    <tr class="summary-row">
-        <td colspan="4" class="summary-label">Total Quantity:</td> 
-        
-        <td id="totalQuantityCount" class="summary-value"></td> 
-        
-        <td class="summary-value"></td> 
-    </tr>
-</tfoot>
-  
-      </table>
-    </div>
-
-    <!-- Card view (for mobile) -->
-    <div class="card-view">
-      <div id="items-card-view">
-        <!-- Cards will be populated by JavaScript -->
+      <div class="info-box">
+        <!-- <label>Delegate Name</label> -->
+        <div class="info-value" id="Delegate-name"></div>
       </div>
     </div>
-  </div>
 
-  <!-- Total Price -->
-  <div class="total">
-    <p><strong>Total Amount:</strong></p>
-    <div class="gray-box" id="total-price"></div>
-  </div>
+    <!-- Customer Information -->
+    <div class="customer-info">
+      <h2 class="section-title">Customer Information</h2>
 
+      <div class="info-boxes">
+        <div class="info-group">
+          <label>Name</label>
+          <div class="info-value" id="customer-name"></div>
+        </div>
+        <div class="info-group">
+          <label>ID</label>
+          <div class="info-value" id="customer-id"></div>
+        </div>
+        <div class="info-group">
+          <label>Address</label>
+          <div class="info-value" id="customer-address"></div>
+        </div>
 
-  <!-- Action Buttons -->
-  <div class="order-actions horizontal-buttons">
-    <button id="refund-order" class="refund-btn-outline">Refund</button>
-    <button id="edit-order" class="edit-btn-outline">Edit</button>
+        <div class="info-group">
+          <label>Note</label>
+          <div
+            class="info-value"
+            id="customer-note"
+            style="white-space: pre-wrap"
+          ></div>
+        </div>
+      </div>
+    </div>
 
-    <button id="confirm-order" class="confirm-btn-outline">Confirm</button>
+    <!-- Ordered Items -->
+    <div class="items-list">
+      <h2>Ordered Items</h2>
 
-  </div>
+      <!-- Table view (for desktop) -->
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Image</th>
+              <th>Item Name</th>
+              <th>Item Price</th>
+              <th>Quantity</th>
+              <th>Total Price</th>
+            </tr>
+          </thead>
+          <tbody id="items-table-body">
+            <!-- Items will be populated by JavaScript -->
+          </tbody>
 
-</body>
+          <tfoot id="items-table-footer">
+            <tr class="summary-row">
+              <td colspan="4" class="summary-label">Total Quantity:</td>
 
+              <td id="totalQuantityCount" class="summary-value"></td>
+
+              <td class="summary-value"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Card view (for mobile) -->
+      <div class="card-view">
+        <div id="items-card-view">
+          <!-- Cards will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Price -->
+    <div class="total">
+      <p><strong>Total Amount:</strong></p>
+      <div class="gray-box" id="total-price"></div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="order-actions horizontal-buttons">
+      <button id="refund-order" class="refund-btn-outline">Refund</button>
+      <button id="edit-order" class="edit-btn-outline">Edit</button>
+
+      <button id="confirm-order" class="confirm-btn-outline">Confirm</button>
+    </div>
+  </body>
 </html>
