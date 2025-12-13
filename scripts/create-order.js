@@ -24,8 +24,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         "categories",
         token
       ),
-      fetchList("https://order-app.gemegypt.net/api/products/orders", "data", token),
-      fetchList("https://order-app.gemegypt.net/api/customers?all=true", "customers", token),
+      fetchList(
+        "https://order-app.gemegypt.net/api/products/orders",
+        "data",
+        token
+      ),
+      fetchList(
+        "https://order-app.gemegypt.net/api/customers?all=true",
+        "customers",
+        token
+      ),
     ]);
 
     // ✅ Make products globally accessible
@@ -1100,7 +1108,10 @@ async function updateOrderPreview() {
       const price = parseFloat(data.price || 0).toFixed(2);
       const total = (price * quantity).toFixed(2);
       const photoUrl = data.image_path
-        ? `https://order-app.gemegypt.net/api/images/${data.image_path.replace(/^\/+/, "")}`
+        ? `https://order-app.gemegypt.net/api/images/${data.image_path.replace(
+            /^\/+/,
+            ""
+          )}`
         : "";
       const bar_code = data.bar_code;
       const card = document.createElement("div");
@@ -1210,14 +1221,17 @@ async function submitOrder(token) {
   try {
     Utils.UI.showLoader("loader");
 
-    const res = await fetch("https://order-app.gemegypt.net/api/orders/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(
+      "https://order-app.gemegypt.net/api/orders/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     Utils.UI.hideLoader("loader");
 
