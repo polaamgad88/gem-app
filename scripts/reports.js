@@ -4,20 +4,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.__API_TOKEN = token;
 
-  // Today pill
   setTodayPill();
 
-  // Apply button
-  document
-    .getElementById("apply-filters-btn")
-    .addEventListener("click", () => loadDashboard(token));
+  const applyBtn = document.getElementById("apply-filters-btn");
+  if (applyBtn) {
+    applyBtn.addEventListener("click", () => loadDashboard(token));
+  }
 
-  // Export team summary
-  document
-    .getElementById("export-team-btn")
-    .addEventListener("click", () => exportTeamSummaryExcel(token));
+  const exportBtn = document.getElementById("export-team-btn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => exportTeamSummaryExcel(token));
+  }
 
-  // Initial load (default: this month)
   await loadDashboard(token);
 });
 
@@ -31,7 +29,6 @@ function setTodayPill() {
   const day = d.getDate();
   const month = d.toLocaleString("en-US", { month: "short" });
   const year = d.getFullYear();
-
   el.innerHTML = `<i class="fa-regular fa-calendar"></i> Today · ${day} ${month} ${year}`;
 }
 
@@ -47,29 +44,25 @@ function formatYYYYMMDD(dateObj) {
 }
 
 /**
- * This Month:
- *   start = 1st day of current month
- *   end   = last day of current month
- *
- * This Year:
- *   start = Jan 1
- *   end   = Dec 31
- *
- * NOTE: your backend treats end_date (YYYY-MM-DD) as end-of-day exclusive by adding +1 day
- * when it's a date-only string. So passing the LAST DAY works perfectly.
+ * Month: start=1st, end=last day
+ * Year: start=Jan 1, end=Dec 31
+ * Backend treats end_date "YYYY-MM-DD" as exclusive next day => passing last day is correct.
  */
 function getRange(periodKey) {
   const now = new Date();
+
   if (periodKey === "year") {
-    const start = new Date(now.getFullYear(), 0, 1);
-    const end = new Date(now.getFullYear(), 11, 31);
-    return { start, end };
+    return {
+      start: new Date(now.getFullYear(), 0, 1),
+      end: new Date(now.getFullYear(), 11, 31),
+    };
   }
 
   // default month
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  return { start, end };
+  return {
+    start: new Date(now.getFullYear(), now.getMonth(), 1),
+    end: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+  };
 }
 
 function getPreviousRange(periodKey) {
@@ -77,53 +70,37 @@ function getPreviousRange(periodKey) {
 
   if (periodKey === "year") {
     const y = now.getFullYear() - 1;
-    return {
-      start: new Date(y, 0, 1),
-      end: new Date(y, 11, 31),
-    };
+    return { start: new Date(y, 0, 1), end: new Date(y, 11, 31) };
   }
 
   // previous month
-  const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const start = new Date(
-    prevMonthDate.getFullYear(),
-    prevMonthDate.getMonth(),
-    1
-  );
-  const end = new Date(
-    prevMonthDate.getFullYear(),
-    prevMonthDate.getMonth() + 1,
-    0
-  );
-  return { start, end };
+  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  return {
+    start: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1),
+    end: new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0),
+  };
 }
 
 function setRangeLabel(periodKey, start, end) {
   const el = document.getElementById("range-label");
   if (!el) return;
 
-  const label =
+  el.textContent =
     periodKey === "year"
       ? `This year (${formatYYYYMMDD(start)} → ${formatYYYYMMDD(end)})`
       : `This month (${formatYYYYMMDD(start)} → ${formatYYYYMMDD(end)})`;
-
-  el.textContent = label;
 }
 
 function pctChange(current, previous) {
   const c = Number(current || 0);
   const p = Number(previous || 0);
-  if (p <= 0) {
-    // If previous is 0, treat any current > 0 as +100%, else 0%
-    return c > 0 ? 100 : 0;
-  }
+  if (p <= 0) return c > 0 ? 100 : 0;
   return ((c - p) / p) * 100;
 }
 
 function setTrend(elRootId, pct) {
   const root = document.getElementById(elRootId);
-  const textEl = document.getElementById(`${elRootId}-text`);
-  if (!root || !textEl) return;
+  if (!root) return;
 
   const value = Number.isFinite(pct) ? pct : 0;
   const isUp = value >= 0;
@@ -142,8 +119,7 @@ function setTrend(elRootId, pct) {
 
 function setBadgeTrend(pct) {
   const badge = document.getElementById("trend-target-badge");
-  const text = document.getElementById("trend-target-text");
-  if (!badge || !text) return;
+  if (!badge) return;
 
   const value = Number.isFinite(pct) ? pct : 0;
   const isUp = value >= 0;
@@ -163,25 +139,6 @@ async function safeJson(res) {
   }
 }
 
-function extractUsers(payload) {
-  if (!payload) return [];
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload.users)) return payload.users;
-  if (Array.isArray(payload.data)) return payload.data;
-  if (Array.isArray(payload.users_data)) return payload.users_data;
-  return [];
-}
-
-function getJwtPayload(token) {
-  try {
-    const part = token.split(".")[1];
-    const json = atob(part.replace(/-/g, "+").replace(/_/g, "/"));
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
 async function apiGet(path, token, params = {}) {
   const usp = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
@@ -190,48 +147,92 @@ async function apiGet(path, token, params = {}) {
   });
 
   const url = `${BASE_URL}${path}${usp.toString() ? `?${usp.toString()}` : ""}`;
+
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
   return { res, data: await safeJson(res) };
 }
 
-async function getVisitsTotal(token, startDate, endDate, userId = null) {
-  const params = {
-    start_date: startDate,
-    end_date: endDate,
-    limit: 1,
-  };
-  if (userId !== null) params.user_id = userId;
+/**
+ * Get visits count (from data.total) + sum(amount) by paging through visits.
+ * We page because /visits doesn't return a SUM.
+ */
+async function getVisitStats(token, startDate, endDate, userId = null) {
+  const limit = 200;
+  let page = 1;
 
-  const { res, data } = await apiGet("/visits", token, params);
-  if (!res.ok) return 0;
+  let total = 0;
+  let amountSum = 0;
 
-  // visits endpoint returns: { page, limit, total, count, visits }
-  if (data && typeof data.total === "number") return data.total;
-  return 0;
+  while (true) {
+    const params = {
+      start_date: startDate,
+      end_date: endDate,
+      page,
+      limit,
+    };
+    if (userId !== null) params.user_id = userId;
+
+    const { res, data } = await apiGet("/visits", token, params);
+    if (!res.ok || !data) break;
+
+    if (page === 1) total = Number(data.total || 0);
+
+    const visits = Array.isArray(data.visits) ? data.visits : [];
+    for (const v of visits) {
+      const a = Number(v.amount || 0);
+      if (!Number.isNaN(a)) amountSum += a;
+    }
+
+    // stop when we've fetched all
+    if (page * limit >= total) break;
+    if (visits.length < limit) break;
+
+    page += 1;
+
+    // safety guard
+    if (page > 200) break;
+  }
+
+  return { total, amountSum };
 }
 
 async function getCustomersTotal(token) {
-  // customers endpoint in your backend is paginated. We only need total.
   const { res, data } = await apiGet("/customers", token, {
     page: 1,
     limit: 1,
   });
   if (!res.ok) return 0;
-
   if (data && typeof data.total === "number") return data.total;
-
-  // fallback
   if (data && Array.isArray(data.data)) return data.data.length;
   return 0;
+}
+
+function extractUsers(payload) {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.users)) return payload.users;
+  if (Array.isArray(payload.data)) return payload.data;
+  return [];
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 async function loadDashboard(token) {
   Utils.UI.hideError?.("error-message");
 
   const periodKey =
-    document.getElementById("date-range-filter").value || "month";
+    document.getElementById("date-range-filter")?.value || "month";
+
   const range = getRange(periodKey);
   const prevRange = getPreviousRange(periodKey);
 
@@ -243,105 +244,92 @@ async function loadDashboard(token) {
 
   setRangeLabel(periodKey, range.start, range.end);
 
-  // ----- Main numbers -----
-  // Target & Collected are mock (0)
+  // ---- Target (mock) ----
   const targetPct = 0;
-  document.getElementById("target-achieved").innerHTML = `${targetPct.toFixed(
-    1
-  )}<span class="unit">%</span>`;
-  document.getElementById("collected-amounts").textContent = "EGP 0.00";
+  const targetEl = document.getElementById("target-achieved");
+  if (targetEl) {
+    targetEl.innerHTML = `${targetPct.toFixed(1)}<span class="unit">%</span>`;
+  }
 
-  // Visits total (team scope by default based on backend permissions)
-  const [visitsThis, visitsPrev] = await Promise.all([
-    getVisitsTotal(token, startDate, endDate),
-    getVisitsTotal(token, prevStart, prevEnd),
+  // ---- Main stats: visits + collected (sum amount) ----
+  const [thisStats, prevStats] = await Promise.all([
+    getVisitStats(token, startDate, endDate),
+    getVisitStats(token, prevStart, prevEnd),
   ]);
 
-  document.getElementById("visits-count").textContent = String(visitsThis);
+  const visitsThis = thisStats.total || 0;
+  const visitsPrev = prevStats.total || 0;
 
-  // Trend indicator: use visits comparison (this vs previous period)
+  const amountThis = thisStats.amountSum || 0;
+  const amountPrev = prevStats.amountSum || 0;
+
+  const visitsEl = document.getElementById("visits-count");
+  if (visitsEl) visitsEl.textContent = String(visitsThis);
+
+  const collectedEl = document.getElementById("collected-amounts");
+  if (collectedEl) collectedEl.textContent = Utils.Format.currency(amountThis);
+
+  // trends
   const visitsPct = pctChange(visitsThis, visitsPrev);
   setTrend("trend-visits", visitsPct);
+
+  const amountPct = pctChange(amountThis, amountPrev);
+  setTrend("trend-collected", amountPct);
+
+  // Badge trend (keep using visits trend for now)
   setBadgeTrend(visitsPct);
 
-  // Customers linked (not truly date-based in current backend; showing total accessible)
+  // ---- customers linked ----
   const customersTotal = await getCustomersTotal(token);
-  document.getElementById("customers-linked").textContent =
-    String(customersTotal);
+  const customersEl = document.getElementById("customers-linked");
+  if (customersEl) customersEl.textContent = String(customersTotal);
 
-  // Trend placeholders for endpoints not present
-  setTrend("trend-collected", 0);
-  // linked "trend" as numeric delta (keep simple)
+  // linked trend placeholder
   const linkedTrendEl = document.getElementById("trend-linked");
-  const linkedTrendTextEl = document.getElementById("trend-linked-text");
-  if (linkedTrendEl && linkedTrendTextEl) {
+  if (linkedTrendEl) {
     linkedTrendEl.classList.add("trend-up");
     linkedTrendEl.innerHTML = `<i class="fa-solid fa-minus"></i> <span id="trend-linked-text">0</span>`;
   }
 
-  // ----- Team breakdown -----
+  // ---- team breakdown ----
   await loadTeamBreakdown(token, startDate, endDate);
 }
 
 async function loadTeamBreakdown(token, startDate, endDate) {
-  const teamSection = document.getElementById("team-section");
   const tbody = document.getElementById("team-table-body");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
-  // Determine admin quickly (JWT payload usually has identity; fallback to /checklogin)
-  let isAdmin = false;
-  const payload = getJwtPayload(token);
-  if (payload && payload.sub && typeof payload.sub === "object") {
-    // flask_jwt_extended commonly stores identity in "sub"
-    isAdmin = !!payload.sub.admin;
-  }
-
-  if (!isAdmin) {
-    const check = await apiGet("/checklogin", token);
-    if (check.res.ok && check.data && check.data.admin !== undefined) {
-      isAdmin = !!check.data.admin;
-    }
-  }
-
-  // Fetch accessible users (for manager this should be subordinates; for admin = all)
   const { res, data } = await apiGet("/users", token);
   if (!res.ok) {
-    teamSection.style.display = "none";
     Utils.UI.showError?.("Failed to load team users.", "error-message");
     return;
   }
 
   const users = extractUsers(data);
 
-  // Decide if team exists:
-  // - Admin: always show
-  // - Non-admin: show if more than 1 user returned (self + at least one subordinate)
-  const hasTeam = isAdmin ? users.length > 0 : users.length > 1;
-
-  if (!hasTeam) {
-    teamSection.style.display = "none";
-    return;
-  }
-
-  teamSection.style.display = "block";
-
-  // Build per-user visits totals (parallel with a small concurrency cap)
   const normalized = users
     .map((u) => ({
-      user_id: u.user_id ?? u.id ?? u.userId ?? null,
-      username: u.username ?? u.name ?? u.user_name ?? "unknown",
+      user_id: u.user_id ?? u.id ?? null,
+      username: u.username ?? u.name ?? "unknown",
     }))
     .filter((u) => u.user_id !== null);
 
-  const results = await mapWithConcurrency(normalized, 6, async (u) => {
-    const visits = await getVisitsTotal(token, startDate, endDate, u.user_id);
-    return { ...u, visits };
+  // If /users returns empty for some reason, still show nothing gracefully
+  if (normalized.length === 0) return;
+
+  const results = await mapWithConcurrency(normalized, 4, async (u) => {
+    const stats = await getVisitStats(token, startDate, endDate, u.user_id);
+    return {
+      ...u,
+      visits: stats.total || 0,
+      collected: stats.amountSum || 0,
+    };
   });
 
-  // Sort by visits desc
   results.sort((a, b) => (b.visits || 0) - (a.visits || 0));
 
-  // Render rows
   for (const u of results) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -353,8 +341,8 @@ async function loadTeamBreakdown(token, startDate, endDate) {
         </div>
       </td>
       <td>0.0%</td>
-      <td>${u.visits || 0}</td>
-      <td>EGP 0.00</td>
+      <td>${u.visits}</td>
+      <td>${Utils.Format.currency(u.collected)}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -379,19 +367,10 @@ async function mapWithConcurrency(items, concurrency, worker) {
   return results;
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 async function exportTeamSummaryExcel(token) {
   try {
     const periodKey =
-      document.getElementById("date-range-filter").value || "month";
+      document.getElementById("date-range-filter")?.value || "month";
     const range = getRange(periodKey);
 
     const startDate = formatYYYYMMDD(range.start);
@@ -414,14 +393,11 @@ async function exportTeamSummaryExcel(token) {
     }
 
     const blob = await res.blob();
-    const now = new Date().toISOString().replace(/[:.-]/g, "").slice(0, 15); // YYYYMMDDTHHMMSS
-    // Try to use filename from Content-Disposition
-    let filename = "subordinates_summary" + now + ".xlsx";
+
+    let filename = `team_summary_${startDate}_to_${endDate}.xlsx`;
     const cd = res.headers.get("Content-Disposition") || "";
     const match = cd.match(/filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i);
-    if (match) {
-      filename = decodeURIComponent(match[1] || match[2] || filename);
-    }
+    if (match) filename = decodeURIComponent(match[1] || match[2] || filename);
 
     const URLobj = window.URL || window.webkitURL;
     if (URLobj && typeof URLobj.createObjectURL === "function") {

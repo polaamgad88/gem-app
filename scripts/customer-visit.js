@@ -2,9 +2,9 @@
 const customerSearchInput = document.getElementById("customer-search");
 const customerSuggestions = document.getElementById("customer-suggestions");
 const checkInButton = document.getElementById("checkInBtn");
-const statusDropdown = document.getElementById("status-dropdown");
 const noteInput = document.getElementById("note");
 const customerAddressInput = document.getElementById("customer-address");
+const billAmountInput = document.getElementById("bill-amount");
 
 // Map setup
 const map = L.map("map").setView([30.044015, 31.331689], 13);
@@ -120,8 +120,6 @@ document.getElementById("customer-address").addEventListener("change", (e) => {
   const selectedAddress = e.target.value;
   console.log("Selected Address:", selectedAddress);
 });
-
-// Handle Check In button click
 checkInButton.addEventListener("click", () => {
   if (!navigator.geolocation) {
     alert("Geolocation not supported");
@@ -131,15 +129,13 @@ checkInButton.addEventListener("click", () => {
   navigator.geolocation.getCurrentPosition(
     async (position) => {
       const { latitude, longitude } = position.coords;
-      if (!marker) {
-        marker = L.marker([latitude, longitude]).addTo(map);
-      }
+
+      if (!marker) marker = L.marker([latitude, longitude]).addTo(map);
       marker.setLatLng([latitude, longitude]);
       map.setView([latitude, longitude], 17);
 
-      // Use the customer ID stored in the input field's custom attribute
-      const customerId = customerSearchInput.getAttribute("data-customer-id"); // Get customer ID
-      const addressId = document.getElementById("customer-address").value; // Get address ID
+      const customerId = customerSearchInput.getAttribute("data-customer-id");
+      const addressId = document.getElementById("customer-address").value;
       const status = statusDropdown.value;
       const note = noteInput.value;
 
@@ -148,30 +144,47 @@ checkInButton.addEventListener("click", () => {
         return;
       }
 
-      // Call the backend to log the visit
+      // ✅ Only require/send amount for bill_collection
+      let amount;
+      if (status === "bill_collection") {
+        const raw = billAmountInput?.value?.trim();
+
+        if (!raw) {
+          alert("Bill amount is required for Bill Collection.");
+          return;
+        }
+
+        amount = Number(raw);
+        if (!Number.isFinite(amount) || amount < 0) {
+          alert("Bill amount must be a valid non-negative number.");
+          return;
+        }
+      }
+
       const token = localStorage.getItem("access_token");
+      const payload = {
+        customer_id: customerId,
+        customer_address_id: addressId,
+        reason: status,
+        note,
+        actual_latitude: latitude,
+        actual_longitude: longitude,
+        ...(status === "bill_collection" ? { amount } : {}), // ✅ conditional field
+      };
+
       const response = await fetch("https://order-app.gemegypt.net/api/visits/checkin", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          customer_id: customerId, // Send customer ID
-          customer_address_id: addressId, // Send address ID
-          reason: status,
-          note,
-          actual_latitude: latitude,
-          actual_longitude: longitude,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
       alert(data.message);
     },
-    (error) => {
-      alert("Error getting location: " + error.message);
-    },
+    (error) => alert("Error getting location: " + error.message),
     { enableHighAccuracy: true }
   );
 });

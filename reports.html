@@ -11,14 +11,17 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     referrerpolicy="no-referrer" />
 
-  <!-- Utils must be loaded before reports.js -->
-  <script src="./scripts/utils.js" defer></script>
+  <!-- IMPORTANT: load Utils first, then reports.js -->
+  <script src="./scripts/utils.js"></script>
   <script src="./scripts/reports.js" defer></script>
 
   <script>
     function applyTheme(mode) {
-      if (mode === "dark") document.body.classList.add("dark-mode");
-      else document.body.classList.remove("dark-mode");
+      if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
     }
 
     window.addEventListener("message", (event) => {
@@ -61,9 +64,6 @@
     body {
       background: var(--bg-main);
       color: var(--text-main);
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
     }
 
     .reports-container {
@@ -116,10 +116,6 @@
       gap: 6px;
     }
 
-    .summary-chip i {
-      font-size: 0.7rem;
-    }
-
     .right-header-actions {
       display: flex;
       align-items: center;
@@ -149,6 +145,7 @@
       box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.7);
+      flex-wrap: wrap;
     }
 
     .filters {
@@ -193,8 +190,8 @@
       align-items: center;
       gap: 6px;
       cursor: pointer;
-      transition: transform var(--transition-fast),
-        box-shadow var(--transition-fast), background var(--transition-fast);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+        background var(--transition-fast);
       box-shadow: 0 10px 24px rgba(37, 99, 235, 0.3);
       white-space: nowrap;
     }
@@ -276,12 +273,6 @@
       gap: 10px;
       position: relative;
       overflow: hidden;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-    }
-
-    .stat-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
     }
 
     .large-card {
@@ -347,12 +338,6 @@
       margin-left: 4px;
     }
 
-    .primary-subcopy {
-      margin-top: 6px;
-      font-size: 0.78rem;
-      opacity: 0.95;
-    }
-
     .secondary-stat .stat-top-row {
       display: flex;
       justify-content: space-between;
@@ -403,9 +388,10 @@
     .details-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
       gap: 10px;
       margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
     .section-title {
@@ -419,11 +405,10 @@
     .section-subtitle {
       font-size: 0.78rem;
       color: var(--text-muted);
-      margin-top: 4px;
     }
 
     .table-wrapper {
-      max-height: 360px;
+      max-height: 320px;
       overflow: auto;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-subtle);
@@ -468,11 +453,23 @@
       border-bottom: 1px solid rgba(226, 232, 240, 0.6);
     }
 
-    .performance-table tbody tr:last-child td {
-      border-bottom: none;
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    /* Dark Mode */
+    .user-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .user-name {
+      font-weight: 500;
+      font-size: 0.82rem;
+    }
+
     body.dark-mode {
       background-color: #1e1e1e;
       color: #f1f1f1;
@@ -500,7 +497,6 @@
 
     body.dark-mode .stat-label,
     body.dark-mode .stat-meta,
-    body.dark-mode .primary-subcopy,
     body.dark-mode .section-subtitle {
       color: #ddd;
     }
@@ -511,18 +507,10 @@
       box-shadow: none;
     }
 
-    body.dark-mode .apply-filter-btn:hover {
-      filter: brightness(1.05);
-    }
-
     body.dark-mode .download-btn {
       background-color: #333;
       border-color: #555;
       color: #f1f1f1;
-    }
-
-    body.dark-mode .download-btn:hover {
-      background-color: #2a2a2a;
     }
 
     body.dark-mode .action-bar {
@@ -555,23 +543,10 @@
       background-color: #2a2a2a;
     }
 
-    body.dark-mode .performance-table tbody tr:nth-child(even) {
-      background-color: #262626;
-    }
-
-    body.dark-mode .performance-table tbody tr:hover {
-      background-color: #333;
-    }
-
     body.dark-mode .filter-select {
       background-color: #333;
       border: 1px solid #555;
       color: #fff;
-    }
-
-    body.dark-mode .summary-chip {
-      background: #333;
-      color: #ddd;
     }
   </style>
 </head>
@@ -587,9 +562,10 @@
         <div class="page-subtitle">
           Real-time visibility into team performance, visits, and collections.
         </div>
+
         <div class="summary-chip">
           <i class="fa-solid fa-circle"></i>
-          Live data · Updated just now
+          <span id="range-label">This month</span>
         </div>
       </div>
 
@@ -601,10 +577,13 @@
       </div>
     </div>
 
+    <div id="error-message" style="display:none;color:#dc2626;margin:10px 2px;"></div>
+
     <div class="action-bar">
       <div class="filters">
-        <span class="filter-group-label">Date Range</span>
+        <span class="filter-group-label">Filters</span>
 
+        <!-- removed last quarter + user filter -->
         <select id="date-range-filter" class="filter-select">
           <option value="month">This Month</option>
           <option value="year">This Year</option>
@@ -616,13 +595,13 @@
         </button>
       </div>
 
-      <div class="section-subtitle" id="range-label">
-        Default: this month (day 1 → last day)
+      <div class="section-subtitle">
+        Dashboard shows summary + team breakdown · full details via export.
       </div>
     </div>
 
     <div class="summary-grid">
-      <div class="stat-card primary-stat large-card achieved-card">
+      <div class="stat-card primary-stat large-card">
         <div class="large-card-header">
           <div class="card-icon">
             <i class="fas fa-bullseye"></i>
@@ -632,91 +611,84 @@
             <span id="trend-target-text">0.0% vs previous</span>
           </div>
         </div>
-        <div class="card-info">
-          <div class="stat-label" style="color: #6b7280">Achieved Target %</div>
-          <div class="stat-value" id="target-achieved" style="color: #db2a3c">
+
+        <div>
+          <div class="stat-label" style="color:#6b7280;">Achieved Target %</div>
+          <div class="stat-value" id="target-achieved" style="color:#db2a3c;">
             0.0<span class="unit">%</span>
-          </div>
-          <div class="primary-subcopy" id="target-subcopy">
-            Target endpoint not added yet · showing <span>0%</span>.
           </div>
         </div>
       </div>
 
-      <div class="stat-card secondary-stat collection-card">
+      <div class="stat-card secondary-stat">
         <div class="stat-top-row">
           <div class="card-icon">
             <i class="fas fa-hand-holding-dollar"></i>
           </div>
           <div class="stat-trend trend-up" id="trend-collected">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <i class="fa-solid fa-minus"></i>
             <span id="trend-collected-text">0.0%</span>
           </div>
         </div>
-        <div class="card-info">
+        <div>
           <div class="stat-label">Collected Amounts</div>
           <div class="stat-value" id="collected-amounts">EGP 0.00</div>
-          <div class="stat-meta">Endpoint not added yet.</div>
+          <div class="stat-meta">Sum of visits.amount in the selected range.</div>
         </div>
       </div>
 
-      <div class="stat-card secondary-stat linked-customers-card">
+      <div class="stat-card secondary-stat">
         <div class="stat-top-row">
           <div class="card-icon">
             <i class="fas fa-users"></i>
           </div>
           <div class="stat-trend trend-up" id="trend-linked">
-            <i class="fa-solid fa-arrow-up"></i>
+            <i class="fa-solid fa-minus"></i>
             <span id="trend-linked-text">0</span>
           </div>
         </div>
-        <div class="card-info">
+        <div>
           <div class="stat-label">Number of Customers Linked</div>
           <div class="stat-value" id="customers-linked">0</div>
-          <div class="stat-meta">
-            Total customers accessible in the selected range.
-          </div>
+          <div class="stat-meta">Total accessible customers.</div>
         </div>
       </div>
 
-      <div class="stat-card secondary-stat visited-customers-card">
+      <div class="stat-card secondary-stat">
         <div class="stat-top-row">
           <div class="card-icon">
             <i class="fas fa-map-marker-alt"></i>
           </div>
           <div class="stat-trend trend-up" id="trend-visits">
-            <i class="fa-solid fa-arrow-up"></i>
+            <i class="fa-solid fa-minus"></i>
             <span id="trend-visits-text">0.0%</span>
           </div>
         </div>
-        <div class="card-info">
+        <div>
           <div class="stat-label">Number of Visits</div>
           <div class="stat-value" id="visits-count">0</div>
-          <div class="stat-meta">Visits in the selected date range.</div>
+          <div class="stat-meta">Total visits in the selected range.</div>
         </div>
       </div>
     </div>
 
-    <!-- TEAM SECTION -->
-    <div class="details-section" id="team-section" style="display: none">
+    <!-- TEAM SECTION (always visible) -->
+    <div class="details-section" id="team-section">
       <div class="details-header">
         <div>
           <div class="section-title">Team Performance Breakdown</div>
-          <div class="section-subtitle" id="team-subtitle">
-            Per-user visits in the selected date range.
+          <div class="section-subtitle">
+            Per-user visits and collected amounts in the selected period.
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <button class="download-btn" id="export-team-btn">
             <i class="fas fa-file-arrow-down"></i>
             Export Team Summary
           </button>
+          <div class="section-subtitle">Uses: /visits/report/subordinates-summary/excel</div>
         </div>
-      </div>
-
-      <div class="section-subtitle" style="margin-bottom: 10px">
-        Export downloads: <b>Subordinates summary Excel</b> for the whole team.
       </div>
 
       <div class="table-wrapper">
@@ -729,12 +701,12 @@
               <th>Collected</th>
             </tr>
           </thead>
-          <tbody id="team-table-body"></tbody>
+          <tbody id="team-table-body">
+            <!-- filled by reports.js -->
+          </tbody>
         </table>
       </div>
     </div>
-
-    <div id="error-message" style="display:none; margin-top: 14px; color: #dc2626; font-weight: 600;"></div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
