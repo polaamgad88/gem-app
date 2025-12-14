@@ -259,7 +259,7 @@ function renderUsers(users) {
       <button onclick="openPasswordModal(${
         user.user_id
       })">Change Password</button>
-<button onclick="openAssignNumberModal(${user.user_id})">Assign Numbers</button>
+<button onclick="openAssignNumberModal(${user.user_id})">Assign Target</button>
       <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
         ${isActive ? "Deactivate" : "Activate"}
       </button>
@@ -276,7 +276,7 @@ function renderUsers(users) {
       <button onclick="openPasswordModal(${
         user.user_id
       })">Change Password</button>
-<button onclick="openAssignNumberModal(${user.user_id})">Assign Numbers</button>
+<button onclick="openAssignNumberModal(${user.user_id})">Assign Target</button>
       <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
         ${isActive ? "Deactivate" : "Activate"}
       </button>
