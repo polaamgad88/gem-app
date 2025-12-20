@@ -125,42 +125,43 @@
     body.dark-mode #customerFilter {
       background-color: #333;
     }
-@media screen and (max-width: 768px) {
-  .filters {
-    display: flex;
-    flex-direction: column;
-    align-items: center;     
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-  }
 
-  .filter-group {
-    width: 90%;              
-    max-width: 350px;        
-    margin-bottom: 20px;     
-    display: flex;
-    flex-direction: column;   
-    text-align: left;       
-  }
+    @media screen and (max-width: 768px) {
+      .filters {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
 
-  .filter-group label {
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-size: 14px;
-  }
+      .filter-group {
+        width: 90%;
+        max-width: 350px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+      }
 
-  .filter-group select, 
-  .filter-group input {
-    width: 100% !important;  
-    height: 45px;            
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;  
-    font-size: 16px;        
-  }
-}
+      .filter-group label {
+        margin-bottom: 8px;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .filter-group select,
+      .filter-group input {
+        width: 100% !important;
+        height: 45px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
 
@@ -301,7 +302,7 @@
       <button id="closeMapBtn" class="close-btn">×</button>
 
       <div class="map-notes-section top">
-        <p class="note-helper-text">Note...</p>
+        <p class="note-helper-text" id="mapNote">Note...</p>
       </div>
       <div id="map"></div>
     </div>

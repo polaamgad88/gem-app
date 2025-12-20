@@ -475,6 +475,7 @@ function renderVisits(data) {
         address_text: v.address_text ?? "-",
         distance_m: dist,
         within_200m: within,
+        note: v.note,
       })
     );
     tbody.appendChild(tr);
@@ -537,8 +538,18 @@ function openMapPopup(payload) {
     address_text,
     distance_m,
     within_200m,
+    note,
   } = payload || {};
-
+  if (note) {
+    const noteEl = document.getElementById("mapNote");
+    if (noteEl) {
+      noteEl.textContent = note;
+      noteEl.style.color = "#000000";
+      noteEl.style.fontWeight = "bold";
+      noteEl.style.fontSize = "17px";
+      noteEl.style.textAlign = "center";
+    }
+  }
   const pLatN = numOrNaN(pLat);
   const pLonN = numOrNaN(pLon);
   const aLatN = numOrNaN(aLat);
