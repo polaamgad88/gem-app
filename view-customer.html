@@ -324,6 +324,72 @@
     body.dark-mode #map {
       border: 1px solid #444;
     }
+/* @media screen and (max-width: 768px) {
+  #address-modal .modal-content {
+    width: 90%;           
+    max-height: 85vh;      
+    overflow-y: auto;      
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    position: relative;
+  }
+
+  #map {
+    height: 90vh;        
+    min-height: 200px;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  #address-save-btn {
+    width: 100%;         
+    padding: 12px;
+    font-size: 16px;
+    margin-top: 10px;
+    flex-shrink: 0;       
+  }
+} */
+  @media screen and (max-width: 768px) {
+  #address-modal .modal-content {
+    width: 90%;           
+    max-height: 80vh;      
+    overflow-y: scroll;   
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    position: relative;
+    background-color: white;
+    border-radius: 8px;
+    -webkit-overflow-scrolling: touch; 
+  }
+  #map {
+    height: 80px;         
+    min-height: 80px;     
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    flex-shrink: 0;       
+  }
+
+  #address-save-btn {
+    width: 100%;           
+    padding: 15px;         
+    font-size: 18px;
+    margin-top: 10px;
+    margin-bottom: 20px;   
+    flex-shrink: 0;        
+    background-color: #28a745; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  #address-input, label {
+    flex-shrink: 0;
+    margin-bottom: 10px;
+  }
+}
   </style>
   <script>
     function applyTheme(mode) {
