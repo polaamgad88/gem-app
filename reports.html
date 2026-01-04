@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     referrerpolicy="no-referrer" />
 
@@ -17,11 +16,8 @@
 
   <script>
     function applyTheme(mode) {
-      if (mode === "dark") {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
-      }
+      if (mode === "dark") document.body.classList.add("dark-mode");
+      else document.body.classList.remove("dark-mode");
     }
 
     window.addEventListener("message", (event) => {
@@ -162,19 +158,14 @@
       letter-spacing: 0.08em;
     }
 
-    .filter-select {
+    /* ✅ New: date inputs (dashboard-like date filtering) */
+    .filter-date {
       border-radius: 999px;
       border: 1px solid var(--border-subtle);
-      padding: 6px 28px 6px 12px;
+      padding: 6px 12px;
       font-size: 0.8rem;
       background: #ffffff;
       color: var(--text-main);
-      appearance: none;
-      background-image: linear-gradient(45deg, transparent 50%, #9ca3af 50%),
-        linear-gradient(135deg, #9ca3af 50%, transparent 50%);
-      background-position: calc(100% - 14px) 11px, calc(100% - 10px) 11px;
-      background-size: 5px 5px, 5px 5px;
-      background-repeat: no-repeat;
       min-width: 150px;
     }
 
@@ -190,8 +181,7 @@
       align-items: center;
       gap: 6px;
       cursor: pointer;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
-        background var(--transition-fast);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
       box-shadow: 0 10px 24px rgba(37, 99, 235, 0.3);
       white-space: nowrap;
     }
@@ -214,9 +204,7 @@
       align-items: center;
       gap: 8px;
       color: var(--text-main);
-      transition: background var(--transition-fast),
-        box-shadow var(--transition-fast), transform var(--transition-fast),
-        border-color var(--transition-fast);
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
       white-space: nowrap;
     }
 
@@ -543,37 +531,37 @@
       background-color: #2a2a2a;
     }
 
-    body.dark-mode .filter-select {
+    /* dark mode date inputs */
+    body.dark-mode .filter-date {
       background-color: #333;
       border: 1px solid #555;
       color: #fff;
     }
 
-.stat-small-wrapper {
-  display: flex;            
-  gap: 20px;
-  margin-top: 8px;
-}
+    .stat-small-wrapper {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+    }
 
-.stat-small {
-  text-align: center;
-}
+    .stat-small {
+      text-align: center;
+    }
 
-.stat-value.small {
-  font-size: 22px;          
-  opacity: 0.8;
-}
+    .stat-value.small {
+      font-size: 22px;
+      opacity: 0.8;
+    }
 
-.stat-text {
-  font-size: 14px;          
-  color: #6b7280;
-  margin-top: 2px;
-}
+    .stat-text {
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
 
-.unit {
-  font-size: 11px;
-}
-
+    .unit {
+      font-size: 11px;
+    }
   </style>
 </head>
 
@@ -591,7 +579,7 @@
 
         <div class="summary-chip">
           <i class="fa-solid fa-circle"></i>
-          <span id="range-label">This month</span>
+          <span id="range-label">Selected range</span>
         </div>
       </div>
 
@@ -605,16 +593,16 @@
 
     <div id="error-message" style="display:none;color:#dc2626;margin:10px 2px;"></div>
 
+    <!-- ✅ Updated: custom date range like dashboard -->
     <div class="action-bar">
       <div class="filters">
         <span class="filter-group-label">Filters</span>
 
-        <!-- removed last quarter + user filter -->
-        <select id="date-range-filter" class="filter-select">
-          <option value="Week">This Week</option>
-          <option value="month">This Month</option>
-          <option value="year">This Year</option>
-        </select>
+        <span class="filter-group-label" style="margin-left:6px;">From</span>
+        <input type="date" id="dateStart" class="filter-date" />
+
+        <span class="filter-group-label">To</span>
+        <input type="date" id="dateEnd" class="filter-date" />
 
         <button class="apply-filter-btn" id="apply-filters-btn">
           <i class="fa-solid fa-sliders"></i>
@@ -644,17 +632,18 @@
           <div class="stat-value" id="target-achieved" style="color:#db2a3c;">
             0.0<span class="unit">%</span>
           </div>
-            <div class="stat-small-wrapper">
-    <div class="stat-small">
-      <div class="stat-value small">60<span class="unit">%</span></div>
-      <div class="stat-text">Cairo</div>
-    </div>
 
-    <div class="stat-small">
-      <div class="stat-value small">72<span class="unit">%</span></div>
-      <div class="stat-text">Region</div>
-    </div>
-  </div>
+          <div class="stat-small-wrapper">
+            <div class="stat-small">
+              <div class="stat-value small">60<span class="unit">%</span></div>
+              <div class="stat-text">Cairo</div>
+            </div>
+
+            <div class="stat-small">
+              <div class="stat-value small">72<span class="unit">%</span></div>
+              <div class="stat-text">Region</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -739,9 +728,7 @@
               <th>Collected</th>
             </tr>
           </thead>
-          <tbody id="team-table-body">
-            <!-- filled by reports.js -->
-          </tbody>
+          <tbody id="team-table-body"></tbody>
         </table>
       </div>
     </div>

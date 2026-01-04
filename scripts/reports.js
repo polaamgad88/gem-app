@@ -1,3 +1,5 @@
+// reports.js (full updated file)
+
 document.addEventListener("DOMContentLoaded", async () => {
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
@@ -5,6 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.__API_TOKEN = token;
 
   setTodayPill();
+  initDateInputs(); // ✅ new
 
   const applyBtn = document.getElementById("apply-filters-btn");
   if (applyBtn) {
@@ -43,52 +46,97 @@ function formatYYYYMMDD(dateObj) {
   return `${y}-${m}-${d}`;
 }
 
+function parseYYYYMMDD(s) {
+  const str = String(s || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return null;
+  const [y, m, d] = str.split("-").map((x) => Number(x));
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+
+function startOfThisMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+function todayDate() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 /**
- * Month: start=1st, end=last day
- * Year: start=Jan 1, end=Dec 31
- * Backend treats end_date "YYYY-MM-DD" as exclusive next day => passing last day is correct.
+ * ✅ Initialize the date inputs to "this month → today" if empty
+ * (You can change it to full month end if you prefer.)
  */
-function getRange(periodKey) {
-  const now = new Date();
+function initDateInputs() {
+  const startEl = document.getElementById("dateStart");
+  const endEl = document.getElementById("dateEnd");
+  if (!startEl || !endEl) return;
 
-  if (periodKey === "year") {
-    return {
-      start: new Date(now.getFullYear(), 0, 1),
-      end: new Date(now.getFullYear(), 11, 31),
-    };
+  if (!startEl.value) startEl.value = formatYYYYMMDD(startOfThisMonth());
+  if (!endEl.value) endEl.value = formatYYYYMMDD(todayDate());
+}
+
+/**
+ * ✅ Read selected range from inputs, with safe fallback to "this month → today"
+ */
+function getSelectedRange() {
+  const startEl = document.getElementById("dateStart");
+  const endEl = document.getElementById("dateEnd");
+
+  let startStr = (startEl?.value || "").trim();
+  let endStr = (endEl?.value || "").trim();
+
+  let start = parseYYYYMMDD(startStr);
+  let end = parseYYYYMMDD(endStr);
+
+  if (!start || !end) {
+    start = startOfThisMonth();
+    end = todayDate();
+    startStr = formatYYYYMMDD(start);
+    endStr = formatYYYYMMDD(end);
+
+    if (startEl) startEl.value = startStr;
+    if (endEl) endEl.value = endStr;
   }
 
-  // default month
+  // if user picks reversed, swap
+  if (start.getTime() > end.getTime()) {
+    const tmp = start;
+    start = end;
+    end = tmp;
+    startStr = formatYYYYMMDD(start);
+    endStr = formatYYYYMMDD(end);
+    if (startEl) startEl.value = startStr;
+    if (endEl) endEl.value = endStr;
+  }
+
   return {
-    start: new Date(now.getFullYear(), now.getMonth(), 1),
-    end: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+    start,
+    end,
+    startStr: formatYYYYMMDD(start),
+    endStr: formatYYYYMMDD(end),
   };
 }
 
-function getPreviousRange(periodKey) {
-  const now = new Date();
+/**
+ * ✅ Previous range with SAME length as selected range:
+ * prevEnd = day before start, prevStart = prevEnd - (len-1 days)
+ */
+function getPreviousSameLengthRange(start, end) {
+  const msDay = 24 * 60 * 60 * 1000;
+  const lenDays = Math.round((end.getTime() - start.getTime()) / msDay) + 1;
 
-  if (periodKey === "year") {
-    const y = now.getFullYear() - 1;
-    return { start: new Date(y, 0, 1), end: new Date(y, 11, 31) };
-  }
+  const prevEnd = new Date(start.getTime() - msDay);
+  const prevStart = new Date(prevEnd.getTime() - (lenDays - 1) * msDay);
 
-  // previous month
-  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  return {
-    start: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1),
-    end: new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0),
-  };
+  return { prevStart, prevEnd };
 }
 
-function setRangeLabel(periodKey, start, end) {
+function setRangeLabel(startStr, endStr) {
   const el = document.getElementById("range-label");
   if (!el) return;
-
-  el.textContent =
-    periodKey === "year"
-      ? `This year (${formatYYYYMMDD(start)} → ${formatYYYYMMDD(end)})`
-      : `This month (${formatYYYYMMDD(start)} → ${formatYYYYMMDD(end)})`;
+  el.textContent = `${startStr} → ${endStr}`;
 }
 
 function pctChange(current, previous) {
@@ -186,13 +234,10 @@ async function getVisitStats(token, startDate, endDate, userId = null) {
       if (!Number.isNaN(a)) amountSum += a;
     }
 
-    // stop when we've fetched all
     if (page * limit >= total) break;
     if (visits.length < limit) break;
 
     page += 1;
-
-    // safety guard
     if (page > 200) break;
   }
 
@@ -230,19 +275,14 @@ function escapeHtml(str) {
 async function loadDashboard(token) {
   Utils.UI.hideError?.("error-message");
 
-  const periodKey =
-    document.getElementById("date-range-filter")?.value || "month";
+  // ✅ Use dashboard-like date inputs
+  const { start, end, startStr, endStr } = getSelectedRange();
+  setRangeLabel(startStr, endStr);
 
-  const range = getRange(periodKey);
-  const prevRange = getPreviousRange(periodKey);
-
-  const startDate = formatYYYYMMDD(range.start);
-  const endDate = formatYYYYMMDD(range.end);
-
-  const prevStart = formatYYYYMMDD(prevRange.start);
-  const prevEnd = formatYYYYMMDD(prevRange.end);
-
-  setRangeLabel(periodKey, range.start, range.end);
+  // previous same-length range
+  const { prevStart, prevEnd } = getPreviousSameLengthRange(start, end);
+  const prevStartStr = formatYYYYMMDD(prevStart);
+  const prevEndStr = formatYYYYMMDD(prevEnd);
 
   // ---- Target (mock) ----
   const targetPct = 0;
@@ -253,8 +293,8 @@ async function loadDashboard(token) {
 
   // ---- Main stats: visits + collected (sum amount) ----
   const [thisStats, prevStats] = await Promise.all([
-    getVisitStats(token, startDate, endDate),
-    getVisitStats(token, prevStart, prevEnd),
+    getVisitStats(token, startStr, endStr),
+    getVisitStats(token, prevStartStr, prevEndStr),
   ]);
 
   const visitsThis = thisStats.total || 0;
@@ -270,14 +310,11 @@ async function loadDashboard(token) {
   if (collectedEl) collectedEl.textContent = Utils.Format.currency(amountThis);
 
   // trends
-  const visitsPct = pctChange(visitsThis, visitsPrev);
-  setTrend("trend-visits", visitsPct);
-
-  const amountPct = pctChange(amountThis, amountPrev);
-  setTrend("trend-collected", amountPct);
+  setTrend("trend-visits", pctChange(visitsThis, visitsPrev));
+  setTrend("trend-collected", pctChange(amountThis, amountPrev));
 
   // Badge trend (keep using visits trend for now)
-  setBadgeTrend(visitsPct);
+  setBadgeTrend(pctChange(visitsThis, visitsPrev));
 
   // ---- customers linked ----
   const customersTotal = await getCustomersTotal(token);
@@ -292,7 +329,7 @@ async function loadDashboard(token) {
   }
 
   // ---- team breakdown ----
-  await loadTeamBreakdown(token, startDate, endDate);
+  await loadTeamBreakdown(token, startStr, endStr);
 }
 
 async function loadTeamBreakdown(token, startDate, endDate) {
@@ -316,7 +353,6 @@ async function loadTeamBreakdown(token, startDate, endDate) {
     }))
     .filter((u) => u.user_id !== null);
 
-  // If /users returns empty for some reason, still show nothing gracefully
   if (normalized.length === 0) return;
 
   const results = await mapWithConcurrency(normalized, 4, async (u) => {
@@ -369,16 +405,11 @@ async function mapWithConcurrency(items, concurrency, worker) {
 
 async function exportTeamSummaryExcel(token) {
   try {
-    const periodKey =
-      document.getElementById("date-range-filter")?.value || "month";
-    const range = getRange(periodKey);
-
-    const startDate = formatYYYYMMDD(range.start);
-    const endDate = formatYYYYMMDD(range.end);
+    const { startStr, endStr } = getSelectedRange();
 
     const params = new URLSearchParams();
-    params.append("start_date", startDate);
-    params.append("end_date", endDate);
+    params.append("start_date", startStr);
+    params.append("end_date", endStr);
 
     const url = `${BASE_URL}/visits/report/subordinates-summary/excel?${params.toString()}`;
 
@@ -394,7 +425,7 @@ async function exportTeamSummaryExcel(token) {
 
     const blob = await res.blob();
 
-    let filename = `team_summary_${startDate}_to_${endDate}.xlsx`;
+    let filename = `team_summary_${startStr}_to_${endStr}.xlsx`;
     const cd = res.headers.get("Content-Disposition") || "";
     const match = cd.match(/filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i);
     if (match) filename = decodeURIComponent(match[1] || match[2] || filename);
