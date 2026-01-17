@@ -1,116 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Customer Visit - Check In</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Leaflet CSS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      crossorigin
-    />
-    <link rel="stylesheet" href="./styles/base.css" />
-    <link rel="stylesheet" href="./styles/customer-visit.css" />
-    <script src="./scripts/customer-visit.js" defer></script>
-    <script>
-      function applyTheme(mode) {
-        if (mode === "dark") {
-          document.body.classList.add("dark-mode");
-        } else {
-          document.body.classList.remove("dark-mode");
-        }
+<head>
+  <meta charset="utf-8" />
+  <title>Customer Visit - Check In</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/customer-visit.css" />
+  <script src="./scripts/customer-visit.js" defer></script>
+
+  <script>
+    function applyTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
       }
-
-      window.addEventListener("message", (event) => {
-        if (event.data.theme) {
-          applyTheme(event.data.theme);
-          localStorage.setItem("theme", event.data.theme);
-        }
-      });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        applyTheme(savedTheme);
-      });
-    </script>
-  </head>
-
-  <body>
-    <div class="top-inputs">
-      <!-- Customer Dropdown -->
-      <div
-        class="custom-customer-select input-container"
-        style="flex: 1; position: relative"
-      >
-        <input
-          type="text"
-          id="customer-search"
-          placeholder="Search Customer..."
-          autocomplete="off"
-        />
-        <ul id="customer-suggestions" class="dropdown-list"></ul>
-      </div>
-
-      <!-- Status Dropdown -->
-      <div class="status-select input-container" style="flex: 0.5">
-        <select id="status-dropdown">
-          <option value="">Select Status...</option>
-          <option value="making_order">Making Order</option>
-          <option value="delivering_order">Delivering Order</option>
-          <option value="bill_collection">Bill Collection</option>
-          <option value="receiving_returns">Receiving Returns</option>
-        </select>
-      </div>
-      <!-- Customer Address -->
-      <div class="input-container">
-        <select id="customer-address" class="address-dropdown">
-          <option value="">Select Customer Address</option>
-        </select>
-      </div>
-<div class="input-container-bill-collection" id="billDiv">
-  <input
-    id="bill-amount"
-    type="number"
-    placeholder="Enter bill amount"
-  />
-</div>
-<script>
-  const statusDropdown = document.getElementById("status-dropdown");
-  const billDiv = document.getElementById("billDiv");
-
-  statusDropdown.addEventListener("change", function () {
-    if (this.value === "bill_collection") {
-      billDiv.style.display = "block";
-    } else {
-      billDiv.style.display = "none";
     }
-  });
-</script>
 
-      <!-- Note Field -->
-      <div class="input-container">
-        <textarea
-          id="note"
-          placeholder="Enter a note (optional)"
-          rows="4"
-        ></textarea>
-      </div>
+    window.addEventListener("message", (event) => {
+      if (event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
 
-      <!-- Check In Button -->
-      <div class="check-in-container">
-        <button id="checkInBtn">Check In</button>
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      applyTheme(savedTheme);
+    });
+  </script>
+</head>
+
+<body>
+  <div class="top-inputs">
+    <!-- Customer Dropdown -->
+    <div class="custom-customer-select input-container" style="flex: 1; position: relative">
+      <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off" />
+      <ul id="customer-suggestions" class="dropdown-list"></ul>
+    </div>
+
+    <!-- Status Dropdown -->
+    <div class="status-select input-container" style="flex: 0.5">
+      <select id="status-dropdown">
+        <option value="">Select Status...</option>
+        <option value="making_order">Making Order</option>
+        <option value="delivering_order">Delivering Order</option>
+        <option value="bill_collection">Bill Collection</option>
+        <option value="receiving_returns">Receiving Returns</option>
+      </select>
+    </div>
+
+    <!-- Customer Address -->
+    <div class="input-container">
+      <select id="customer-address" class="address-dropdown">
+        <option value="">Select Customer Address</option>
+      </select>
+    </div>
+
+    <!-- Bill Amount -->
+    <div class="input-container-bill-collection" id="billDiv" style="display: none;">
+      <input id="bill-amount" type="number" placeholder="Enter bill amount" />
+    </div>
+
+    <!-- Note Field -->
+    <div class="input-container">
+      <textarea id="note" placeholder="Enter a note (optional)" rows="4"></textarea>
+    </div>
+
+    <!-- Location status -->
+    <div class="input-container" style="flex: 1;">
+      <div id="locationStatus" style="font-size: 12px; opacity: 0.8;">
+        Location: waiting for permission...
       </div>
     </div>
 
-    <!-- Map -->
-    <div id="map"></div>
+    <!-- Check In Button -->
+    <div class="check-in-container">
+      <button id="checkInBtn">Check In</button>
+    </div>
+  </div>
 
-    <!-- Leaflet JS -->
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      crossorigin
-    ></script>
-  </body>
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
+</body>
+
 </html>
