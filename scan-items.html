@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Scan Order Items</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin
+  />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/scan-items.css" />
+  <script src="./scripts/scan-items.js" defer></script>
+
+  <script>
+    function applyTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
+    }
+
+    window.addEventListener("message", (event) => {
+      if (event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      applyTheme(savedTheme);
+    });
+  </script>
+</head>
+<body>
+  <main class="scan-items-page">
+    <section class="scan-items-container">
+      <div class="page-header">
+        <h1>Scan Order Items</h1>
+        <p>Load an order, scan or enter item barcodes, then finish the process.</p>
+      </div>
+
+      <!-- Order Search -->
+      <section class="card order-search-card">
+        <div class="section-title">Find Order</div>
+
+        <div class="order-search-row">
+          <div class="field-group order-id-group">
+            <label for="orderIdInput">Order ID</label>
+            <input
+              type="text"
+              id="orderIdInput"
+              class="input"
+              placeholder="Enter order ID"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="search-btn-group">
+            <button id="searchOrderBtn" class="btn btn-primary" type="button">
+              Search
+            </button>
+          </div>
+        </div>
+
+        <div id="orderSearchLoader" class="search-loader hidden">
+          <div class="spinner"></div>
+          <span>Searching for order...</span>
+        </div>
+
+        <div id="orderSearchMessage" class="search-message hidden"></div>
+      </section>
+
+      <!-- Loaded Order -->
+      <section id="loadedOrderSection" class="card loaded-order-card hidden">
+        <div class="section-title">Ordered Items</div>
+
+        <div class="order-summary">
+          <div><strong>Order ID:</strong> <span id="loadedOrderId">-</span></div>
+          <div><strong>Status:</strong> <span id="loadedOrderStatus">-</span></div>
+          <div><strong>Customer:</strong> <span id="loadedCustomerName">-</span></div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>SKU</th>
+                <th>Qty</th>
+                <th>C</th>
+                <th>R</th>
+              </tr>
+            </thead>
+            <tbody id="orderedItemsTableBody">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Barcode Input Mode -->
+        <div class="barcode-method-block">
+          <label class="method-label">Barcode Input Method</label>
+
+          <div class="scanner-mode-switch" role="tablist" aria-label="Barcode input method">
+            <button
+              type="button"
+              id="modeCameraBtn"
+              class="mode-btn active"
+              data-mode="camera"
+            >
+              Scanner Camera
+            </button>
+            <button
+              type="button"
+              id="modeManualBtn"
+              class="mode-btn"
+              data-mode="manual"
+            >
+              Manual Entry
+            </button>
+          </div>
+        </div>
+
+        <!-- Scanner / Manual -->
+        <div class="scanner-submit-row">
+          <div class="scanner-box">
+            <label for="barcodeInput" class="scanner-main-label">Barcode Scanner / Camera</label>
+
+            <!-- Camera mode -->
+            <div id="cameraModeSection" class="scanner-mode-panel">
+              <div id="scannerCamera" class="scanner-camera">
+                <video id="scannerVideo" class="scanner-video" autoplay playsinline muted></video>
+
+                <div class="scanner-overlay">
+                  <div class="barcode-finder">
+                    <div class="finder-corner tl"></div>
+                    <div class="finder-corner tr"></div>
+                    <div class="finder-corner bl"></div>
+                    <div class="finder-corner br"></div>
+                    <div class="scan-line"></div>
+                  </div>
+
+                  <div class="scanner-hint">Move the finder over a barcode</div>
+                </div>
+              </div>
+
+              <input
+                type="text"
+                id="barcodeInput"
+                class="input"
+                placeholder="Scanned barcode will appear here"
+                readonly
+              />
+            </div>
+
+            <!-- Manual mode -->
+            <div id="manualModeSection" class="scanner-mode-panel hidden">
+              <input
+                type="text"
+                id="manualBarcodeInput"
+                class="input"
+                placeholder="Enter barcode manually"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="scanner-submit-btn">
+            <button id="submitScanBtn" class="btn btn-secondary" type="button">
+              Submit
+            </button>
+          </div>
+        </div>
+
+        <div class="finish-row">
+          <button id="finishOrderBtn" class="btn btn-success" type="button">
+            Finish
+          </button>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
