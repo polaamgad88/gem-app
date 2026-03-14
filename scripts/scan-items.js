@@ -18,19 +18,17 @@ document.addEventListener("DOMContentLoaded", () => {
     "orderedItemsTableBody",
   );
 
+  const submitScanBtn = document.getElementById("submitScanBtn");
+  const finishOrderBtn = document.getElementById("finishOrderBtn");
+  const startCheckingBtn = document.getElementById("startCheckingBtn");
+
   const modeCameraBtn = document.getElementById("modeCameraBtn");
   const modeManualBtn = document.getElementById("modeManualBtn");
   const cameraModeSection = document.getElementById("cameraModeSection");
   const manualModeSection = document.getElementById("manualModeSection");
   const barcodeInput = document.getElementById("barcodeInput");
   const manualBarcodeInput = document.getElementById("manualBarcodeInput");
-  const finishOrderBtn = document.getElementById("finishOrderBtn");
-
-  enhanceUi();
-
-  const submitScanBtn = document.getElementById("submitScanBtn");
   const scanQtyInput = document.getElementById("scanQtyInput");
-  const startCheckingBtn = document.getElementById("startCheckingBtn");
 
   let cameraStream = null;
   let loadedOrder = null;
@@ -124,6 +122,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  orderedItemsTableBody.addEventListener("click", (event) => {
+    const minusBtn = event.target.closest(".minus-btn");
+    if (!minusBtn) return;
+    if (!canEditDraft()) return;
+
+    const row = minusBtn.closest("tr");
+    if (!row) return;
+
+    const index = Number(row.dataset.index);
+    const item = loadedOrder?.items?.[index];
+    if (!item) return;
+
+    const nextChecked = Math.max(0, Number(item.draft_qty_checked || 0) - 1);
+    updateDraftItemAtIndex(index, nextChecked);
+    updateRowFromItem(row, loadedOrder.items[index]);
+
+    highlightRow(row);
+    showMessage(
+      `Reduced ${item.product_name}. Final checked = ${loadedOrder.items[index].draft_qty_checked}.`,
+      false,
+    );
+  });
+
+  orderedItemsTableBody.addEventListener("input", (event) => {
+    const target = event.target;
+    if (!target.classList.contains("final-checked-input")) return;
+    if (!canEditDraft()) return;
+
+    handleFinalCheckedInput(target);
+  });
+
+  orderedItemsTableBody.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!target.classList.contains("final-checked-input")) return;
+    if (!canEditDraft()) return;
+
+    handleFinalCheckedInput(target, true);
+  });
+
   if (startCheckingBtn) {
     startCheckingBtn.addEventListener("click", async () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
@@ -150,6 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (["checked", "opened", "reopened"].includes(currentStatus)) {
           showMessage("This order is already ready for checking.", false);
           updateActionButtons();
+          setDraftInputsDisabled(false);
           return;
         }
 
@@ -174,9 +212,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (submitScanBtn) {
-    submitScanBtn.addEventListener("click", async () => {
+    submitScanBtn.addEventListener("click", () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
         alert("Please load a SAP order first.");
+        return;
+      }
+
+      if (!canEditDraft()) {
+        alert("Start or reopen checking first.");
         return;
       }
 
@@ -196,48 +239,35 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      try {
-        submitScanBtn.disabled = true;
-        showMessage("");
+      const matched = findMatchingItemRow(barcode);
 
-        const token = await getAuthToken();
-        if (!token) {
-          throw new Error("Authentication token not found.");
-        }
-
-        const sapOrderId = loadedOrder.sap_order.sap_order_id;
-        const scanResult = await scanSapOrderItem(
-          sapOrderId,
-          barcode,
-          incrementBy,
-          token,
-        );
-
-        updateItemRowFromScan(scanResult);
-        updateLoadedOrderItemState(scanResult);
-
-        if (barcodeInput) barcodeInput.value = "";
-        if (manualBarcodeInput) manualBarcodeInput.value = "";
-
-        if (
-          manualModeSection &&
-          !manualModeSection.classList.contains("hidden") &&
-          manualBarcodeInput
-        ) {
-          manualBarcodeInput.focus();
-        }
-
-        showMessage(
-          scanResult.message ||
-            `Checked ${scanResult.product_name} successfully.`,
-          false,
-        );
-      } catch (error) {
-        console.error("Scan failed:", error);
-        showMessage(error.message || "Failed to check item.", true);
-      } finally {
-        submitScanBtn.disabled = false;
+      if (!matched) {
+        showMessage("This barcode does not match any item in the order.", true);
+        return;
       }
+
+      const nextChecked =
+        Number(matched.item.draft_qty_checked || 0) + incrementBy;
+
+      updateDraftItemAtIndex(matched.index, nextChecked);
+      updateRowFromItem(matched.row, loadedOrder.items[matched.index]);
+
+      if (barcodeInput) barcodeInput.value = "";
+      if (manualBarcodeInput) manualBarcodeInput.value = "";
+
+      if (
+        manualModeSection &&
+        !manualModeSection.classList.contains("hidden") &&
+        manualBarcodeInput
+      ) {
+        manualBarcodeInput.focus();
+      }
+
+      highlightRow(matched.row);
+      showMessage(
+        `Updated ${matched.item.product_name} by ${incrementBy}. Final checked = ${loadedOrder.items[matched.index].draft_qty_checked}.`,
+        false,
+      );
     });
   }
 
@@ -245,6 +275,11 @@ document.addEventListener("DOMContentLoaded", () => {
     finishOrderBtn.addEventListener("click", async () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
         alert("Please load a SAP order first.");
+        return;
+      }
+
+      if (!canEditDraft()) {
+        alert("Start or reopen checking first.");
         return;
       }
 
@@ -258,7 +293,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const sapOrderId = loadedOrder.sap_order.sap_order_id;
-        const result = await prepareSapOrder(sapOrderId, token);
+        const finalItemsPayload = loadedOrder.items.map((item) => ({
+          sap_order_detail_id: item.sap_order_detail_id,
+          qty_checked: Number(item.draft_qty_checked || 0),
+        }));
+
+        const result = await prepareSapOrder(
+          sapOrderId,
+          finalItemsPayload,
+          token,
+        );
 
         loadedOrder = normalizeLoadedOrderPayload(result);
         populateOrderDetails(loadedOrder);
@@ -388,38 +432,36 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  async function scanSapOrderItem(sapOrderId, barcode, incrementBy, token) {
+  async function prepareSapOrder(sapOrderId, items, token) {
     return requestJson(
-      `${API_BASE}/sap-orders/${encodeURIComponent(sapOrderId)}/scan`,
+      `${API_BASE}/sap-orders/${encodeURIComponent(sapOrderId)}/prepare`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          barcode,
-          increment_by: incrementBy,
-        }),
-      },
-    );
-  }
-
-  async function prepareSapOrder(sapOrderId, token) {
-    return requestJson(
-      `${API_BASE}/sap-orders/${encodeURIComponent(sapOrderId)}/prepare`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        body: JSON.stringify({ items }),
       },
     );
   }
 
   function normalizeLoadedOrderPayload(payload) {
     const sapOrder = payload?.sap_order || payload || {};
-    const items = Array.isArray(payload?.items) ? payload.items : [];
+    const rawItems = Array.isArray(payload?.items) ? payload.items : [];
+    const items = rawItems.map((item) => {
+      const quantity = Number(item.quantity || 0);
+      const checked = Number(item.qty_checked || 0);
+
+      return {
+        ...item,
+        quantity,
+        original_qty_checked: checked,
+        draft_qty_checked: checked,
+        draft_qty_remaining: Math.max(quantity - checked, 0),
+      };
+    });
+
     const summary = payload?.summary || {
       items_count: items.length,
       total_quantity: items.reduce(
@@ -452,6 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadedCustomerName.textContent = sapOrder.prepared_by_username || "-";
 
     renderOrderItems(items);
+    setDraftInputsDisabled(!canEditDraft());
   }
 
   function renderOrderItems(items) {
@@ -469,12 +512,100 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${escapeHtml(item.product_name || "-")}</td>
         <td>${escapeHtml(item.bar_code || "-")}</td>
         <td>${escapeHtml(item.quantity ?? "-")}</td>
-        <td><input type="number" min="0" class="mini-input" data-col="c" value="${Number(item.qty_checked || 0)}" readonly /></td>
-        <td><input type="number" min="0" class="mini-input" data-col="r" value="${Number(item.qty_remaining || 0)}" readonly /></td>
+        <td><span class="table-value">${Number(item.original_qty_checked || 0)}</span></td>
+        <td>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            class="mini-input final-checked-input"
+            data-col="final"
+            value="${Number(item.draft_qty_checked || 0)}"
+          />
+        </td>
+        <td><span class="table-value" data-col="remaining">${Number(item.draft_qty_remaining || 0)}</span></td>
+        <td>
+          <button
+            type="button"
+            class="minus-btn"
+            title="Reduce by 1"
+            aria-label="Reduce by 1"
+          >-</button>
+        </td>
       `;
 
       orderedItemsTableBody.appendChild(row);
     });
+  }
+
+  function handleFinalCheckedInput(input, normalize = false) {
+    const row = input.closest("tr");
+    if (!row || !loadedOrder?.items?.length) return;
+
+    const index = Number(row.dataset.index);
+    const currentItem = loadedOrder.items[index];
+    if (!currentItem) return;
+
+    let rawValue = String(input.value || "").trim();
+
+    if (!rawValue && !normalize) {
+      return;
+    }
+
+    let nextChecked = parseInt(rawValue || "0", 10);
+    if (!Number.isFinite(nextChecked) || nextChecked < 0) {
+      nextChecked = 0;
+    }
+
+    input.value = String(nextChecked);
+    updateDraftItemAtIndex(index, nextChecked);
+    updateRowFromItem(row, loadedOrder.items[index]);
+  }
+
+  function updateDraftItemAtIndex(index, nextChecked) {
+    const item = loadedOrder?.items?.[index];
+    if (!item) return;
+
+    const safeChecked = Math.max(0, parseInt(nextChecked, 10) || 0);
+    item.draft_qty_checked = safeChecked;
+    item.draft_qty_remaining = Math.max(
+      Number(item.quantity || 0) - safeChecked,
+      0,
+    );
+  }
+
+  function updateRowFromItem(row, item) {
+    if (!row || !item) return;
+
+    const finalInput = row.querySelector('[data-col="final"]');
+    const remainingText = row.querySelector('[data-col="remaining"]');
+
+    if (finalInput) {
+      finalInput.value = String(Number(item.draft_qty_checked || 0));
+    }
+
+    if (remainingText) {
+      remainingText.textContent = String(Number(item.draft_qty_remaining || 0));
+    }
+  }
+
+  function findMatchingItemRow(barcode) {
+    const normalizedBarcode = normalizeBarcode(barcode);
+    const rows = Array.from(orderedItemsTableBody.querySelectorAll("tr"));
+
+    for (const row of rows) {
+      const rowBarcode = normalizeBarcode(row.dataset.barcode || "");
+      if (rowBarcode && rowBarcode === normalizedBarcode) {
+        const index = Number(row.dataset.index);
+        return {
+          row,
+          index,
+          item: loadedOrder?.items?.[index],
+        };
+      }
+    }
+
+    return null;
   }
 
   function resetLoadedOrderUI(options = {}) {
@@ -513,68 +644,26 @@ document.addEventListener("DOMContentLoaded", () => {
     updateActionButtons();
   }
 
-  function updateLoadedOrderItemState(scanResult) {
-    if (!loadedOrder?.items?.length) return;
+  function canEditDraft() {
+    if (!loadedOrder?.sap_order?.sap_order_id) return false;
 
-    const target = loadedOrder.items.find((item) => {
-      if (
-        String(item.sap_order_detail_id || "") ===
-        String(scanResult.sap_order_detail_id || "")
-      ) {
-        return true;
-      }
-
-      if (
-        String(item.product_id || "") === String(scanResult.product_id || "")
-      ) {
-        return true;
-      }
-
-      return (
-        normalizeBarcode(item.bar_code || "") ===
-        normalizeBarcode(scanResult.barcode || "")
-      );
-    });
-
-    if (!target) return;
-
-    target.qty_checked = Number(scanResult.qty_checked || 0);
-    target.qty_remaining = Number(scanResult.qty_remaining || 0);
+    const status = String(loadedOrder.sap_order.status || "").toLowerCase();
+    return ["checked", "opened", "reopened"].includes(status);
   }
 
-  function updateItemRowFromScan(scanResult) {
-    const rows = Array.from(orderedItemsTableBody.querySelectorAll("tr"));
+  function setDraftInputsDisabled(disabled) {
+    const finalInputs = orderedItemsTableBody.querySelectorAll(
+      ".final-checked-input",
+    );
+    const minusButtons = orderedItemsTableBody.querySelectorAll(".minus-btn");
 
-    const row = rows.find((candidate) => {
-      if (
-        String(candidate.dataset.detailId || "") ===
-        String(scanResult.sap_order_detail_id || "")
-      ) {
-        return true;
-      }
-
-      if (
-        String(candidate.dataset.productId || "") ===
-        String(scanResult.product_id || "")
-      ) {
-        return true;
-      }
-
-      return (
-        normalizeBarcode(candidate.dataset.barcode || "") ===
-        normalizeBarcode(scanResult.barcode || "")
-      );
+    finalInputs.forEach((input) => {
+      input.disabled = disabled;
     });
 
-    if (!row) return;
-
-    const cInput = row.querySelector('[data-col="c"]');
-    const rInput = row.querySelector('[data-col="r"]');
-
-    if (cInput) cInput.value = Number(scanResult.qty_checked || 0);
-    if (rInput) rInput.value = Number(scanResult.qty_remaining || 0);
-
-    highlightRow(row);
+    minusButtons.forEach((button) => {
+      button.disabled = disabled;
+    });
   }
 
   function showLoader(show) {
@@ -594,67 +683,25 @@ document.addEventListener("DOMContentLoaded", () => {
     orderSearchMessage.style.color = isError ? "#dc2626" : "#16a34a";
   }
 
-  function enhanceUi() {
-    const summaryStrongEls = document.querySelectorAll(".order-summary strong");
-    if (summaryStrongEls[2]) {
-      summaryStrongEls[2].textContent = "Prepared By:";
-    }
-
-    if (barcodeInput) {
-      barcodeInput.readOnly = false;
-      barcodeInput.placeholder = "Camera-detected or typed barcode";
-    }
-
-    const scannerSubmitWrap = document.querySelector(".scanner-submit-btn");
-    if (scannerSubmitWrap && !document.getElementById("scanQtyInput")) {
-      const qtyLabel = document.createElement("label");
-      qtyLabel.setAttribute("for", "scanQtyInput");
-      qtyLabel.className = "scanner-main-label";
-      qtyLabel.textContent = "Qty";
-
-      const qtyInput = document.createElement("input");
-      qtyInput.type = "number";
-      qtyInput.min = "1";
-      qtyInput.step = "1";
-      qtyInput.value = "1";
-      qtyInput.id = "scanQtyInput";
-      qtyInput.className = "input";
-
-      scannerSubmitWrap.prepend(qtyInput);
-      scannerSubmitWrap.prepend(qtyLabel);
-    }
-
-    const submitBtn = document.getElementById("submitScanBtn");
-    if (submitBtn) {
-      submitBtn.textContent = "Check";
-    }
-
-    const finishRow = document.querySelector(".finish-row");
-    if (finishRow && !document.getElementById("startCheckingBtn")) {
-      const startBtn = document.createElement("button");
-      startBtn.id = "startCheckingBtn";
-      startBtn.className = "btn btn-primary";
-      startBtn.type = "button";
-      startBtn.textContent = "Start Checking";
-      startBtn.style.marginInlineEnd = "12px";
-      finishRow.prepend(startBtn);
-    }
-  }
-
   function updateActionButtons() {
-    const status = String(loadedOrder?.sap_order?.status || "").toLowerCase();
     const hasLoadedOrder = Boolean(loadedOrder?.sap_order?.sap_order_id);
-
-    const scanAllowedStatuses = ["checked", "opened", "reopened", "prepared"];
-    const canScan = hasLoadedOrder && scanAllowedStatuses.includes(status);
+    const canEdit = canEditDraft();
+    const status = String(loadedOrder?.sap_order?.status || "").toLowerCase();
 
     if (submitScanBtn) {
-      submitScanBtn.disabled = !canScan;
+      submitScanBtn.disabled = !canEdit;
     }
 
     if (finishOrderBtn) {
-      finishOrderBtn.disabled = !hasLoadedOrder;
+      finishOrderBtn.disabled = !canEdit;
     }
+
+    // Qty field should stay usable once an order is loaded
+    if (scanQtyInput) {
+      scanQtyInput.disabled = !hasLoadedOrder;
+    }
+
+    setDraftInputsDisabled(!canEdit);
 
     if (startCheckingBtn) {
       startCheckingBtn.disabled = !hasLoadedOrder;
@@ -673,7 +720,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-
   function initScannerModeToggle() {
     if (
       !modeCameraBtn ||
@@ -798,8 +844,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     detectorInterval = setInterval(async () => {
       try {
-        if (!cameraStream || !video || video.readyState < 2 || !barcodeDetector)
+        if (
+          !cameraStream ||
+          !video ||
+          video.readyState < 2 ||
+          !barcodeDetector
+        ) {
           return;
+        }
 
         const detected = await barcodeDetector.detect(video);
         if (!Array.isArray(detected) || detected.length === 0) return;
