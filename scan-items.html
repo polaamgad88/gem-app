@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <title>Scan Order Items</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
   <link rel="stylesheet" href="./styles/base.css" />
   <link rel="stylesheet" href="./styles/scan-items.css" />
   <script src="./scripts/scan-items.js" defer></script>
@@ -36,6 +33,7 @@
     });
   </script>
 </head>
+
 <body>
   <main class="scan-items-page">
     <section class="scan-items-container">
@@ -51,30 +49,25 @@
         <div class="order-search-row">
           <div class="field-group order-id-group">
             <label for="orderIdInput">Order ID</label>
-            <input
-              type="text"
-              id="orderIdInput"
-              class="input"
-              placeholder="Enter order ID"
-              autocomplete="off"
-            />
+            <input type="text" id="orderIdInput" class="input" placeholder="Enter order ID" autocomplete="off" />
           </div>
 
-    <div class="search-btn-group">
-  <button id="searchOrderBtn" class="btn btn-primary" type="button">
-    Search
-  </button>
-  <button id="cancelSearchBtn" class="btn btn-light hidden" type="button">
-    Cancel
-  </button>
-</div>
+          <div class="search-btn-group">
+            <button id="searchOrderBtn" class="btn btn-primary" type="button">
+              Search
+            </button>
+            <button id="cancelSearchBtn" class="btn btn-light hidden" type="button">
+              Cancel
+            </button>
+          </div>
 
-        <div id="orderSearchLoader" class="search-loader hidden">
-          <div class="spinner"></div>
-          <span>Searching for order...</span>
+          <div id="orderSearchLoader" class="search-loader hidden">
+            <div class="spinner"></div>
+            <span>Searching for order...</span>
+          </div>
+
+          <div id="orderSearchMessage" class="search-message hidden"></div>
         </div>
-
-        <div id="orderSearchMessage" class="search-message hidden"></div>
       </section>
 
       <!-- Loaded Order -->
@@ -110,20 +103,10 @@
           <label class="method-label">Barcode Input Method</label>
 
           <div class="scanner-mode-switch" role="tablist" aria-label="Barcode input method">
-            <button
-              type="button"
-              id="modeCameraBtn"
-              class="mode-btn active"
-              data-mode="camera"
-            >
+            <button type="button" id="modeCameraBtn" class="mode-btn active" data-mode="camera">
               Scanner Camera
             </button>
-            <button
-              type="button"
-              id="modeManualBtn"
-              class="mode-btn"
-              data-mode="manual"
-            >
+            <button type="button" id="modeManualBtn" class="mode-btn" data-mode="manual">
               Manual Entry
             </button>
           </div>
@@ -152,24 +135,14 @@
                 </div>
               </div>
 
-              <input
-                type="text"
-                id="barcodeInput"
-                class="input"
-                placeholder="Scanned barcode will appear here"
-                readonly
-              />
+              <input type="text" id="barcodeInput" class="input" placeholder="Scanned barcode will appear here"
+                readonly />
             </div>
 
             <!-- Manual mode -->
             <div id="manualModeSection" class="scanner-mode-panel hidden">
-              <input
-                type="text"
-                id="manualBarcodeInput"
-                class="input"
-                placeholder="Enter barcode manually"
-                autocomplete="off"
-              />
+              <input type="text" id="manualBarcodeInput" class="input" placeholder="Enter barcode manually"
+                autocomplete="off" />
             </div>
           </div>
 
@@ -189,4 +162,5 @@
     </section>
   </main>
 </body>
+
 </html>
