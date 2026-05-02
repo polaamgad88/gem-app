@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadedOrderId = document.getElementById("loadedOrderId");
   const loadedOrderStatus = document.getElementById("loadedOrderStatus");
   const loadedCustomerName = document.getElementById("loadedCustomerName");
+  const loadedReviewedBy = document.getElementById("loadedReviewedBy"); // NEW
+  const loadedReviewedAt = document.getElementById("loadedReviewedAt"); // NEW
   const orderedItemsTableBody = document.getElementById(
     "orderedItemsTableBody",
   );
@@ -21,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitScanBtn = document.getElementById("submitScanBtn");
   const finishOrderBtn = document.getElementById("finishOrderBtn");
   const startCheckingBtn = document.getElementById("startCheckingBtn");
+  const reviewOrderBtn = document.getElementById("reviewOrderBtn"); // NEW
 
   const modeCameraBtn = document.getElementById("modeCameraBtn");
   const modeManualBtn = document.getElementById("modeManualBtn");
@@ -41,6 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initScannerModeToggle();
   updateActionButtons();
+
+  // ─── Search ───────────────────────────────────────────────────────────────
 
   searchOrderBtn.addEventListener("click", async () => {
     const sapOrderId = orderIdInput.value.trim();
@@ -122,6 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // ─── Table interactions ───────────────────────────────────────────────────
+
   orderedItemsTableBody.addEventListener("click", (event) => {
     const minusBtn = event.target.closest(".minus-btn");
     if (!minusBtn) return;
@@ -135,7 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!item) return;
 
     const nextChecked = Math.max(0, Number(item.draft_qty_checked || 0) - 1);
-    updateDraftItemAtIndex(index, nextChecked);
+    const me = getCurrentUserInfo();
+    updateDraftItemAtIndex(index, nextChecked, me.user_id, me.username);
     updateRowFromItem(row, loadedOrder.items[index]);
 
     highlightRow(row);
@@ -149,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const target = event.target;
     if (!target.classList.contains("final-checked-input")) return;
     if (!canEditDraft()) return;
-
     handleFinalCheckedInput(target);
   });
 
@@ -157,14 +164,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const target = event.target;
     if (!target.classList.contains("final-checked-input")) return;
     if (!canEditDraft()) return;
-
     handleFinalCheckedInput(target, true);
   });
+
+  // ─── Start Checking ───────────────────────────────────────────────────────
 
   if (startCheckingBtn) {
     startCheckingBtn.addEventListener("click", async () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
-        alert("Please load a SAP order first.");
+        showMessage("Please load a SAP order first.", true);
         return;
       }
 
@@ -191,7 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        if (currentStatus === "prepared") {
+        // "prepared" and "reviewed" both get reopened when the user wants to re-check
+        if (["prepared", "reviewed"].includes(currentStatus)) {
           responsePayload = await reopenSapOrder(sapOrderId, token);
         } else {
           responsePayload = await startCheckingSapOrder(sapOrderId, token);
@@ -211,15 +220,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ─── Scan / Check ─────────────────────────────────────────────────────────
+
   if (submitScanBtn) {
     submitScanBtn.addEventListener("click", () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
-        alert("Please load a SAP order first.");
+        showMessage("Please load a SAP order first.", true);
         return;
       }
 
       if (!canEditDraft()) {
-        alert("Start or reopen checking first.");
+        showMessage("Start or reopen checking first.", true);
         return;
       }
 
@@ -235,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       if (!barcode) {
-        alert("Please scan or enter a barcode first.");
+        showMessage("Please scan or enter a barcode first.", true);
         return;
       }
 
@@ -249,7 +260,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const nextChecked =
         Number(matched.item.draft_qty_checked || 0) + incrementBy;
 
-      updateDraftItemAtIndex(matched.index, nextChecked);
+      const me = getCurrentUserInfo();
+      updateDraftItemAtIndex(
+        matched.index,
+        nextChecked,
+        me.user_id,
+        me.username,
+      );
       updateRowFromItem(matched.row, loadedOrder.items[matched.index]);
 
       if (barcodeInput) barcodeInput.value = "";
@@ -271,15 +288,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ─── Finish (Prepare) ─────────────────────────────────────────────────────
+
   if (finishOrderBtn) {
     finishOrderBtn.addEventListener("click", async () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
-        alert("Please load a SAP order first.");
+        showMessage("Please load a SAP order first.", true);
         return;
       }
 
       if (!canEditDraft()) {
-        alert("Start or reopen checking first.");
+        showMessage("Start or reopen checking first.", true);
         return;
       }
 
@@ -296,6 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const finalItemsPayload = loadedOrder.items.map((item) => ({
           sap_order_detail_id: item.sap_order_detail_id,
           qty_checked: Number(item.draft_qty_checked || 0),
+          checked_by_user_id: item.checked_by_user_id || null,
         }));
 
         const result = await prepareSapOrder(
@@ -308,14 +328,19 @@ document.addEventListener("DOMContentLoaded", () => {
         populateOrderDetails(loadedOrder);
         updateActionButtons();
 
-        if (result.mail?.sent) {
+        // Compute missing items from the actual returned data
+        const missingCount = (loadedOrder.items || []).filter(
+          (item) => Number(item.qty_remaining || 0) > 0,
+        ).length;
+
+        if (missingCount > 0) {
           showMessage(
-            "Order finished successfully. Missing-items email was sent by the backend.",
+            `Order marked as prepared. ${missingCount} item(s) are missing. A reviewer must confirm the order.`,
             false,
           );
         } else {
           showMessage(
-            "Order finished successfully. All items were checked, so no missing-items email was needed.",
+            "Order marked as prepared. All items were fully checked. A reviewer must confirm the order.",
             false,
           );
         }
@@ -328,6 +353,163 @@ document.addEventListener("DOMContentLoaded", () => {
         finishOrderBtn.disabled = false;
       }
     });
+  }
+
+  // ─── Review (NEW) ─────────────────────────────────────────────────────────
+
+  if (reviewOrderBtn) {
+    let reviewPendingConfirm = false;
+
+    reviewOrderBtn.addEventListener("click", async () => {
+      // ── Permission check (client-side guard) ──────────────────────────────
+      const me = getCurrentUserInfo();
+      if (!me.is_admin && !me.is_storage_admin) {
+        showMessage(
+          "You don't have permission to review orders. Only Storage Admins and system Admins can confirm a review.",
+          true,
+        );
+        reviewPendingConfirm = false;
+        updateActionButtons();
+        return;
+      }
+
+      if (!loadedOrder?.sap_order?.sap_order_id) {
+        showMessage("Please load a SAP order first.", true);
+        reviewPendingConfirm = false;
+        updateActionButtons();
+        return;
+      }
+
+      const status = String(loadedOrder.sap_order.status || "").toLowerCase();
+
+      if (status === "reviewed") {
+        showMessage("This order has already been reviewed.", false);
+        reviewPendingConfirm = false;
+        updateActionButtons();
+        return;
+      }
+
+      if (status !== "prepared") {
+        showMessage(
+          `Order cannot be reviewed — current status is "${status}". Finish the order first.`,
+          true,
+        );
+        reviewPendingConfirm = false;
+        updateActionButtons();
+        return;
+      }
+
+      // ── Two-click confirmation (replaces browser confirm()) ───────────────
+      if (!reviewPendingConfirm) {
+        reviewPendingConfirm = true;
+        reviewOrderBtn.textContent = "Tap again to confirm review";
+        showMessage(
+          "A confirmation email will be sent to the team. Click 'Tap again to confirm review' to proceed.",
+          false,
+        );
+        // Auto-cancel after 5 s if user doesn't click again
+        setTimeout(() => {
+          if (reviewPendingConfirm) {
+            reviewPendingConfirm = false;
+            showMessage("");
+            updateActionButtons();
+          }
+        }, 5000);
+        return;
+      }
+
+      // Second click — proceed
+      reviewPendingConfirm = false;
+
+      try {
+        reviewOrderBtn.disabled = true;
+        showMessage("");
+
+        const token = await getAuthToken();
+        if (!token) throw new Error("Authentication token not found.");
+
+        const sapOrderId = loadedOrder.sap_order.sap_order_id;
+        const result = await reviewSapOrder(sapOrderId, token);
+
+        loadedOrder = normalizeLoadedOrderPayload(result);
+        populateOrderDetails(loadedOrder);
+        updateActionButtons();
+
+        showMessage(
+          "Order reviewed and confirmed. Confirmation email sent.",
+          false,
+        );
+        console.log("Review response:", result);
+      } catch (error) {
+        console.error("Review failed:", error);
+
+        // Translate backend error messages into plain language
+        const raw = error.message || "";
+        let friendlyMsg;
+        if (
+          /storage admin/i.test(raw) ||
+          /401/.test(raw) ||
+          /permission/i.test(raw)
+        ) {
+          friendlyMsg =
+            "Permission denied — only Storage Admins can confirm a review.";
+        } else if (/not found/i.test(raw) || /404/.test(raw)) {
+          friendlyMsg = "SAP order not found.";
+        } else if (/prepared/i.test(raw)) {
+          friendlyMsg =
+            "The order must be in 'prepared' status before it can be reviewed.";
+        } else if (/token/i.test(raw)) {
+          friendlyMsg = "Your session has expired. Please log in again.";
+        } else {
+          friendlyMsg = raw || "Something went wrong. Please try again.";
+        }
+
+        showMessage(friendlyMsg, true);
+      } finally {
+        reviewOrderBtn.disabled = false;
+        updateActionButtons();
+      }
+    });
+  }
+
+  // ─── Auth ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Decode the JWT sub payload to get current user id + username.
+   * Returns { user_id, username } or nulls if not available.
+   */
+  function getCurrentUserInfo() {
+    const possibleKeys = [
+      "token",
+      "authToken",
+      "access_token",
+      "accessToken",
+      "jwt",
+    ];
+    for (const key of possibleKeys) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      try {
+        const parts = raw.split(".");
+        if (parts.length < 2) continue;
+        const sub = JSON.parse(
+          atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
+        );
+        const identity = sub.sub || sub;
+        return {
+          user_id: identity.id || identity.user_id || null,
+          username: identity.username || null,
+          is_admin: Boolean(identity.admin),
+          is_storage_admin: Boolean(identity.storage_manager),
+        };
+      } catch (_) {}
+    }
+    return {
+      user_id: null,
+      username: null,
+      is_admin: false,
+      is_storage_admin: false,
+    };
   }
 
   async function getAuthToken() {
@@ -360,6 +542,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return null;
   }
 
+  // ─── HTTP helpers ─────────────────────────────────────────────────────────
+
   async function requestJson(url, options = {}) {
     const response = await fetch(url, options);
 
@@ -386,9 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `${API_BASE}/sap-orders/${encodeURIComponent(sapOrderId)}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       },
     );
   }
@@ -400,9 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        doc_num: Number(sapOrderId),
-      }),
+      body: JSON.stringify({ doc_num: Number(sapOrderId) }),
     });
   }
 
@@ -411,9 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `${API_BASE}/sap-orders/${encodeURIComponent(sapOrderId)}/start-checking`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       },
     );
   }
@@ -446,6 +624,19 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  // NEW — calls POST /sap-orders/<id>/review
+  async function reviewSapOrder(sapOrderId, token) {
+    return requestJson(
+      `${API_BASE}/sap-orders/${encodeURIComponent(sapOrderId)}/review`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+  }
+
+  // ─── Data normalisation ───────────────────────────────────────────────────
+
   function normalizeLoadedOrderPayload(payload) {
     const sapOrder = payload?.sap_order || payload || {};
     const rawItems = Array.isArray(payload?.items) ? payload.items : [];
@@ -459,6 +650,10 @@ document.addEventListener("DOMContentLoaded", () => {
         original_qty_checked: checked,
         draft_qty_checked: checked,
         draft_qty_remaining: Math.max(quantity - checked, 0),
+        // Preserve checker info returned by the backend
+        checked_by_user_id: item.checked_by_user_id || null,
+        checked_by_username: item.checked_by_username || null,
+        checked_at: item.checked_at || null,
       };
     });
 
@@ -478,12 +673,10 @@ document.addEventListener("DOMContentLoaded", () => {
       ),
     };
 
-    return {
-      sap_order: sapOrder,
-      items,
-      summary,
-    };
+    return { sap_order: sapOrder, items, summary };
   }
+
+  // ─── Render ───────────────────────────────────────────────────────────────
 
   function populateOrderDetails(payload) {
     const sapOrder = payload?.sap_order || {};
@@ -492,6 +685,18 @@ document.addEventListener("DOMContentLoaded", () => {
     loadedOrderId.textContent = sapOrder.sap_order_id ?? "-";
     loadedOrderStatus.textContent = sapOrder.status || "-";
     loadedCustomerName.textContent = sapOrder.prepared_by_username || "-";
+
+    // NEW — reviewer fields (elements may be absent in older HTML, guard with ?.
+    if (loadedReviewedBy) {
+      loadedReviewedBy.textContent = sapOrder.reviewed_by_username || "-";
+    }
+    if (loadedReviewedAt) {
+      loadedReviewedAt.textContent = sapOrder.reviewed_at || "-";
+    }
+
+    // Highlight status badge
+    loadedOrderStatus.className =
+      "status-badge status-" + (sapOrder.status || "unknown").toLowerCase();
 
     renderOrderItems(items);
     setDraftInputsDisabled(!canEditDraft());
@@ -524,6 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
           />
         </td>
         <td><span class="table-value" data-col="remaining">${Number(item.draft_qty_remaining || 0)}</span></td>
+        <td class="checker-col" data-col="checker">${renderCheckerCell(item)}</td>
         <td>
           <button
             type="button"
@@ -538,6 +744,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ─── Draft logic ──────────────────────────────────────────────────────────
+
   function handleFinalCheckedInput(input, normalize = false) {
     const row = input.closest("tr");
     if (!row || !loadedOrder?.items?.length) return;
@@ -548,21 +756,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let rawValue = String(input.value || "").trim();
 
-    if (!rawValue && !normalize) {
-      return;
-    }
+    if (!rawValue && !normalize) return;
 
     let nextChecked = parseInt(rawValue || "0", 10);
-    if (!Number.isFinite(nextChecked) || nextChecked < 0) {
-      nextChecked = 0;
-    }
+    if (!Number.isFinite(nextChecked) || nextChecked < 0) nextChecked = 0;
 
     input.value = String(nextChecked);
-    updateDraftItemAtIndex(index, nextChecked);
+    const me = getCurrentUserInfo();
+    updateDraftItemAtIndex(index, nextChecked, me.user_id, me.username);
     updateRowFromItem(row, loadedOrder.items[index]);
   }
 
-  function updateDraftItemAtIndex(index, nextChecked) {
+  function updateDraftItemAtIndex(
+    index,
+    nextChecked,
+    checkerUserId,
+    checkerUsername,
+  ) {
     const item = loadedOrder?.items?.[index];
     if (!item) return;
 
@@ -572,6 +782,12 @@ document.addEventListener("DOMContentLoaded", () => {
       Number(item.quantity || 0) - safeChecked,
       0,
     );
+
+    // Record who made this change (from scan button or manual edit)
+    if (checkerUserId !== undefined) {
+      item.checked_by_user_id = checkerUserId;
+      item.checked_by_username = checkerUsername || null;
+    }
   }
 
   function updateRowFromItem(row, item) {
@@ -579,14 +795,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const finalInput = row.querySelector('[data-col="final"]');
     const remainingText = row.querySelector('[data-col="remaining"]');
+    const checkerCol = row.querySelector('[data-col="checker"]');
 
-    if (finalInput) {
+    if (finalInput)
       finalInput.value = String(Number(item.draft_qty_checked || 0));
-    }
-
-    if (remainingText) {
+    if (remainingText)
       remainingText.textContent = String(Number(item.draft_qty_remaining || 0));
-    }
+    if (checkerCol) checkerCol.innerHTML = renderCheckerCell(item);
   }
 
   function findMatchingItemRow(barcode) {
@@ -597,16 +812,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const rowBarcode = normalizeBarcode(row.dataset.barcode || "");
       if (rowBarcode && rowBarcode === normalizedBarcode) {
         const index = Number(row.dataset.index);
-        return {
-          row,
-          index,
-          item: loadedOrder?.items?.[index],
-        };
+        return { row, index, item: loadedOrder?.items?.[index] };
       }
     }
 
     return null;
   }
+
+  // ─── State helpers ────────────────────────────────────────────────────────
 
   function resetLoadedOrderUI(options = {}) {
     const { keepInputValue = false, preserveMessage = false } = options;
@@ -620,16 +833,15 @@ document.addEventListener("DOMContentLoaded", () => {
     loadedOrderStatus.textContent = "-";
     loadedCustomerName.textContent = "-";
 
-    if (!keepInputValue) {
-      orderIdInput.value = "";
-    }
+    if (loadedReviewedBy) loadedReviewedBy.textContent = "-";
+    if (loadedReviewedAt) loadedReviewedAt.textContent = "-";
+
+    if (!keepInputValue) orderIdInput.value = "";
 
     orderIdInput.disabled = false;
     searchOrderBtn.disabled = false;
 
-    if (cancelSearchBtn) {
-      cancelSearchBtn.classList.add("hidden");
-    }
+    if (cancelSearchBtn) cancelSearchBtn.classList.add("hidden");
 
     if (barcodeInput) barcodeInput.value = "";
     if (manualBarcodeInput) manualBarcodeInput.value = "";
@@ -637,18 +849,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     stopCamera();
 
-    if (!preserveMessage) {
-      showMessage("");
-    }
+    if (!preserveMessage) showMessage("");
 
     updateActionButtons();
   }
 
+  /**
+   * The order is editable (scanning/checking allowed) only when status is
+   * one of the active working statuses.  "prepared" and "reviewed" are
+   * locked — the preparer must reopen, or a reviewer must act.
+   */
   function canEditDraft() {
     if (!loadedOrder?.sap_order?.sap_order_id) return false;
-
     const status = String(loadedOrder.sap_order.status || "").toLowerCase();
     return ["checked", "opened", "reopened"].includes(status);
+  }
+
+  /**
+   * Returns true only when the order is in "prepared" status,
+   * meaning it's waiting for a reviewer to confirm it.
+   */
+  function canReview() {
+    if (!loadedOrder?.sap_order?.sap_order_id) return false;
+    const status = String(loadedOrder.sap_order.status || "").toLowerCase();
+    return status === "prepared";
   }
 
   function setDraftInputsDisabled(disabled) {
@@ -656,15 +880,15 @@ document.addEventListener("DOMContentLoaded", () => {
       ".final-checked-input",
     );
     const minusButtons = orderedItemsTableBody.querySelectorAll(".minus-btn");
-
     finalInputs.forEach((input) => {
       input.disabled = disabled;
     });
-
     minusButtons.forEach((button) => {
       button.disabled = disabled;
     });
   }
+
+  // ─── UI feedback ──────────────────────────────────────────────────────────
 
   function showLoader(show) {
     orderSearchLoader.classList.toggle("hidden", !show);
@@ -683,62 +907,79 @@ document.addEventListener("DOMContentLoaded", () => {
     orderSearchMessage.style.color = isError ? "#dc2626" : "#16a34a";
   }
 
+  /**
+   * Central place that drives ALL button states based on current order status.
+   *
+   * Status flow:
+   *   checked → opened → (scanning) → prepared → reviewed
+   *                ↑_______reopen____________________|
+   */
   function updateActionButtons() {
     const hasLoadedOrder = Boolean(loadedOrder?.sap_order?.sap_order_id);
     const canEdit = canEditDraft();
+    const canRev = canReview();
     const status = String(loadedOrder?.sap_order?.status || "").toLowerCase();
 
-    if (submitScanBtn) {
-      submitScanBtn.disabled = !canEdit;
-    }
+    // Scan / Check button
+    if (submitScanBtn) submitScanBtn.disabled = !canEdit;
 
-    if (finishOrderBtn) {
-      finishOrderBtn.disabled = !canEdit;
-    }
+    // Finish (Prepare) button
+    if (finishOrderBtn) finishOrderBtn.disabled = !canEdit;
 
-    // Qty field should stay usable once an order is loaded
-    if (scanQtyInput) {
-      scanQtyInput.disabled = !hasLoadedOrder;
-    }
+    // Qty field usable once an order is loaded
+    if (scanQtyInput) scanQtyInput.disabled = !hasLoadedOrder;
 
     setDraftInputsDisabled(!canEdit);
 
+    // ── Start / Reopen button ──────────────────────────────────────────────
     if (startCheckingBtn) {
       startCheckingBtn.disabled = !hasLoadedOrder;
 
       if (!hasLoadedOrder) {
         startCheckingBtn.textContent = "Start Checking";
-        return;
-      }
-
-      if (["checked", "opened", "reopened"].includes(status)) {
+      } else if (["checked", "opened", "reopened"].includes(status)) {
         startCheckingBtn.textContent = "Ready for Checking";
-      } else if (status === "prepared") {
+      } else if (["prepared", "reviewed"].includes(status)) {
         startCheckingBtn.textContent = "Reopen for Checking";
       } else {
         startCheckingBtn.textContent = "Start Checking";
       }
     }
+
+    // ── Review button ──────────────────────────────────────────────────────
+    if (reviewOrderBtn) {
+      // Always show the button once an order is loaded — hide it only
+      // when there is no order at all.
+      reviewOrderBtn.classList.toggle("hidden", !hasLoadedOrder);
+
+      if (status === "reviewed") {
+        reviewOrderBtn.textContent = "Reviewed ✓";
+        reviewOrderBtn.disabled = true;
+        reviewOrderBtn.classList.add("reviewed");
+      } else {
+        reviewOrderBtn.textContent = "Confirm Review";
+        reviewOrderBtn.classList.remove("reviewed");
+        // Enabled only when status is "prepared"
+        reviewOrderBtn.disabled = !canRev;
+      }
+    }
   }
+
+  // ─── Camera / Scanner ─────────────────────────────────────────────────────
+
   function initScannerModeToggle() {
     if (
       !modeCameraBtn ||
       !modeManualBtn ||
       !cameraModeSection ||
       !manualModeSection
-    ) {
+    )
       return;
-    }
 
     setScannerMode("camera");
 
-    modeCameraBtn.addEventListener("click", () => {
-      setScannerMode("camera");
-    });
-
-    modeManualBtn.addEventListener("click", () => {
-      setScannerMode("manual");
-    });
+    modeCameraBtn.addEventListener("click", () => setScannerMode("camera"));
+    modeManualBtn.addEventListener("click", () => setScannerMode("manual"));
   }
 
   function setScannerMode(mode) {
@@ -751,9 +992,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cameraModeSection.classList.toggle("hidden", !isCamera);
     manualModeSection.classList.toggle("hidden", isCamera);
 
-    if (switchWrap) {
-      switchWrap.classList.toggle("manual-active", !isCamera);
-    }
+    if (switchWrap) switchWrap.classList.toggle("manual-active", !isCamera);
 
     if (isCamera) {
       if (manualBarcodeInput) manualBarcodeInput.value = "";
@@ -779,9 +1018,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-        },
+        video: { facingMode: { ideal: "environment" } },
         audio: false,
       });
 
@@ -844,14 +1081,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     detectorInterval = setInterval(async () => {
       try {
-        if (
-          !cameraStream ||
-          !video ||
-          video.readyState < 2 ||
-          !barcodeDetector
-        ) {
+        if (!cameraStream || !video || video.readyState < 2 || !barcodeDetector)
           return;
-        }
 
         const detected = await barcodeDetector.detect(video);
         if (!Array.isArray(detected) || detected.length === 0) return;
@@ -860,16 +1091,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!rawValue) return;
 
         const now = Date.now();
-        if (rawValue === lastDetectedValue && now - lastDetectedAt < 1000) {
+        if (rawValue === lastDetectedValue && now - lastDetectedAt < 1000)
           return;
-        }
 
         lastDetectedValue = rawValue;
         lastDetectedAt = now;
 
-        if (barcodeInput) {
-          barcodeInput.value = rawValue;
-        }
+        if (barcodeInput) barcodeInput.value = rawValue;
       } catch (error) {}
     }, 400);
   }
@@ -883,17 +1111,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function stopCamera() {
     stopBarcodeDetection();
-
     if (!cameraStream) return;
 
     cameraStream.getTracks().forEach((track) => track.stop());
     cameraStream = null;
 
     const video = document.getElementById("scannerVideo");
-    if (video) {
-      video.srcObject = null;
-    }
+    if (video) video.srcObject = null;
   }
+
+  // ─── Utilities ────────────────────────────────────────────────────────────
 
   function normalizeBarcode(value) {
     return String(value || "")
@@ -903,13 +1130,90 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function highlightRow(row) {
     if (!row) return;
-
     row.style.transition = "background-color 0.35s ease";
     row.style.backgroundColor = "rgba(34, 197, 94, 0.16)";
-
     setTimeout(() => {
       row.style.backgroundColor = "";
     }, 900);
+  }
+
+  // ─── Checker cell renderer ────────────────────────────────────────────────
+
+  /**
+   * Returns an HTML string for the "Checked By" cell.
+   *
+   * States:
+   *   • Not checked yet  — grey badge "Not checked yet"
+   *   • Fully checked    — green badge with username + "X min ago"
+   *   • Partially / missing — amber badge with username + remaining note
+   *   • Draft (in-session change, no server timestamp yet) — blue badge
+   */
+  function renderCheckerCell(item) {
+    const qty = Number(item.quantity || 0);
+    const checked = Number(item.draft_qty_checked ?? item.qty_checked ?? 0);
+    const remaining = Number(
+      item.draft_qty_remaining ?? item.qty_remaining ?? 0,
+    );
+    const username = item.checked_by_username || null;
+    const checkedAt = item.checked_at || null;
+
+    // Nothing touched at all
+    if (!username && checked === 0) {
+      return `<span class="checker-badge checker-none">Not checked yet</span>`;
+    }
+
+    // Has a username (from server or just set in this session)
+    const nameLabel = escapeHtml(username || "You");
+    const timeLabel = checkedAt ? `· ${timeAgo(checkedAt)}` : `· just now`;
+
+    if (remaining === 0 && checked >= qty && qty > 0) {
+      // Fully done ✓
+      return `
+        <span class="checker-badge checker-done" title="Checked at ${escapeHtml(checkedAt || "this session")}">
+          ✓ ${nameLabel} <small>${timeLabel}</small>
+        </span>`;
+    }
+
+    if (checked > 0 && remaining > 0) {
+      // Partially checked — missing items
+      return `
+        <span class="checker-badge checker-partial" title="Checked at ${escapeHtml(checkedAt || "this session")}">
+          ⚠ ${nameLabel} <small>· ${remaining} missing ${timeLabel}</small>
+        </span>`;
+    }
+
+    // checked = 0 but username exists (was reset / reopened after being checked)
+    return `
+      <span class="checker-badge checker-reset" title="Previously checked by ${nameLabel}">
+        — ${nameLabel} <small>(reset)</small>
+      </span>`;
+  }
+
+  /**
+   * Returns a human-readable relative time string for a datetime string.
+   * e.g. "just now", "2 min ago", "1 hr ago", "3 days ago"
+   */
+  function timeAgo(datetimeStr) {
+    if (!datetimeStr) return "";
+    try {
+      // Backend returns "YYYY-MM-DD HH:MM:SS" (no timezone suffix) — treat as local
+      const normalized = datetimeStr.replace(" ", "T");
+      const date = new Date(normalized);
+      if (isNaN(date.getTime())) return datetimeStr;
+
+      const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+
+      if (diffSec < 10) return "just now";
+      if (diffSec < 60) return `${diffSec}s ago`;
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin} min ago`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr} hr ago`;
+      const diffDay = Math.floor(diffHr / 24);
+      return `${diffDay} day${diffDay !== 1 ? "s" : ""} ago`;
+    } catch (_) {
+      return datetimeStr;
+    }
   }
 
   function escapeHtml(value) {

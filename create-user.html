@@ -19,7 +19,6 @@
       color: #333;
     }
 
-
     .logo {
       display: block;
       margin: 0 auto 20px;
@@ -32,29 +31,70 @@
       .logo {
         height: 90px;
       }
-
-
     }
 
-    /* Dark mode design */
+    /* ── checkbox group ────────────────────────────────────── */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-family: sans-serif;
+      font-size: 14px;
+      position: relative;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #28a745;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      appearance: auto;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-group.danger input[type="checkbox"] {
+      accent-color: #dc3545;
+    }
+
+    /* ── flags section ─────────────────────────────────────── */
+    .flags-section {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-top: 10px;
+      background: #fafafa;
+    }
+
+    .flags-section legend {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      padding: 0 6px;
+    }
+
+    /* mutual-exclusion hint */
+    .mutex-note {
+      font-size: 11px;
+      color: #888;
+      margin-top: 4px;
+      margin-left: 26px;
+    }
+
+    /* Dark mode */
     body.dark-mode {
       background-color: #121212 !important;
       color: #e0e0e0 !important;
     }
 
-    body.dark-mode h2 {
-      color: #f5f5f5 !important;
-    }
-
-    body.dark-mode a {
-      color: #ddd !important;
-      background-color: #1e1e1e !important;
-      border: 1px solid #333 !important;
-    }
-
-    body.dark-mode a:hover {
-      background-color: #333 !important;
-    }
+    body.dark-mode h2 { color: #f5f5f5 !important; }
 
     body.dark-mode input,
     body.dark-mode select,
@@ -64,18 +104,15 @@
       border: 1px solid #444 !important;
     }
 
-    body.dark-mode label {
-      color: #ccc !important;
+    body.dark-mode label { color: #ccc !important; }
+
+    body.dark-mode .flags-section {
+      background: #1a1a1a;
+      border-color: #333;
     }
 
-    body.dark-mode a {
-      color: #1e1e1e !important;
-      background-color: #fff !important;
-    }
-
-    body.dark-mode a:hover {
-      background-color: #f1f1f1 !important;
-    }
+    body.dark-mode .flags-section legend { color: #aaa; }
+    body.dark-mode .mutex-note { color: #666; }
   </style>
   <script>
     function applyTheme(mode) {
@@ -101,32 +138,40 @@
 </head>
 
 <body>
-  <h2 style="color: #333; text-align: center;margin-bottom: 20px;">Add User</h2>
+  <h2 style="color: #333; text-align: center; margin-bottom: 20px;">Add User</h2>
 
   <form id="create-user-form">
+
+    <!-- Username -->
     <div style="display: flex; flex-direction: column">
       <label for="username" style="margin-bottom: 4px">Username:</label>
       <input type="text" id="username" name="username" required
         style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
     </div>
 
+    <!-- Phone -->
     <div style="display: flex; flex-direction: column">
       <label for="phone" style="margin-bottom: 4px">Phone:</label>
       <input type="number" id="phone" name="phone" required
         style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
     </div>
 
+    <!-- Email -->
     <div style="display: flex; flex-direction: column">
       <label for="email" style="margin-bottom: 4px">Email:</label>
       <input type="email" id="email" name="email" required
         style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
     </div>
+
+    <!-- Password -->
     <div style="display: flex; flex-direction: column">
-      <label for="email" style="margin-bottom: 4px">Password:</label>
-      <input type="password" id="password" name="password" required
-        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px" />
+      <label for="password" style="margin-bottom: 4px">Password:</label>
+      <input type="password" id="password" name="password" autocomplete="new-password"
+        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px"
+        placeholder="Leave empty to use default (123)" />
     </div>
 
+    <!-- Role -->
     <div style="display: flex; flex-direction: column">
       <label for="role" style="margin-bottom: 4px">Role:</label>
       <select id="role" name="role" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px">
@@ -135,51 +180,67 @@
         <option value="Supervisor">Supervisor</option>
         <option value="Manager">Manager</option>
         <option value="Financial">Financial</option>
+        <option value="car">Car (Driver)</option>
       </select>
     </div>
 
+    <!-- Assigned To -->
     <div style="display: flex; flex-direction: column">
       <label for="assigned-to" style="margin-bottom: 4px">Assigned To (User):</label>
-      <select id="assigned-to" name="assigned_to" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px">
+      <select id="assigned-to" name="assigned_to"
+        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px">
         <option value="">None</option>
       </select>
     </div>
 
-    <div style="
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            font-family: sans-serif;
-            font-size: 14px;
-            position: relative;
-          ">
-      <input type="checkbox" id="is-admin" name="admin" style="
-              width: 16px;
-              height: 16px;
-              accent-color: #28a745;
-              cursor: pointer;
-              border: 1px solid #ccc;
-              border-radius: 4px;
-              appearance: auto;
-            " />
-      <label for="is-admin" style="margin: 0; cursor: pointer; user-select: none">
-        Is Admin
-      </label>
-    </div>
+    <!-- ── Flags ─────────────────────────────────────────── -->
+    <fieldset class="flags-section">
+      <legend>Permissions & Flags</legend>
 
+      <!-- Is Admin -->
+      <div class="checkbox-group danger">
+        <input type="checkbox" id="is-admin" name="admin" />
+        <label for="is-admin">Is Admin</label>
+      </div>
+
+      <!-- Driver -->
+      <div class="checkbox-group" id="driver-group">
+        <input type="checkbox" id="is-driver" name="driver" />
+        <label for="is-driver">Driver</label>
+      </div>
+      <p class="mutex-note" id="driver-note">Requires role "Car (Driver)". Cannot combine with Storage.</p>
+
+      <!-- Storage (regular) -->
+      <div class="checkbox-group" id="storage-group">
+        <input type="checkbox" id="is-storage" name="storage" />
+        <label for="is-storage">Storage User</label>
+      </div>
+      <p class="mutex-note">Can scan and prepare SAP orders. Cannot combine with Driver.</p>
+
+      <!-- Storage Admin -->
+      <div class="checkbox-group" id="storage-admin-group">
+        <input type="checkbox" id="is-storage-admin" name="storage_admin" />
+        <label for="is-storage-admin">Storage Admin</label>
+      </div>
+      <p class="mutex-note">Can review/confirm prepared SAP orders. Overrides "Storage User" if both checked.</p>
+
+    </fieldset>
+
+    <!-- Submit -->
     <button type="submit" class="btn btn-add" style="
-            background: linear-gradient(135deg, #28a745, #218838);
-            color: white;
-            padding: 10px;
-            font-size: 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-          " onmouseover="this.style.backgroundColor='#0b2a59'" onmouseout="this.style.backgroundColor='#0b2a59'">
+        background: linear-gradient(135deg, #28a745, #218838);
+        color: white;
+        padding: 10px;
+        font-size: 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+        margin-top: 16px;
+      ">
       Add User
     </button>
+
   </form>
 </body>
 
