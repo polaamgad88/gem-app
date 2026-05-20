@@ -369,6 +369,13 @@
       applyTheme(savedTheme);
     });
   </script>
+  <script>
+    if (window.self === window.top) {
+      const page = location.pathname.split("/").pop() || "products.html";
+      window.location.replace("index.html?page=" + encodeURIComponent(page));
+    }
+  </script>
+
 </head>
 
 <body>

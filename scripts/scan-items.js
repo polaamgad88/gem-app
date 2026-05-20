@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const manualBarcodeInput = document.getElementById("manualBarcodeInput");
   const scanQtyInput = document.getElementById("scanQtyInput");
 
+  // ── Item-scanner camera (used after order is loaded) ──────────────────────
   let cameraStream = null;
   let loadedOrder = null;
 
@@ -42,8 +43,21 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastDetectedAt = 0;
   let cameraInfoShown = false;
 
+  // ── Order-ID camera (used in the search section before order is loaded) ───
+  const orderScanToggleBtn = document.getElementById("orderScanToggleBtn");
+  const orderScanPanel = document.getElementById("orderScanPanel");
+  const orderScanVideo = document.getElementById("orderScanVideo");
+
+  let orderCameraStream = null;
+  let orderDetectorInterval = null;
+  let orderBarcodeDetector = null;
+  let orderLastBarcode = "";
+  let orderLastAt = 0;
+  let orderScanActive = false;
+
   initScannerModeToggle();
   updateActionButtons();
+  initOrderScanToggle();
 
   // ─── Search ───────────────────────────────────────────────────────────────
 
@@ -102,6 +116,12 @@ document.addEventListener("DOMContentLoaded", () => {
       populateOrderDetails(loadedOrder);
       loadedOrderSection.classList.remove("hidden");
       showMessage("SAP order loaded successfully.", false);
+
+      stopOrderCamera(); // order found — close the search-camera
+      if (orderScanToggleBtn) {
+        orderScanToggleBtn.textContent = "📷 Scan Order ID";
+        orderScanToggleBtn.classList.remove("active");
+      }
 
       initCameraIfNeeded();
       updateActionButtons();
@@ -963,6 +983,145 @@ document.addEventListener("DOMContentLoaded", () => {
         reviewOrderBtn.disabled = !canRev;
       }
     }
+  }
+
+  // ─── Order-ID camera (search camera) ─────────────────────────────────────
+
+  function initOrderScanToggle() {
+    if (!orderScanToggleBtn) return;
+
+    orderScanToggleBtn.addEventListener("click", () => {
+      orderScanActive = !orderScanActive;
+
+      if (orderScanActive) {
+        orderScanToggleBtn.textContent = "✕ Stop Scanning";
+        orderScanToggleBtn.classList.add("active");
+        if (orderScanPanel) orderScanPanel.classList.remove("hidden");
+        startOrderCamera();
+      } else {
+        orderScanToggleBtn.textContent = "📷 Scan Order ID";
+        orderScanToggleBtn.classList.remove("active");
+        if (orderScanPanel) orderScanPanel.classList.add("hidden");
+        stopOrderCamera();
+      }
+    });
+  }
+
+  async function startOrderCamera() {
+    if (!orderScanVideo) return;
+    if (orderCameraStream) {
+      startOrderBarcodeDetection();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      orderCameraStream = stream;
+      orderScanVideo.srcObject = stream;
+      try {
+        await orderScanVideo.play();
+      } catch (_) {}
+      startOrderBarcodeDetection();
+    } catch (err) {
+      console.error("Order camera failed:", err);
+      showMessage(
+        "Unable to access camera. Please allow camera permission.",
+        true,
+      );
+      orderScanActive = false;
+      if (orderScanToggleBtn) {
+        orderScanToggleBtn.textContent = "📷 Scan Order ID";
+        orderScanToggleBtn.classList.remove("active");
+      }
+      if (orderScanPanel) orderScanPanel.classList.add("hidden");
+    }
+  }
+
+  function stopOrderCamera() {
+    if (orderDetectorInterval) {
+      clearInterval(orderDetectorInterval);
+      orderDetectorInterval = null;
+    }
+    if (!orderCameraStream) return;
+    orderCameraStream.getTracks().forEach((t) => t.stop());
+    orderCameraStream = null;
+    if (orderScanVideo) orderScanVideo.srcObject = null;
+    orderScanActive = false;
+  }
+
+  function startOrderBarcodeDetection() {
+    if (orderDetectorInterval) {
+      clearInterval(orderDetectorInterval);
+      orderDetectorInterval = null;
+    }
+    if (!orderScanVideo || !orderCameraStream) return;
+
+    if (!("BarcodeDetector" in window)) {
+      showMessage(
+        "Camera preview is on, but this browser cannot auto-read barcodes. Enter the order ID manually.",
+        false,
+      );
+      return;
+    }
+
+    (async () => {
+      try {
+        if (!orderBarcodeDetector) {
+          try {
+            orderBarcodeDetector = new BarcodeDetector({
+              formats: [
+                "ean_13",
+                "ean_8",
+                "upc_a",
+                "upc_e",
+                "code_128",
+                "code_39",
+                "qr_code",
+              ],
+            });
+          } catch (_) {
+            orderBarcodeDetector = new BarcodeDetector();
+          }
+        }
+      } catch (err) {
+        console.error("Order BarcodeDetector init failed:", err);
+        return;
+      }
+
+      orderDetectorInterval = setInterval(async () => {
+        try {
+          if (
+            !orderCameraStream ||
+            !orderScanVideo ||
+            orderScanVideo.readyState < 2
+          )
+            return;
+          const detected = await orderBarcodeDetector.detect(orderScanVideo);
+          if (!Array.isArray(detected) || detected.length === 0) return;
+
+          const raw = String(detected[0].rawValue || "").trim();
+          if (!raw) return;
+
+          const now = Date.now();
+          if (raw === orderLastBarcode && now - orderLastAt < 1500) return;
+          orderLastBarcode = raw;
+          orderLastAt = now;
+
+          // Fill the order ID input and fire the search
+          if (orderIdInput) orderIdInput.value = raw;
+          clearInterval(orderDetectorInterval);
+          orderDetectorInterval = null;
+
+          // Small delay so the user can see the value appear before search starts
+          setTimeout(() => {
+            searchOrderBtn.click();
+          }, 300);
+        } catch (_) {}
+      }, 400);
+    })();
   }
 
   // ─── Camera / Scanner ─────────────────────────────────────────────────────

@@ -563,6 +563,13 @@
       font-size: 11px;
     }
   </style>
+  <script>
+    if (window.self === window.top) {
+      const page = location.pathname.split("/").pop() || "reports.html";
+      window.location.replace("index.html?page=" + encodeURIComponent(page));
+    }
+  </script>
+
 </head>
 
 <body>

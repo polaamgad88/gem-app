@@ -113,6 +113,12 @@
       applyTheme(savedTheme);
     });
   </script>
+  <script>
+    if (window.self === window.top) {
+      const page = location.pathname.split("/").pop() || "create-order.html";
+      window.location.replace("index.html?page=" + encodeURIComponent(page));
+    }
+  </script>
 
 </head>
 

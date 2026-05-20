@@ -7,22 +7,31 @@
   <title>Delegate Dashboard</title>
   <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
   <style>
+    /* ── Reset & base ── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     html,
     body {
       height: 100%;
-      overflow: hidden;
-    }
-
-    body {
       margin: 0;
+      overflow: hidden;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f8f9fb;
       color: #333;
+    }
+
+    body {
       display: flex;
       height: 100vh;
     }
 
+    /* ── Sidebar ── */
     .sidebar {
       width: 250px;
       background-color: #fff;
@@ -31,7 +40,8 @@
       flex-direction: column;
       padding: 20px;
       border-right: 1px solid #ddd;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, width 0.3s ease, padding 0.3s ease;
+      flex-shrink: 0;
     }
 
     .sidebar.collapsed {
@@ -52,13 +62,22 @@
     .sidebar h2 {
       font-size: 16px;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 4px;
     }
 
+    .sidebar .version {
+      align-self: center;
+      color: gray;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Nav links ── */
     .nav-links {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 8px;
+      margin-top: 10px;
     }
 
     .nav-links a {
@@ -69,40 +88,13 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      transition: background 0.3s ease;
-    }
-
-    .nav-links .add-order {
-      background-color: #28a745;
-      color: #fff;
-    }
-
-    .topbar {
-      height: 60px;
-      background: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      margin: 15px 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    .topbar-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      transition: background 0.2s ease;
       font-size: 14px;
-      color: #333;
-      margin: 0;
-      font-weight: 600;
+      white-space: nowrap;
     }
 
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 15px;
+    .nav-links a:hover {
+      background-color: #f0f4ff;
     }
 
     .nav-links a.active {
@@ -110,8 +102,61 @@
       color: #fff;
     }
 
+    .nav-links a.add-order {
+      background-color: #28a745;
+      color: #fff;
+    }
+
+    .nav-links a.add-order:hover {
+      background-color: #218838;
+    }
+
+    /* ── Main area ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      margin-left: 5px;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      height: 60px;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      margin: 15px 20px 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #333;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .topbar-title i.fa-bars {
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .btn-top {
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 6px;
       border: none;
       cursor: pointer;
@@ -128,36 +173,21 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 6px;
       text-decoration: none;
+      font-size: 14px;
     }
 
-    /* Main content */
-    .main {
-      flex: 1;
-      /* display: flex;
-        flex-direction: column; */
-      margin-left: 5px;
-      transition: all 0.3s ease;
-    }
-
-    /* .sidebar.collapsed ~ .main {
-        margin-left: 0;
-      } */
+    /* ── Iframe content ── */
     .main-content {
       flex: 1;
       width: 100%;
-      height: calc(100vh - 80px);
       border: none;
+      margin-top: 15px;
     }
 
-    .main-content h2 {
-      font-size: 22px;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
+    /* ── Dark mode ── */
     body.dark-mode {
       background-color: #121212;
       color: #e0e0e0;
@@ -169,67 +199,32 @@
       border-right: 1px solid #444;
     }
 
+    body.dark-mode .nav-links a {
+      color: #ddd;
+    }
+
+    body.dark-mode .nav-links a:hover {
+      background-color: #2a2a2a;
+    }
+
+    body.dark-mode .nav-links a.active {
+      background-color: #1a3a6e;
+    }
+
     body.dark-mode .topbar {
       background-color: #1e1e1e;
-      color: #fff;
     }
 
     body.dark-mode .topbar-title {
       color: #ddd;
     }
 
-    body.dark-mode .theme-dropdown .dropdown-content {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-    }
-
-    body.dark-mode .theme-dropdown .dropdown-content a {
+    body.dark-mode .btn-theme {
+      background: #333;
       color: #ddd;
     }
 
-    body.dark-mode .theme-dropdown .dropdown-content a:hover {
-      background-color: #333;
-    }
-
-    body.dark-mode .nav-links a {
-      color: #ddd;
-    }
-
-    body.dark-mode .nav-links a:hover {
-      background-color: #333;
-    }
-
-    .theme-dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .theme-dropdown .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #fff;
-      min-width: 120px;
-      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-      z-index: 1;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .theme-dropdown .dropdown-content a {
-      color: #333;
-      padding: 10px 12px;
-      text-decoration: none;
-      display: block;
-    }
-
-    .theme-dropdown .dropdown-content a:hover {
-      background-color: #f1f1f1;
-    }
-
-    .theme-dropdown.show .dropdown-content {
-      display: block;
-    }
-
+    /* ── Mobile ── */
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
@@ -238,8 +233,8 @@
         height: 100%;
         transform: translateX(-100%);
         z-index: 1000;
-        width: 250px;
-        padding: 20px;
+        width: 250px !important;
+        padding: 20px !important;
       }
 
       .sidebar.active {
@@ -249,128 +244,76 @@
       .main {
         flex: 1;
         width: 100%;
+        margin-left: 0;
       }
 
-      .topbar-title i {
-        cursor: pointer;
-        font-size: 22px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .topbar-title span {
+      .topbar-title span#page-title {
         display: none;
       }
     }
   </style>
 
-  <script src="./scripts/utils.js"></script>
-  <script src="./scripts/delegate-landing.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleBtn = document.getElementById("theme-toggle");
-      const body = document.body;
-      const iframe = document.getElementById("main-frame");
-
-      function updateButton() {
-        if (body.classList.contains("dark-mode")) {
-          toggleBtn.textContent = "☀️ Light";
-        } else {
-          toggleBtn.textContent = "🌙 Dark";
-        }
-      }
-
-      if (localStorage.getItem("theme") === "dark") {
-        body.classList.add("dark-mode");
-      }
-
-      updateButton();
-
-      toggleBtn.addEventListener("click", () => {
-        body.classList.toggle("dark-mode");
-        const theme = body.classList.contains("dark-mode") ? "dark" : "light";
-        localStorage.setItem("theme", theme);
-        updateButton();
-
-        iframe.contentWindow.postMessage({ theme }, "*");
-      });
-    });
-    document.addEventListener("DOMContentLoaded", () => {
-      const menuBtn = document.querySelector(".topbar-title i.fa-bars");
-      const sidebar = document.querySelector(".sidebar");
-      const sidebarLinks = sidebar.querySelectorAll("a");
-
-      menuBtn.addEventListener("click", () => {
-        if (window.innerWidth <= 768) {
-          // Mobile toggle
-          sidebar.classList.toggle("active");
-        } else {
-          // Desktop collapse
-          sidebar.classList.toggle("collapsed");
-        }
-      });
-
-      sidebarLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-          if (window.innerWidth <= 768) {
-            sidebar.classList.remove("active");
-          }
-        });
-      });
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const navLinks = document.querySelectorAll(".nav-links a");
-      navLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-          navLinks.forEach((l) => l.classList.remove("active"));
-          link.classList.add("active");
-        });
-      });
-    });
-  </script>
+  <!-- Matomo analytics (must stay in <head>) -->
   <script>
     var _paq = window._paq = window._paq || [];
-    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
     _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
     _paq.push(["setCookieDomain", "*.dashboard-cristal.site"]);
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
+    _paq.push(["trackPageView"]);
+    _paq.push(["enableLinkTracking"]);
     (function () {
       var u = "//dashboard-cristal.site/stats/";
-      _paq.push(['setTrackerUrl', u + 'matomo.php']);
-      _paq.push(['setSiteId', '1']);
-      var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-      g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
+      _paq.push(["setTrackerUrl", u + "matomo.php"]);
+      _paq.push(["setSiteId", "1"]);
+      var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
+      g.async = true; g.src = u + "matomo.js"; s.parentNode.insertBefore(g, s);
     })();
   </script>
+
+  <script src="./scripts/utils.js"></script>
+  <script src="./scripts/delegate-landing.js"></script>
 </head>
 
 <body>
+
+  <!-- ── Sidebar ── -->
   <div class="sidebar">
-    <img src="./assets/GEM Icon.jpg" alt="gem logo" class="logo" />
-    <h2>Welcome, <span id="username"></span>👋</h2>
-    <span style="align-self: center; color: gray">version 3.3</span>
-    <hr style="margin: 10px 0" />
+    <img src="./assets/GEM Icon.jpg" alt="GEM logo" class="logo" />
+    <h2>Welcome, <span id="username"></span> 👋</h2>
+    <span class="version">version 3.3</span>
+    <hr style="margin: 0 0 10px; border-color: #eee;" />
 
-    <div class="nav-links">
+    <nav class="nav-links">
       <a href="./dashboard.html">
-        <i class="fa-solid fa-chart-pie"></i>
-        Overview
+        <i class="fa-solid fa-chart-pie"></i> Overview
       </a>
-      <a href="reports.html"> <i class="fa fa-chart-line"></i> Reports </a>
-      <a href="./orders.html"><i class="fa-solid fa-list"></i> View Orders</a>
-      <a href="./create-order.html" class="add-order"><i class="fa-solid fa-plus"></i> Add New Order</a>
-      <a href="./customers.html"><i class="fa-solid fa-users"></i> Manage Customers</a>
-      <a href="./users.html"><i class="fa-solid fa-user-gear"></i> Manage Users</a>
-      <a style="display: none" id="products_page" href="./products.html"><i class="fa-solid fa-box"></i> Manage
-        Products</a>
-      <a href="./customer-visit.html"><i class="fa-solid fa-location-dot"></i> Customer Visit</a>
-      <a href="./scan-items.html"><i class="fa-regular fa-barcode-read"></i> Scan Items </a>
-
-    </div>
+      <a href="./reports.html">
+        <i class="fa fa-chart-line"></i> Reports
+      </a>
+      <a href="./orders.html">
+        <i class="fa-solid fa-list"></i> View Orders
+      </a>
+      <a href="./create-order.html" class="add-order">
+        <i class="fa-solid fa-plus"></i> Add New Order
+      </a>
+      <a href="./customers.html">
+        <i class="fa-solid fa-users"></i> Manage Customers
+      </a>
+      <a href="./users.html">
+        <i class="fa-solid fa-user-gear"></i> Manage Users
+      </a>
+      <a href="./products.html" id="products_page" style="display: none;">
+        <i class="fa-solid fa-box"></i> Manage Products
+      </a>
+      <a href="./customer-visit.html">
+        <i class="fa-solid fa-location-dot"></i> Customer Visit
+      </a>
+      <a href="./scan-items.html">
+        <i class="fa-solid fa-barcode"></i> Scan Items
+      </a>
+    </nav>
   </div>
 
+  <!-- ── Main ── -->
   <div class="main">
     <div class="topbar">
       <h1 class="topbar-title">
@@ -384,8 +327,10 @@
         </a>
       </div>
     </div>
-    <iframe id="main-frame" class="main-content" src="dashboard.html"></iframe>
+
+    <iframe id="main-frame" class="main-content" src="./dashboard.html"></iframe>
   </div>
+
   <script src="./scripts/app.js"></script>
 </body>
 
