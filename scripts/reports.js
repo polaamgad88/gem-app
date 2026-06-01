@@ -204,39 +204,47 @@ async function apiGet(path, token, params = {}) {
 }
 
 /**
- * Get visits count (from data.total) + sum(amount) by paging through visits.
- * We page because /visits doesn't return a SUM.
+ * Get visits count + sum(amount). Backend now returns `total_amount` as a
+ * server-side aggregate, so a single request is enough. Falls back to client-side
+ * pagination for older backends that don't return total_amount.
  */
 async function getVisitStats(token, startDate, endDate, userId = null) {
+  const params = {
+    start_date: startDate,
+    end_date: endDate,
+    page: 1,
+    limit: 1,
+  };
+  if (userId !== null) params.user_id = userId;
+
+  const { res, data } = await apiGet("/visits", token, params);
+  if (!res.ok || !data) return { total: 0, amountSum: 0 };
+
+  const total = Number(data.total || 0);
+
+  // Fast path: server-aggregated total_amount.
+  if (typeof data.total_amount === "number") {
+    return { total, amountSum: Number(data.total_amount) };
+  }
+
+  // Slow path: paginate client-side (legacy backends).
   const limit = 200;
   let page = 1;
-
-  let total = 0;
   let amountSum = 0;
 
   while (true) {
-    const params = {
-      start_date: startDate,
-      end_date: endDate,
-      page,
-      limit,
-    };
-    if (userId !== null) params.user_id = userId;
+    const p = { start_date: startDate, end_date: endDate, page, limit };
+    if (userId !== null) p.user_id = userId;
 
-    const { res, data } = await apiGet("/visits", token, params);
-    if (!res.ok || !data) break;
-
-    if (page === 1) total = Number(data.total || 0);
-
-    const visits = Array.isArray(data.visits) ? data.visits : [];
+    const { res: r, data: d } = await apiGet("/visits", token, p);
+    if (!r.ok || !d) break;
+    const visits = Array.isArray(d.visits) ? d.visits : [];
     for (const v of visits) {
       const a = Number(v.amount || 0);
       if (!Number.isNaN(a)) amountSum += a;
     }
-
     if (page * limit >= total) break;
     if (visits.length < limit) break;
-
     page += 1;
     if (page > 200) break;
   }
@@ -250,7 +258,9 @@ async function getCustomersTotal(token) {
     limit: 1,
   });
   if (!res.ok) return 0;
+  // Backend returns: {customers, total, page, pages}
   if (data && typeof data.total === "number") return data.total;
+  if (data && Array.isArray(data.customers)) return data.customers.length;
   if (data && Array.isArray(data.data)) return data.data.length;
   return 0;
 }
@@ -334,9 +344,11 @@ async function loadDashboard(token) {
 
 async function loadTeamBreakdown(token, startDate, endDate) {
   const tbody = document.getElementById("team-table-body");
+  const cards = document.getElementById("team-cards");
   if (!tbody) return;
 
   tbody.innerHTML = "";
+  if (cards) cards.innerHTML = "";
 
   const { res, data } = await apiGet("/users", token);
   if (!res.ok) {
@@ -366,6 +378,9 @@ async function loadTeamBreakdown(token, startDate, endDate) {
 
   results.sort((a, b) => (b.visits || 0) - (a.visits || 0));
 
+  const tbodyFrag = document.createDocumentFragment();
+  const cardsFrag = document.createDocumentFragment();
+
   for (const u of results) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -380,8 +395,33 @@ async function loadTeamBreakdown(token, startDate, endDate) {
       <td>${u.visits}</td>
       <td>${Utils.Format.currency(u.collected)}</td>
     `;
-    tbody.appendChild(tr);
+    tbodyFrag.appendChild(tr);
+
+    if (cards) {
+      const card = document.createElement("div");
+      card.className = "team-card";
+      card.innerHTML = `
+        <div class="team-card-header">
+          <span class="user-name">${escapeHtml(u.username)}</span>
+          <span class="team-card-target">0.0%</span>
+        </div>
+        <div class="team-card-body">
+          <div class="team-card-stat">
+            <span class="team-card-label">Visits</span>
+            <span class="team-card-value">${u.visits}</span>
+          </div>
+          <div class="team-card-stat">
+            <span class="team-card-label">Collected</span>
+            <span class="team-card-value">${Utils.Format.currency(u.collected)}</span>
+          </div>
+        </div>
+      `;
+      cardsFrag.appendChild(card);
+    }
   }
+
+  tbody.appendChild(tbodyFrag);
+  if (cards) cards.appendChild(cardsFrag);
 }
 
 async function mapWithConcurrency(items, concurrency, worker) {

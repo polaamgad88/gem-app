@@ -1,440 +1,338 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const token = await Utils.Auth.requireAuth();
-  if (!token) return;
+/* Users page — perf refactored. Preserves global functions used by inline onclick handlers. */
 
-  const isAdmin = localStorage.getItem("is_admin") === "1";
+(function () {
+  const { Api, Auth, UI, Async, DOM } = window.Utils;
+  const esc = DOM.escapeHtml;
 
-  if (isAdmin) {
-    document.getElementById("create-user-btn").style.display = "inline-block";
-    document.getElementById("create-user-btn").addEventListener("click", () => {
-      window.location.href = "create-user.html";
-    });
-  } else {
-    document.getElementById("create-user-btn").style.display = "none";
-  }
+  let allUsers = [];
 
-  await loadUsers(token);
+  document.addEventListener("DOMContentLoaded", async () => {
+    const token = await Auth.requireAuth();
+    if (!token) return;
 
-  document.getElementById("user-search").addEventListener("input", (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    filterUsers(searchTerm);
+    const isAdmin = localStorage.getItem("is_admin") === "1";
+    const createBtn = document.getElementById("create-user-btn");
+    if (createBtn) {
+      createBtn.style.display = isAdmin ? "inline-block" : "none";
+      if (isAdmin) {
+        createBtn.addEventListener("click", () => {
+          window.location.href = "create-user.html";
+        });
+      }
+    }
+
+    await loadUsers();
+
+    const searchInput = document.getElementById("user-search");
+    if (searchInput) {
+      const onSearch = Async.debounce((value) => filterUsers(value.toLowerCase()), 200);
+      searchInput.addEventListener("input", (e) => onSearch(e.target.value));
+    }
+
+    toggleView();
+    window.addEventListener("resize", Async.throttle(toggleView, 150));
+
+    wireModalForms();
+    wireDropdownDelegation();
   });
 
-  toggleView();
-  window.addEventListener("resize", toggleView);
-});
+  async function loadUsers() {
+    try {
+      const data = await Api.get("/users");
+      allUsers = data.users || [];
+      renderUsers(allUsers);
+    } catch (err) {
+      console.error("Failed to load users:", err);
+      alert(err.data?.message || "Could not load users.");
+    }
+  }
 
-let allUsers = [];
+  function toggleView() {
+    const cardView = document.querySelector(".card-view");
+    const table = document.querySelector("table");
+    if (!cardView || !table) return;
+    if (window.innerWidth <= 768) {
+      cardView.style.display = "block";
+      table.style.display = "none";
+    } else {
+      cardView.style.display = "none";
+      table.style.display = "table";
+    }
+  }
 
-async function loadUsers(token) {
-  try {
-    const res = await fetch("https://order-app.gemegypt.net/api/users", {
-      headers: { Authorization: `Bearer ${token}` },
+  function renderUsers(users) {
+    const isAdmin = localStorage.getItem("is_admin") === "1";
+    const tableBody = document.getElementById("users-table-body");
+    const cardContainer = document.getElementById("user-cards");
+    if (!tableBody || !cardContainer) return;
+
+    const tbodyFrag = document.createDocumentFragment();
+    const cardsFrag = document.createDocumentFragment();
+
+    const total = users.length;
+    users.forEach((user, idx) => {
+      const isUserAdmin = !!user.admin;
+      const isActive = String(user.status) === "1";
+      const dropPos = total - idx <= 2 ? "look_up" : "look_down";
+
+      let userClass = "";
+      let badgeLabel = "";
+      if (!isActive) {
+        userClass = "inactive-badge";
+        badgeLabel = " (Inactive)";
+      } else if (isUserAdmin) {
+        userClass = "admin-badge";
+        badgeLabel = " (Admin)";
+      }
+
+      const usernameDisplay = `<span class="${userClass}">${esc(user.username)} - ${esc(user.user_id)}${esc(badgeLabel)}</span>`;
+      const menuHtml = buildMenu(user.user_id, isActive, isAdmin, dropPos);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${usernameDisplay}</td>
+        <td>${esc(user.role || "")}</td>
+        <td>${esc(user.assigned_to_username || "—")} - ${esc(user.assigned_to_user_id || "—")}</td>
+        <td>${esc(user.phone || "—")}</td>
+        <td>
+          <div class="action-container">
+            <button class="action-btn" data-dropdown-id="user-dropdown-${user.user_id}">⋮</button>
+            ${menuHtml}
+          </div>
+        </td>`;
+      tbodyFrag.appendChild(tr);
+
+      const card = document.createElement("div");
+      card.className = "user-card";
+      card.innerHTML = `
+        <p><strong>Username:</strong> ${usernameDisplay}</p>
+        <p><strong>Role:</strong> ${esc(user.role || "")}</p>
+        <p><strong>Assigned To:</strong> ${esc(user.assigned_to_username || "—")} - ${esc(user.assigned_to_user_id || "—")}</p>
+        <p><strong>Phone:</strong> ${esc(user.phone || "—")}</p>
+        <div class="card-actions">
+          <div class="row-actions">
+            <button class="btn view-btn" data-action="edit" data-id="${user.user_id}">Edit</button>
+            ${isAdmin ? `<button class="btn delete-btn" data-action="delete" data-id="${user.user_id}">Delete</button>` : ""}
+          </div>
+          <div class="row-actions">
+            <button class="btn" data-action="password" data-id="${user.user_id}">Change Password</button>
+            <button class="btn toggle-btn" data-action="toggle" data-id="${user.user_id}" data-status="${isActive ? 0 : 1}">
+              ${isActive ? "Deactivate" : "Activate"}
+            </button>
+          </div>
+        </div>`;
+      cardsFrag.appendChild(card);
     });
 
-    const data = await res.json();
-    allUsers = data.users || [];
-    renderUsers(allUsers);
-  } catch (err) {
-    console.error("Failed to load users:", err);
-    alert("Could not load users.");
-  }
-}
-
-function toggleView() {
-  const cardView = document.querySelector(".card-view");
-  const table = document.querySelector("table");
-
-  if (window.innerWidth <= 768) {
-    cardView.style.display = "block";
-    table.style.display = "none";
-  } else {
-    cardView.style.display = "none";
-    table.style.display = "table";
-  }
-}
-
-function viewUser(userId) {
-  window.location.href = `view-user.html?user_id=${userId}`;
-}
-
-async function deleteUser(userId) {
-  if (!confirm("Are you sure you want to delete this user?")) return;
-
-  const token = localStorage.getItem("access_token");
-
-  try {
-    const res = await fetch(`https://order-app.gemegypt.net/api/users/delete/${userId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert("User deleted successfully");
-      await loadUsers(token);
-    } else {
-      alert(data.message || "Failed to delete user");
-    }
-  } catch (err) {
-    console.error("Error deleting user:", err);
-    alert("Error deleting user");
-  }
-}
-async function openEditModal(userId) {
-  const user = allUsers.find((u) => u.user_id === userId);
-  if (!user) return;
-
-  document.getElementById("edit-user-id").value = user.user_id;
-  document.getElementById("edit-username").value = user.username;
-  document.getElementById("edit-email").value = user.email;
-  document.getElementById("edit-phone").value = user.phone;
-  document.getElementById("edit-role").value = user.role;
-  document.getElementById("edit-assigned-to").value =
-    user.assigned_to_user_id || "";
-  document.getElementById("edit-admin").checked = user.admin;
-  document.getElementById("edit-driver").checked = user.driver == 1;
-  document.getElementById("edit-storage").checked = user.storage == 1;
-
-  document.getElementById("edit-user-modal").classList.remove("hidden");
-}
-function closeEditModal() {
-  document.getElementById("edit-user-modal").classList.add("hidden");
-}
-function openPasswordModal(userId) {
-  document.getElementById("password-user-id").value = userId;
-  document.getElementById("change-password-modal").classList.remove("hidden");
-}
-function closePasswordModal() {
-  document.getElementById("change-password-modal").classList.add("hidden");
-}
-document
-  .getElementById("edit-user-form")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("access_token");
-    const userId = document.getElementById("edit-user-id").value;
-
-    // First: update info
-    const infoRes = await fetch(
-      `https://order-app.gemegypt.net/api/users/edit_info/${userId}`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: new URLSearchParams({
-          username: document.getElementById("edit-username").value,
-          email: document.getElementById("edit-email").value,
-          phone: document.getElementById("edit-phone").value,
-          driver: document.getElementById("edit-driver").checked ? "1" : "0",
-          storage: document.getElementById("edit-storage").checked ? "1" : "0",
-        }),
-      }
-    );
-
-    // Second: update role
-    const roleRes = await fetch(
-      `https://order-app.gemegypt.net/api/users/edit_role/${userId}`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: new URLSearchParams({
-          role: document.getElementById("edit-role").value,
-          admin: document.getElementById("edit-admin").checked ? "1" : "0",
-        }),
-      }
-    );
-
-    // 🔄 Third: update assigned Manager
-    await fetch(`https://order-app.gemegypt.net/api/users/change_manager/${userId}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams({
-        assigned_to_user_id: document.getElementById("edit-assigned-to").value,
-      }),
-    });
-
-    const infoData = await infoRes.json();
-    const roleData = await roleRes.json();
-
-    alert(infoData.message || roleData.message);
-    closeEditModal();
-    await loadUsers(token);
-  });
-
-document
-  .getElementById("change-password-form")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("access_token");
-    const userId = document.getElementById("password-user-id").value;
-    const newPassword = document.getElementById("new-password").value;
-
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/users/change_password/${userId}`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: new URLSearchParams({ password: newPassword }),
-      }
-    );
-
-    const data = await res.json();
-    alert(data.message || "Password updated");
-    closePasswordModal();
-  });
-
-async function toggleUserStatus(userId, newStatus) {
-  const token = localStorage.getItem("access_token");
-  try {
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/users/set_active/${userId}/${newStatus}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert(data.message || "User status updated");
-      await loadUsers(token);
-    } else {
-      alert(data.message || "Failed to update user status");
-    }
-  } catch (err) {
-    console.error("Error toggling status:", err);
-    alert("Failed to update status");
-  }
-}
-function openAssignNumberModal(userId) {
-  document.getElementById("assign-user-id").value = userId;
-
-  const user = allUsers.find((u) => u.user_id === userId);
-  if (user) {
-    document.getElementById("local-number").value = user.local_number || "";
-    document.getElementById("abroad-number").value = user.abroad_number || "";
-  } else {
-    document.getElementById("local-number").value = "";
-    document.getElementById("abroad-number").value = "";
+    tableBody.replaceChildren(tbodyFrag);
+    cardContainer.replaceChildren(cardsFrag);
   }
 
-  document
-    .getElementById("assign-number-modal")
-    .classList.remove("hidden");
-}
+  function buildMenu(userId, isActive, isAdmin, posClass) {
+    return `
+      <div class="dropdown-menu ${posClass}" id="user-dropdown-${userId}">
+        <button data-action="edit" data-id="${userId}">Edit</button>
+        <button data-action="password" data-id="${userId}">Change Password</button>
+        <button data-action="assign-target" data-id="${userId}">Assign Target</button>
+        <button data-action="toggle" data-id="${userId}" data-status="${isActive ? 0 : 1}">
+          ${isActive ? "Deactivate" : "Activate"}
+        </button>
+        ${isAdmin ? `<button class="delete-btn" data-action="delete" data-id="${userId}">Delete</button>` : ""}
+      </div>`;
+  }
 
-function closeAssignNumberModal() {
-  document
-    .getElementById("assign-number-modal")
-    .classList.add("hidden");
-}
+  // ── Single body-level delegation for dropdown + menu actions ─────────────
+  function wireDropdownDelegation() {
+    document.body.addEventListener("click", (e) => {
+      const actionBtn = e.target.closest("[data-action][data-id]");
+      const openTrigger = e.target.closest("[data-dropdown-id]");
 
-function renderUsers(users) {
-  const isAdmin = localStorage.getItem("is_admin") === "1";
-  const tableBody = document.getElementById("users-table-body");
-  const cardContainer = document.getElementById("user-cards");
-
-  tableBody.innerHTML = "";
-  cardContainer.innerHTML = "";
-  const usersLength = users.length;
-  counter = 0;
-  users.forEach((user) => {
-    const isUserAdmin = user.admin;
-    const isActive = user.status == "1";
-    counter += 1;
-    menu = "";
-    if (usersLength - counter <= 2) {
-      menu = `
-      <div class="dropdown-menu look_up" id="user-dropdown-${user.user_id}">
-      <button onclick="openEditModal(${user.user_id})">Edit</button>
-      <button onclick="openPasswordModal(${
-        user.user_id
-      })">Change Password</button>
-<button onclick="openAssignNumberModal(${user.user_id})">Assign Target</button>
-      <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
-        ${isActive ? "Deactivate" : "Activate"}
-      </button>
-      ${
-        isAdmin
-          ? `<button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
-          : ""
+      // Close all open menus when clicking outside any action
+      if (!actionBtn && !openTrigger) {
+        document.querySelectorAll(".dropdown-menu").forEach((m) => (m.style.display = "none"));
+        return;
       }
-    </div>`;
-    } else {
-      menu = `
-      <div class="dropdown-menu look_down" id="user-dropdown-${user.user_id}">
-      <button onclick="openEditModal(${user.user_id})">Edit</button>
-      <button onclick="openPasswordModal(${
-        user.user_id
-      })">Change Password</button>
-<button onclick="openAssignNumberModal(${user.user_id})">Assign Target</button>
-      <button onclick="toggleUserStatus(${user.user_id}, ${isActive ? 0 : 1})">
-        ${isActive ? "Deactivate" : "Activate"}
-      </button>
-      ${
-        isAdmin
-          ? `<button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
-          : ""
-      }
-    </div>`;
-    }
-    let userClass = "";
-    let badgeLabel = "";
 
-    if (!isActive) {
-      userClass = "inactive-badge";
-      badgeLabel = " (Inactive)";
-    } else if (isUserAdmin) {
-      userClass = "admin-badge";
-      badgeLabel = " (Admin)";
-    }
-
-    const usernameDisplay = `<span class="${userClass}">${user.username} - ${user.user_id}${badgeLabel}</span>`;
-
-    // === Table view row ===
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${usernameDisplay}</td>
-      <td>${user.role}</td>
-      <td>${user.assigned_to_username || "—"} - ${
-      user.assigned_to_user_id || "—"
-    }</td>
-      <td>${user.phone || "—"}</td>
-      <td>
-  <style>
-    .action-container {
-      position: relative;
-      display: inline-block;
-      font-family: sans-serif;
-    }
-
-    .action-btn {
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 6px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #333;
-      transition: background-color 0.2s ease;
-    }
-
-    .action-btn:hover {
-      background-color: #0b2a59;
-      color: white;
-    }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: white;
-      min-width: 150px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      border-radius: 6px;
-      overflow: hidden;
-      z-index: 9999;
-    }
-
-    .dropdown-menu button {
-      width: 100%;
-      padding: 8px 12px;
-      background: none;
-      border: none;
-      text-align: left;
-      font-size: 13px;
-      color: #333;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .dropdown-menu button:hover {
-      background-color: #d3d3d3;
-      color: black;
-    }
-
-    .dropdown-menu .delete-btn:hover {
-      background-color: #f8d7da;
-      color: #c00;
-    }
-  </style>
-
-  <div class="action-container">
-    <button class="action-btn look_up" data-dropdown-id="user-dropdown-${
-      user.user_id
-    }">⋮</button>
-    ${menu}
-  </div>
-</td>
-
-    `;
-    document.addEventListener("click", function (e) {
-      const isActionBtn = e.target.matches(".action-btn");
-      const openMenus = document.querySelectorAll(".dropdown-menu");
-
-      openMenus.forEach((menu) => (menu.style.display = "none"));
-
-      if (isActionBtn) {
+      if (openTrigger) {
         e.stopPropagation();
-        const id = e.target.getAttribute("data-dropdown-id");
-        const menu = document.getElementById(id);
+        document.querySelectorAll(".dropdown-menu").forEach((m) => (m.style.display = "none"));
+        const menu = document.getElementById(openTrigger.dataset.dropdownId);
         if (menu) menu.style.display = "block";
+        return;
+      }
+
+      if (actionBtn) {
+        const action = actionBtn.dataset.action;
+        const id = parseInt(actionBtn.dataset.id, 10);
+        document.querySelectorAll(".dropdown-menu").forEach((m) => (m.style.display = "none"));
+        if (action === "edit") openEditModal(id);
+        else if (action === "password") openPasswordModal(id);
+        else if (action === "assign-target") openAssignNumberModal(id);
+        else if (action === "toggle") toggleUserStatus(id, parseInt(actionBtn.dataset.status, 10));
+        else if (action === "delete") deleteUser(id);
+      }
+    });
+  }
+
+  // ── Modal wiring ────────────────────────────────────────────────────────
+
+  function wireModalForms() {
+    const editForm = document.getElementById("edit-user-form");
+    editForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById("edit-user-id").value;
+      try {
+        // Run info+role+manager in parallel — backend doesn't require ordering
+        await Promise.all([
+          Api.postForm(`/users/edit_info/${userId}`, {
+            username: document.getElementById("edit-username").value,
+            email: document.getElementById("edit-email").value,
+            phone: document.getElementById("edit-phone").value,
+            driver: document.getElementById("edit-driver").checked ? "1" : "0",
+            storage: document.getElementById("edit-storage").checked ? "1" : "0",
+          }),
+          Api.postForm(`/users/edit_role/${userId}`, {
+            role: document.getElementById("edit-role").value,
+            admin: document.getElementById("edit-admin").checked ? "1" : "0",
+          }),
+          Api.postForm(`/users/change_manager/${userId}`, {
+            assigned_to_user_id: document.getElementById("edit-assigned-to").value,
+          }),
+        ]);
+        alert("User updated");
+        closeEditModal();
+        Api.invalidate("/users");
+        await loadUsers();
+      } catch (err) {
+        alert(err.data?.message || err.message || "Update failed.");
       }
     });
 
-    tableBody.appendChild(tr);
+    const pwForm = document.getElementById("change-password-form");
+    pwForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById("password-user-id").value;
+      const newPassword = document.getElementById("new-password").value;
+      try {
+        const data = await Api.postForm(`/users/change_password/${userId}`, {
+          password: newPassword,
+        });
+        alert(data?.message || "Password updated");
+        closePasswordModal();
+      } catch (err) {
+        alert(err.data?.message || err.message || "Password update failed.");
+      }
+    });
+  }
 
-    // === Card view ===
-    const card = document.createElement("div");
-    card.className = "user-card";
-    card.innerHTML = `
-      <p><strong>Username:</strong> ${usernameDisplay}</p>
-      <p><strong>Role:</strong> ${user.role}</p>
-      <p><strong>Assigned To:</strong> ${user.assigned_to_username || "—"} - ${
-      user.assigned_to_user_id || "—"
-    }</p>
-      <p><strong>Phone:</strong> ${user.phone || "—"}</p>
-     <div class="card-actions">
-  <div class="row-actions">
-    <button class="btn view-btn" onclick="openEditModal(${
-      user.user_id
-    })">Edit</button>
-    ${
-      isAdmin
-        ? `<button class="btn delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>`
-        : ""
+  // ── Global helpers (referenced by inline onclick handlers) ──────────────
+
+  async function openEditModal(userId) {
+    const user = allUsers.find((u) => u.user_id === userId);
+    if (!user) return;
+    document.getElementById("edit-user-id").value = user.user_id;
+    document.getElementById("edit-username").value = user.username || "";
+    document.getElementById("edit-email").value = user.email || "";
+    document.getElementById("edit-phone").value = user.phone || "";
+    document.getElementById("edit-role").value = user.role || "";
+    document.getElementById("edit-assigned-to").value = user.assigned_to_user_id || "";
+    document.getElementById("edit-admin").checked = !!user.admin;
+    document.getElementById("edit-driver").checked = user.driver == 1;
+    document.getElementById("edit-storage").checked = user.storage == 1;
+    document.getElementById("edit-user-modal").classList.remove("hidden");
+  }
+
+  function closeEditModal() {
+    document.getElementById("edit-user-modal")?.classList.add("hidden");
+  }
+
+  function openPasswordModal(userId) {
+    document.getElementById("password-user-id").value = userId;
+    document.getElementById("change-password-modal").classList.remove("hidden");
+  }
+
+  function closePasswordModal() {
+    document.getElementById("change-password-modal")?.classList.add("hidden");
+  }
+
+  function openAssignNumberModal(userId) {
+    document.getElementById("assign-user-id").value = userId;
+    const user = allUsers.find((u) => u.user_id === userId);
+    // Backend now returns both cairo_target / region_target and legacy aliases.
+    document.getElementById("local-number").value = user?.cairo_target ?? user?.local_number ?? "";
+    document.getElementById("abroad-number").value = user?.region_target ?? user?.abroad_number ?? "";
+    document.getElementById("assign-number-modal").classList.remove("hidden");
+  }
+
+  function closeAssignNumberModal() {
+    document.getElementById("assign-number-modal")?.classList.add("hidden");
+  }
+
+  /**
+   * Placeholder — backend currently has no endpoint for saving local/abroad number per user.
+   * Add this in users.py if you want this feature wired up. See backend recommendations.
+   */
+  async function submitAssignNumber() {
+    const userId = document.getElementById("assign-user-id").value;
+    const cairoTarget = document.getElementById("local-number").value;
+    const regionTarget = document.getElementById("abroad-number").value;
+    try {
+      await Api.postForm(`/users/assign_target/${userId}`, {
+        cairo_target: cairoTarget,
+        region_target: regionTarget,
+      });
+      alert("Targets saved");
+      closeAssignNumberModal();
+      Api.invalidate("/users");
+      await loadUsers();
+    } catch (err) {
+      alert(err.data?.message || err.message || "Failed to save targets.");
     }
-  </div>
+  }
 
-  <div class="row-actions">
-    <button class="btn" onclick="openPasswordModal(${
-      user.user_id
-    })">Change Password</button>
-    <button class="btn toggle-btn" onclick="toggleUserStatus(${user.user_id}, ${
-      isActive ? 0 : 1
-    })">
-      ${isActive ? "Deactivate" : "Activate"}
-    </button>
-  </div>
-</div>
+  async function deleteUser(userId) {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await Api.del(`/users/delete/${userId}`);
+      alert("User deleted successfully");
+      Api.invalidate("/users");
+      await loadUsers();
+    } catch (err) {
+      alert(err.data?.message || err.message || "Failed to delete user");
+    }
+  }
 
-    `;
-    cardContainer.appendChild(card);
-  });
-}
+  async function toggleUserStatus(userId, newStatus) {
+    try {
+      const data = await Api.post(`/users/set_active/${userId}/${newStatus}`);
+      alert(data?.message || "User status updated");
+      Api.invalidate("/users");
+      await loadUsers();
+    } catch (err) {
+      alert(err.data?.message || "Failed to update status");
+    }
+  }
 
-function filterUsers(searchTerm) {
-  const filteredUsers = allUsers.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm)
-  );
-  renderUsers(filteredUsers);
-}
+  function filterUsers(searchTerm) {
+    const filtered = allUsers.filter((u) =>
+      (u.username || "").toLowerCase().includes(searchTerm)
+    );
+    renderUsers(filtered);
+  }
+
+  function viewUser(userId) {
+    window.location.href = `view-user.html?user_id=${userId}`;
+  }
+
+  // Export globals for inline onclick compatibility
+  window.openEditModal = openEditModal;
+  window.closeEditModal = closeEditModal;
+  window.openPasswordModal = openPasswordModal;
+  window.closePasswordModal = closePasswordModal;
+  window.openAssignNumberModal = openAssignNumberModal;
+  window.closeAssignNumberModal = closeAssignNumberModal;
+  window.submitAssignNumber = submitAssignNumber;
+  window.deleteUser = deleteUser;
+  window.toggleUserStatus = toggleUserStatus;
+  window.viewUser = viewUser;
+})();

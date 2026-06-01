@@ -2,39 +2,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("create-customer-form");
   const successMsg = document.getElementById("success-message");
   const errorMsg = document.getElementById("error-message");
+  const submitBtn = form?.querySelector('button[type="submit"]');
+
   const token = await Utils.Auth.requireAuth();
-  if (!token) return;
+  if (!token || !form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     successMsg.style.display = "none";
     errorMsg.style.display = "none";
 
-    const formData = new FormData(form);
-    const payload = new URLSearchParams(formData);
+    const fd = new FormData(form);
+    const payload = Object.fromEntries(fd.entries());
 
+    if (submitBtn) submitBtn.disabled = true;
     try {
-      const res = await fetch("https://order-app.gemegypt.net/api/customers/create", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: payload,
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        successMsg.style.display = "block";
-        form.reset();
-      } else {
-        errorMsg.textContent = data.message || "Something went wrong";
-        errorMsg.style.display = "block";
-      }
+      await Utils.Api.postForm("/customers/create", payload);
+      successMsg.style.display = "block";
+      form.reset();
+      Utils.Api.invalidate("/customers");
     } catch (err) {
-      console.error("Create error:", err);
-      errorMsg.textContent = "Server error. Please try again later.";
+      errorMsg.textContent =
+        err.data?.message || err.message || "Server error. Please try again.";
       errorMsg.style.display = "block";
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
   });
 });

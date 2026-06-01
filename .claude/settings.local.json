@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import ast; ast.parse\\(open\\('auth.py'\\).read\\(\\)\\); ast.parse\\(open\\('users.py'\\).read\\(\\)\\); ast.parse\\(open\\('customers.py'\\).read\\(\\)\\); ast.parse\\(open\\('visit.py'\\).read\\(\\)\\); ast.parse\\(open\\('products.py'\\).read\\(\\)\\); print\\('OK'\\)\")"
+    ]
+  }
+}

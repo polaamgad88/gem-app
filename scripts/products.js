@@ -800,7 +800,7 @@ async function toggleVisability(productId, currentVisability) {
 
   try {
     const res = await fetch(
-      `https://order-app.gemegypt.net/api/products/set_visability/${productId}/${newVisability}`,
+      `https://order-app.gemegypt.net/api/products/set_visibility/${productId}/${newVisability}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -813,7 +813,7 @@ async function toggleVisability(productId, currentVisability) {
       alert(result.message);
       fetchAndRenderProducts(token);
     } else {
-      alert(result.message || "Failed to update visability.");
+      alert(result.message || "Failed to update visibility.");
     }
   } catch (error) {
     alert("Network error. Please try again.");

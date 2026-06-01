@@ -171,25 +171,14 @@ async function handleCreateUser(token) {
   // ── Send ───────────────────────────────────────────────────────────────
 
   try {
-    const res = await fetch("https://order-app.gemegypt.net/api/register", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData.toString(),
-    });
-
-    const message = await res.text(); // backend returns plain text
-
-    if (res.ok) {
-      alert("User created successfully!");
-      window.location.href = "users.html";
-    } else {
-      alert(message || "Failed to create user.");
-    }
+    // Backend now accepts JSON or form, and returns JSON.
+    const payload = Object.fromEntries(formData.entries());
+    const data = await Utils.Api.postForm("/register", payload);
+    alert(data?.message || "User created successfully!");
+    Utils.Api.invalidate("/users");
+    window.location.href = "users.html";
   } catch (err) {
     console.error("Error creating user:", err);
-    alert("An error occurred while creating the user.");
+    alert(err.data?.message || err.message || "Failed to create user.");
   }
 }

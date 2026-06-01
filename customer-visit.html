@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Customer Visit - Check In</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
@@ -14,85 +14,81 @@
 
   <script>
     function applyTheme(mode) {
-      if (mode === "dark") {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
-      }
+      document.body.classList.toggle("dark-mode", mode === "dark");
     }
 
     window.addEventListener("message", (event) => {
-      if (event.data.theme) {
+      if (event.data && event.data.theme) {
         applyTheme(event.data.theme);
         localStorage.setItem("theme", event.data.theme);
       }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
-      const savedTheme = localStorage.getItem("theme") || "light";
-      applyTheme(savedTheme);
+      applyTheme(localStorage.getItem("theme") || "light");
     });
-  </script>
-  <script>
+
     if (window.self === window.top) {
       const page = location.pathname.split("/").pop() || "customer-visit.html";
       window.location.replace("index.html?page=" + encodeURIComponent(page));
     }
   </script>
-
 </head>
 
 <body>
-  <div class="top-inputs">
-    <!-- Customer Dropdown -->
-    <div class="custom-customer-select input-container" style="flex: 1; position: relative">
-      <input type="text" id="customer-search" placeholder="Search Customer..." autocomplete="off" />
-      <ul id="customer-suggestions" class="dropdown-list"></ul>
-    </div>
+  <div class="container">
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="customer-search">Customer</label>
+        <div class="custom-customer-select input-container">
+          <input type="text" id="customer-search" class="responsive-input" placeholder="Search Customer..." autocomplete="off" />
+          <ul id="customer-suggestions" class="dropdown-list"></ul>
+        </div>
+      </div>
 
-    <!-- Status Dropdown -->
-    <div class="status-select input-container" style="flex: 0.5">
-      <select id="status-dropdown">
-        <option value="">Select Status...</option>
-        <option value="making_order">Making Order</option>
-        <option value="delivering_order">Delivering Order</option>
-        <option value="bill_collection">Bill Collection</option>
-        <option value="receiving_returns">Receiving Returns</option>
-      </select>
-    </div>
+      <div class="form-field">
+        <label for="status-dropdown">Visit Reason</label>
+        <div class="status-select input-container">
+          <select id="status-dropdown" class="responsive-input">
+            <option value="">Select Reason...</option>
+            <option value="making_order">Making Order</option>
+            <option value="delivering_order">Delivering Order</option>
+            <option value="bill_collection">Bill Collection</option>
+            <option value="receiving_returns">Receiving Returns</option>
+          </select>
+        </div>
+      </div>
 
-    <!-- Customer Address -->
-    <div class="input-container">
-      <select id="customer-address" class="address-dropdown">
-        <option value="">Select Customer Address</option>
-      </select>
-    </div>
+      <div class="form-field">
+        <label for="customer-address">Address</label>
+        <div class="input-container">
+          <select id="customer-address" class="address-dropdown responsive-input">
+            <option value="">Select Customer Address</option>
+          </select>
+        </div>
+      </div>
 
-    <!-- Bill Amount -->
-    <div class="input-container-bill-collection" id="billDiv" style="display: none;">
-      <input id="bill-amount" type="number" placeholder="Enter bill amount" />
-    </div>
+      <div class="form-field input-container-bill-collection" id="billDiv">
+        <label for="bill-amount">Bill Amount</label>
+        <input id="bill-amount" class="responsive-input" type="number" inputmode="decimal" placeholder="Enter bill amount" />
+      </div>
 
-    <!-- Note Field -->
-    <div class="input-container">
-      <textarea id="note" placeholder="Enter a note (optional)" rows="4"></textarea>
-    </div>
-
-    <!-- Location status -->
-    <div class="input-container" style="flex: 1;">
-      <div id="locationStatus" style="font-size: 12px; opacity: 0.8;">
-        Location: waiting for permission...
+      <div class="form-field full-span">
+        <label for="note">Note</label>
+        <textarea id="note" class="responsive-input" placeholder="Enter a note (optional)" rows="3"></textarea>
       </div>
     </div>
 
-    <!-- Check In Button -->
-    <div class="check-in-container">
+    <div class="location-bar">
+      <div class="location-indicator" id="locationStatus">
+        <span class="location-dot"></span>
+        Location: waiting for permission...
+      </div>
       <button id="checkInBtn">Check In</button>
     </div>
-  </div>
 
-  <!-- Map -->
-  <div id="map"></div>
+    <div id="map"></div>
+  </div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>

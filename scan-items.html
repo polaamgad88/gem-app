@@ -4,142 +4,19 @@
 <head>
   <meta charset="utf-8" />
   <title>Scan Order Items</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
   <link rel="stylesheet" href="./styles/base.css" />
   <link rel="stylesheet" href="./styles/scan-items.css" />
   <script src="./scripts/scan-items.js" defer></script>
 
-  <style>
-    /* ── Review button ─────────────────────────────────────────────────────── */
-    .btn-review {
-      background-color: #d97706;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 18px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .btn-review:hover:not(:disabled) {
-      background-color: #b45309;
-    }
-
-    .btn-review:disabled {
-      background-color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .btn-review.reviewed {
-      background-color: #16a34a;
-      cursor: not-allowed;
-    }
-
-    /* ── Order-ID scan toggle button ───────────────────────────────────────── */
-    .btn-order-scan {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border: 1.5px solid #6366f1;
-      border-radius: 6px;
-      background: #fff;
-      color: #6366f1;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .btn-order-scan:hover {
-      background: #ede9fe;
-    }
-
-    .btn-order-scan.active {
-      background: #6366f1;
-      color: #fff;
-    }
-
-    body.dark-mode .btn-order-scan {
-      background: #1e1e2e;
-      border-color: #818cf8;
-      color: #818cf8;
-    }
-
-    body.dark-mode .btn-order-scan.active {
-      background: #4f46e5;
-      color: #fff;
-    }
-
-    /* ── Order-ID camera panel ─────────────────────────────────────────────── */
-    .order-scan-panel {
-      margin-top: 14px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #000;
-      position: relative;
-      max-width: 420px;
-    }
-
-    .order-scan-panel video {
-      width: 100%;
-      display: block;
-      max-height: 240px;
-      object-fit: cover;
-    }
-
-    /* reuse finder overlay from scan-items.css if present; add a hint bar */
-    .order-scan-hint {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.55);
-      color: #fff;
-      font-size: 12px;
-      text-align: center;
-      padding: 6px;
-    }
-
-    /* Animated scan line */
-    .order-scan-line {
-      position: absolute;
-      top: 0;
-      left: 8%;
-      right: 8%;
-      height: 2px;
-      background: #6366f1;
-      box-shadow: 0 0 6px #6366f1;
-      animation: order-scan-sweep 1.8s linear infinite;
-    }
-
-    @keyframes order-scan-sweep {
-      0% {
-        top: 10%;
-      }
-
-      50% {
-        top: 85%;
-      }
-
-      100% {
-        top: 10%;
-      }
-    }
-  </style>
-
   <script>
     function applyTheme(mode) {
       document.body.classList.toggle("dark-mode", mode === "dark");
     }
     window.addEventListener("message", (event) => {
-      if (event.data.theme) {
+      if (event.data && event.data.theme) {
         applyTheme(event.data.theme);
         localStorage.setItem("theme", event.data.theme);
       }
@@ -147,8 +24,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       applyTheme(localStorage.getItem("theme") || "light");
     });
-  </script>
-  <script>
+
     if (window.self === window.top) {
       const page = location.pathname.split("/").pop() || "scan-items.html";
       window.location.replace("index.html?page=" + encodeURIComponent(page));
@@ -160,11 +36,6 @@
   <main class="scan-items-page">
     <section class="scan-items-container">
 
-      <div class="page-header">
-        <h1>Scan Order Items</h1>
-        <p>Load a SAP order, scan items, review the final checked values, then finish.</p>
-      </div>
-
       <!-- ── Find SAP Order ─────────────────────────────────────────────────── -->
       <section class="card order-search-card">
         <div class="section-title">Find SAP Order</div>
@@ -172,14 +43,13 @@
         <div class="order-search-row">
           <div class="field-group order-id-group">
             <label for="orderIdInput">SAP Order ID</label>
-            <input type="text" id="orderIdInput" class="input" placeholder="Enter SAP order ID" autocomplete="off" />
+            <input type="text" id="orderIdInput" class="input" placeholder="Enter SAP order ID" autocomplete="off" inputmode="numeric" />
           </div>
 
           <div class="search-btn-group">
             <button id="searchOrderBtn" class="btn btn-primary" type="button">
               Search
             </button>
-            <!-- NEW: scan toggle for order ID -->
             <button id="orderScanToggleBtn" class="btn-order-scan" type="button">
               📷 Scan Order ID
             </button>
@@ -196,7 +66,6 @@
           <div id="orderSearchMessage" class="search-message hidden"></div>
         </div>
 
-        <!-- NEW: order-ID camera panel (hidden until toggle is clicked) -->
         <div id="orderScanPanel" class="order-scan-panel hidden">
           <video id="orderScanVideo" autoplay playsinline muted></video>
           <div class="order-scan-line"></div>
@@ -274,14 +143,14 @@
 
             <div id="manualModeSection" class="scanner-mode-panel hidden">
               <input type="text" id="manualBarcodeInput" class="input" placeholder="Enter barcode manually"
-                autocomplete="off" />
+                autocomplete="off" inputmode="numeric" />
             </div>
           </div>
 
           <div class="scanner-submit-btn scanner-submit-stack">
             <div class="scan-qty-block">
               <label for="scanQtyInput" class="scanner-main-label">Qty</label>
-              <input type="number" id="scanQtyInput" class="input scan-qty-input" min="1" step="1" value="1" />
+              <input type="number" id="scanQtyInput" class="input scan-qty-input" min="1" step="1" value="1" inputmode="numeric" />
             </div>
             <button id="submitScanBtn" class="btn btn-secondary" type="button">
               Check

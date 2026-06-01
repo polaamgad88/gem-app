@@ -3,152 +3,56 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Create Customer</title>
   <link rel="stylesheet" href="./styles/base.css" />
   <link rel="stylesheet" href="./styles/create-customer.css" />
-  <script src="./scripts/utils.js"></script>
+  <script src="./scripts/utils.js" defer></script>
   <script src="./scripts/create-customer.js" defer></script>
   <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f3f3f5;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-
-
-
-    .logo {
-      display: block;
-      margin: 0 auto 20px;
-      height: 137px;
-      max-height: 140px;
-      object-fit: contain;
-    }
-
-    @media (max-width: 576px) {
-      .logo {
-        height: 90px;
-      }
-
-
-    }
-
-    /* 🌙 Dark Mode Styles */
-    body.dark-mode {
-      background-color: #121212;
-      color: #f1f1f1;
-    }
-
-    body.dark-mode a {
-      color: #ddd !important;
-      background-color: #1e1e1e !important;
-      border: 1px solid #333 !important;
-    }
-
-    body.dark-mode h2 {
-      color: #fff !important;
-    }
-
-    body.dark-mode form label {
-      color: #ccc;
-    }
-
-    body.dark-mode input {
-      background-color: #1e1e1e;
-      color: #f1f1f1;
-      border: 1px solid #444;
-      padding: 8px;
-      border-radius: 6px;
-    }
-
-    body.dark-mode input:focus {
-      outline: none;
-      border-color: #28a745;
-    }
-
-    body.dark-mode button[type="submit"] {
-      background: linear-gradient(135deg, #0b5ed7, #084298);
-    }
-
-    body.dark-mode button[type="submit"]:hover {
-      background: linear-gradient(135deg, #0a58ca, #052c65);
-    }
-
-    body.dark-mode a {
-      color: #1e1e1e !important;
-      background-color: #fff !important;
-    }
-
-    body.dark-mode a:hover {
-      background-color: #f1f1f1 !important;
-    }
-  </style>
   <script>
     function applyTheme(mode) {
-      if (mode === "dark") {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
-      }
+      document.body.classList.toggle("dark-mode", mode === "dark");
     }
 
     window.addEventListener("message", (event) => {
-      if (event.data.theme) {
+      if (event.data && event.data.theme) {
         applyTheme(event.data.theme);
         localStorage.setItem("theme", event.data.theme);
       }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
-      const savedTheme = localStorage.getItem("theme") || "light";
-      applyTheme(savedTheme);
+      applyTheme(localStorage.getItem("theme") || "light");
     });
-  </script>
-  <script>
+
     if (window.self === window.top) {
       const page = location.pathname.split("/").pop() || "create-customer.html";
       window.location.replace("index.html?page=" + encodeURIComponent(page));
     }
   </script>
-
 </head>
 
 <body>
-
-  <h2 style="color: #333; text-align: center">Create New Customer</h2>
+  <h2 class="page-heading">Create New Customer</h2>
 
   <form id="create-customer-form">
-    <label>First Name:</label>
-    <input type="text" name="first_name" required />
+    <label for="cc-first">First Name:</label>
+    <input id="cc-first" type="text" name="first_name" required />
 
-    <label>Last Name:</label>
-    <input type="text" name="last_name" required />
+    <label for="cc-last">Last Name:</label>
+    <input id="cc-last" type="text" name="last_name" required />
 
-    <label>Email:</label>
-    <input type="email" name="email" />
+    <label for="cc-email">Email:</label>
+    <input id="cc-email" type="email" name="email" autocomplete="email" />
 
-    <label>Phone:</label>
-    <input type="text" name="phone" />
+    <label for="cc-phone">Phone:</label>
+    <input id="cc-phone" type="tel" name="phone" autocomplete="tel" />
 
-    <label>code:</label>
-    <input type="text" name="code" required />
+    <label for="cc-code">Code:</label>
+    <input id="cc-code" type="text" name="code" required />
 
-    <button type="submit" style="
-            background: linear-gradient(135deg, #28a745, #218838);
-            color: white;
-            padding: 10px;
-            font-size: 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-          " onmouseover="this.style.backgroundColor='#28a745'" onmouseout="this.style.backgroundColor='#007bff'">
-      Create Customer
-    </button>
+    <button type="submit">Create Customer</button>
   </form>
 
   <div id="success-message" class="success" style="display: none">

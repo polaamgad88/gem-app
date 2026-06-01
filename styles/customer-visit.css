@@ -1,100 +1,122 @@
-/* Create Order Page Styles */
+/* Customer Visit Page */
 @import url("./base.css");
 
 body {
-  background-color: var(--gray-100);
-  padding: var(--spacing-md);
+  font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  background-color: #f5f7fa;
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.06), transparent),
+                    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(99, 102, 241, 0.04), transparent);
+  color: #1f2937;
+  margin: 0 auto;
+  padding: 20px;
+  padding-top: calc(20px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  max-width: 1200px;
+  box-sizing: border-box;
 }
 
 .container {
-  max-width: var(--container-lg);
+  max-width: 100%;
   margin: 0 auto;
-  background: white;
-  padding: var(--spacing-lg);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--box-shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-@media (max-width: 768px) {
-  .container {
-    width: 97% !important;
-    /* Updated from full width */
-    margin: 20px auto;
-    padding: 20px;
-  }
-
-  .order-header {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .order-header input,
-  .order-header select,
-  .custom-customer-select {
-    width: 100%;
-    flex: none;
-  }
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  background: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #eef0f4;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
 }
 
-.responsive-input {
-  flex: 1 1 30%;
-  padding: 12px 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  background-color: #f1f3f5;
-  color: #555;
+.form-field {
+  display: flex;
+  flex-direction: column;
 }
 
-@media (max-width: 576px) {
-  .responsive-input {
-    flex: 1 1 100%;
-    font-size: 14px;
-    padding: 10px;
-    height: 40px;
-  }
+.form-field.full-span {
+  grid-column: 1 / -1;
 }
 
-.responsive-input {
-  background-color: #f2f3f5;
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 16px;
+.form-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #344054;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .input-container {
-  flex: 1 1 30%;
   position: relative;
 }
 
-.barcode-suggestions.dropdown-list {
-  position: relative;
-  z-index: 100;
-  margin-top: 5px;
-  list-style: none;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--border-radius-sm);
-  background: white;
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 0;
+.responsive-input,
+.address-dropdown {
   width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #d0d5dd;
+  font-size: 15px;
+  background-color: #f8fafc;
+  color: #1f2937;
+  min-height: 46px;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
 }
 
-.barcode-suggestions.dropdown-list li {
-  padding: 0.5rem;
+.responsive-input:focus,
+.address-dropdown:focus {
+  border-color: #2563eb;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+textarea.responsive-input {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.input-container-bill-collection {
+  display: none;
+}
+
+/* Dropdowns */
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0 0 10px 10px;
+  max-height: 240px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: none;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.dropdown-list li {
+  padding: 10px 14px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid var(--gray-100);
+  transition: background 0.15s;
 }
 
-.barcode-suggestions.dropdown-list li:hover {
-  background-color: var(--gray-100);
+.dropdown-list li:hover {
+  background: #f1f5f9;
 }
 
 #customer-suggestions {
@@ -104,251 +126,199 @@ body {
   right: 0;
   z-index: 1000;
   background-color: white;
-  border: 1px solid var(--gray-300);
+  border: 1px solid #e5e7eb;
   border-top: none;
-  max-height: 200px;
+  border-radius: 0 0 10px 10px;
+  max-height: 240px;
   overflow-y: auto;
   list-style: none;
   padding: 0;
   margin: 0;
   display: none;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
 }
 
 #customer-suggestions li {
-  padding: var(--spacing-xs);
+  padding: 10px 14px;
   cursor: pointer;
+  transition: background 0.15s;
 }
 
-.dropdown-list {
-  list-style: none;
-  padding: 0;
-  margin: 4px 0 0;
-  position: absolute;
-  background: white;
-  z-index: 10;
-  width: 100%;
+#customer-suggestions li:hover {
+  background-color: #f1f5f9;
 }
 
-/* Mobile view adjustments */
-@media (max-width: 576px) {
-  .input-container {
-    flex: 1 1 100%;
-  }
-
-  .responsive-input {
-    font-size: 14px;
-    padding: 8px 12px;
-    height: 40px;
-  }
-}
-
-/* Customer Visit Styles */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  padding: 20px;
-}
-
-.container {
-  display: grid;
-  gap: 16px;
-  max-width: 700px;
-  margin: auto;
-}
-
-.input-container {
+.barcode-suggestions.dropdown-list {
   position: relative;
+  z-index: 100;
+  margin-top: 5px;
+  list-style: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 0;
+  width: 100%;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
 }
 
-#map {
-  height: 450px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-button {
-  padding: 10px 16px;
-  border: 1px solid #fff;
-  border-radius: 6px;
+.barcode-suggestions.dropdown-list li {
+  padding: 10px 14px;
   cursor: pointer;
-  background: #4caf50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.barcode-suggestions.dropdown-list li:hover {
+  background-color: #f1f5f9;
+}
+
+/* Location Bar */
+.location-bar {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid #eef0f4;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.location-indicator {
+  flex: 1;
+  font-size: 13px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(37, 99, 235, 0.06);
+  border-radius: 10px;
+  border-left: 3px solid #2563eb;
+}
+
+.location-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+button#checkInBtn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
   color: white;
   font-size: 16px;
-  width: 100% !important;
+  font-weight: 700;
+  min-height: 50px;
+  min-width: 140px;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+  transition: transform 0.15s, filter 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
 }
 
-button:hover {
-  background: #45a049;
+button#checkInBtn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(34, 197, 94, 0.38);
 }
 
-.dropdown-list {
-  position: absolute;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 100%;
-  max-height: 300px;
-  /* Increased height for the dropdown */
-  overflow-y: auto;
-  z-index: 1000;
-  display: none;
-  box-sizing: border-box;
+button#checkInBtn:active {
+  transform: translateY(0);
 }
 
-.dropdown-list li {
-  padding: 8px;
-  cursor: pointer;
+/* Map */
+#map {
+  height: 450px;
+  border: 2px solid rgba(37, 99, 235, 0.12);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
 }
 
-.dropdown-list li:hover {
-  background: #f0f0f0;
-}
-
-textarea {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.address-dropdown {
-  width: 100%;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-
-  .container {
-    gap: 12px;
-    flex: 0 0 auto;
-  }
-
-  .top-inputs {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .top-inputs>div {
-    width: 100% !important;
-    flex: unset !important;
-  }
-
-  .input-container input,
-  .status-select select {
-    width: 100% !important;
-    height: 48px;
-    font-size: 16px;
-    padding: 0 12px;
-    border-radius: 8px;
-    box-sizing: border-box;
-  }
-
-  button {
-    width: 100% !important;
-  }
-
-  #map {
-    flex: 1;
-    height: auto;
-    min-height: 250px;
-  }
-}
-
-@media (min-width: 768px) {
-  .top-inputs {
-    flex-direction: row;
-  }
-
-  .status-select {
-    flex: 0 0 200px;
-  }
-
-  #checkInBtn {
-    width: auto;
-    padding: 12px 24px;
-  }
-}
-
-/* 🌙 Dark Mode — Customer Visit (Check-In) */
+/* ── Dark Mode ── */
 body.dark-mode {
-  background-color: #121212;
-  color: #e7e7ea;
+  background-color: #0c1120;
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.1), transparent),
+                    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(99, 102, 241, 0.06), transparent);
+  color: #e2e8f0;
 }
 
-/* Card/container */
-body.dark-mode .container {
-  background: #151923;
-  color: #e7e7ea;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .6);
-  border: 1px solid #2a3142;
+body.dark-mode .form-grid {
+  background: #1a1d23;
+  border-color: #2a2e36;
 }
 
-/* Inputs, selects, textarea */
-body.dark-mode input,
+body.dark-mode .form-field label {
+  color: #94a3b8;
+}
+
+body.dark-mode .responsive-input,
+body.dark-mode .address-dropdown,
 body.dark-mode select,
-body.dark-mode textarea,
-body.dark-mode .address-dropdown {
-  background: #1f2430;
-  color: #e7e7ea;
-  border: 1px solid #2a3142;
+body.dark-mode input,
+body.dark-mode textarea {
+  background: #232831;
+  color: #e2e8f0;
+  border-color: #334155;
 }
 
-body.dark-mode input::placeholder,
+body.dark-mode .responsive-input:focus,
+body.dark-mode .address-dropdown:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+body.dark-mode .responsive-input::placeholder,
 body.dark-mode textarea::placeholder {
-  color: #9aa3b2;
+  color: #64748b;
 }
 
-/* “Type-ahead” dropdowns */
+body.dark-mode .location-bar {
+  background: #1a1d23;
+  border-color: #2a2e36;
+}
+
+body.dark-mode .location-indicator {
+  background: rgba(99, 102, 241, 0.1);
+  color: #94a3b8;
+  border-left-color: #6366f1;
+}
+
 body.dark-mode .dropdown-list,
-body.dark-mode #customer-suggestions {
-  background: #151923;
-  color: #e7e7ea;
-  border: 1px solid #2a3142;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+body.dark-mode #customer-suggestions,
+body.dark-mode .barcode-suggestions.dropdown-list {
+  background: #1a1d23;
+  color: #e2e8f0;
+  border-color: #2a2e36;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
 body.dark-mode .dropdown-list li:hover,
-body.dark-mode #customer-suggestions li:hover {
-  background: #1d2432;
+body.dark-mode #customer-suggestions li:hover,
+body.dark-mode .barcode-suggestions.dropdown-list li:hover {
+  background: #232831;
 }
 
-/* Buttons (keep your green, just tune contrast a bit) */
-body.dark-mode button {
-  background: #2e7d32;
-  /* darker green for dark bg */
-  border-color: #2e7d32;
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
-}
-
-body.dark-mode button:hover {
-  background: #256b28;
-}
-
-/* Map container + Leaflet controls */
 body.dark-mode #map {
-  border-color: #2a3142;
-  background: #0f1220;
-  /* behind tiles while loading */
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
-/* Zoom buttons */
 body.dark-mode .leaflet-bar a {
   background: #232a3b;
   color: #e7e7ea;
@@ -359,24 +329,102 @@ body.dark-mode .leaflet-bar a:hover {
   background: #2a3142;
 }
 
-/* Popups */
 body.dark-mode .leaflet-popup-content-wrapper,
 body.dark-mode .leaflet-popup-tip {
   background: #1f2430;
   color: #e7e7ea;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, .5);
   border: 1px solid #2a3142;
 }
 
-/* Mobile tweaks */
-@media (max-width: 768px) {
-
-  body.dark-mode .top-inputs>div,
-  body.dark-mode .input-container {
-    background: transparent;
+/* ── Tablet ── */
+@media (max-width: 992px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
-.input-container-bill-collection {
-  display: none;
-  margin-top: 10px;
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  body {
+    padding: 8px;
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .container {
+    gap: 10px;
+  }
+
+  .page-header-card {
+    padding: 14px 18px;
+    border-radius: 12px;
+  }
+
+  .page-header-card h1 {
+    font-size: 18px;
+  }
+
+  .page-header-card p {
+    font-size: 12px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 12px;
+    border-radius: 12px;
+  }
+
+  .form-field.full-span {
+    grid-column: 1;
+  }
+
+  .form-field label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .responsive-input,
+  .address-dropdown {
+    padding: 10px 12px;
+    min-height: 42px;
+    font-size: 14px;
+  }
+
+  textarea.responsive-input {
+    min-height: 60px;
+    rows: 2;
+  }
+
+  .location-bar {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+
+  .location-indicator {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  button#checkInBtn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 15px;
+    padding: 12px 24px;
+  }
+
+  #map {
+    height: 50vh;
+    min-height: 260px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .responsive-input,
+  .address-dropdown {
+    font-size: 16px;
+  }
 }

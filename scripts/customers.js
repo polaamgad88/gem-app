@@ -1,190 +1,151 @@
-let token;
-let currentPage = 1;
-let totalPages = 1;
-let allCustomers = [];
-let searchTerm = "";
+/* Customers page — perf refactored. */
 
-document.addEventListener("DOMContentLoaded", async function () {
-  token = await Utils.Auth.requireAuth(); // <== assign it here
-  if (!token) return;
+(function () {
+  const { Api, Auth, UI, Async, DOM } = window.Utils;
+  const esc = DOM.escapeHtml;
 
-  Utils.UI.checkScreenSize();
-  window.addEventListener("resize", Utils.UI.checkScreenSize);
-
-  const customersData = await fetchCustomers(token, currentPage);
-  renderCustomers(customersData);
-  renderPagination();
-
-  document.getElementById("add-customer-btn").addEventListener("click", () => {
-    window.location.href = "create-customer.html"; // to be created
-  });
-
-  document
-    .getElementById("customer-search")
-    .addEventListener("input", async function () {
-      searchTerm = this.value.trim();
-      //.toLowerCase(); // <- Update global searchTerm
-      currentPage = 1; // <- Reset to first page
-      const customersData = await fetchCustomers(
-        token,
-        currentPage,
-        searchTerm
-      );
-      renderCustomers(customersData);
-      renderPagination();
-    });
-});
-
-function renderPagination() {
-  const containerId = "pagination";
-  let container = document.getElementById(containerId);
-  if (!container) {
-    container = document.createElement("div");
-    container.id = containerId;
-    container.className = "pagination-controls";
-    // document.querySelector(".container").appendChild(container);
-    // document.querySelector(".table-responsive").after(container);
-      if (window.innerWidth <= 768) {
-    document.querySelector(".card-view").after(container);
-  } else {
-    document.querySelector(".table-responsive").after(container);
-  }
-  }
-
-  container.innerHTML = "";
-
-  const maxButtons = 10;
-  const half = Math.floor(maxButtons / 2);
-  let start = Math.max(1, currentPage - half);
-  let end = Math.min(totalPages, start + maxButtons - 1);
-  if (end - start < maxButtons) start = Math.max(1, end - maxButtons + 1);
-
-  const createBtn = (text, page, disabled = false, active = false) => {
-    const btn = document.createElement("button");
-    btn.textContent = text;
-    if (disabled) btn.disabled = true;
-    if (active) btn.classList.add("active");
-    btn.addEventListener("click", async () => {
-      const customersData = await fetchCustomers(token, page, searchTerm);
-      renderCustomers(customersData);
-      renderPagination();
-    });
-    return btn;
+  const state = {
+    currentPage: 1,
+    totalPages: 1,
+    searchTerm: "",
   };
 
-  container.appendChild(createBtn("◀", currentPage - 1, currentPage === 1));
+  document.addEventListener("DOMContentLoaded", async () => {
+    const token = await Auth.requireAuth();
+    if (!token) return;
 
-  for (let i = start; i <= end; i++) {
-    container.appendChild(createBtn(i, i, false, i === currentPage));
-  }
+    UI.checkScreenSize();
+    window.addEventListener("resize", Async.throttle(UI.checkScreenSize, 150));
 
-  container.appendChild(
-    createBtn("▶", currentPage + 1, currentPage === totalPages)
-  );
-}
+    const customers = await fetchCustomers();
+    renderCustomers(customers);
+    renderPagination();
 
-async function fetchCustomers(token, page = 1, search = "") {
-  try {
-    const query = new URLSearchParams({
-      page,
-      limit: 10,
+    document.getElementById("add-customer-btn")?.addEventListener("click", () => {
+      window.location.href = "create-customer.html";
     });
 
-    if (search) query.append("search", search);
+    const searchInput = document.getElementById("customer-search");
+    if (searchInput) {
+      const debouncedSearch = Async.debounce(async (value) => {
+        state.searchTerm = value;
+        state.currentPage = 1;
+        const list = await fetchCustomers();
+        renderCustomers(list);
+        renderPagination();
+      }, 300);
+      searchInput.addEventListener("input", (e) => debouncedSearch(e.target.value.trim()));
+    }
 
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/customers?${query.toString()}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
+    // Event delegation for view buttons (no per-row listener cost).
+    document.body.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-customer-id]");
+      if (btn && btn.classList.contains("btn-view")) {
+        window.location.href = `view-customer.html?customer_id=${btn.dataset.customerId}`;
       }
-    );
-    const data = await res.json();
+    });
+  });
 
-    currentPage = data.page || 1;
-    totalPages = data.pages || 1;
-    allCustomers = data.customers || [];
+  async function fetchCustomers(page = state.currentPage) {
+    try {
+      const query = { page, limit: 10 };
+      if (state.searchTerm) query.search = state.searchTerm;
 
-    return allCustomers;
-  } catch (err) {
-    console.error("Failed to fetch customers:", err);
-    return [];
+      const data = await Api.get("/customers", { query });
+      state.currentPage = data.page || 1;
+      state.totalPages = data.pages || 1;
+      return data.customers || [];
+    } catch (err) {
+      console.error("Failed to fetch customers:", err);
+      UI.showError("Failed to load customers.");
+      return [];
+    }
   }
-}
 
-function renderCustomers(customers) {
-  const tableBody = document.getElementById("customersTable");
-  const cardContainer = document.getElementById("customerCards");
+  function renderCustomers(customers) {
+    const tableBody = document.getElementById("customersTable");
+    const cardContainer = document.getElementById("customerCards");
+    if (!tableBody || !cardContainer) return;
 
-  tableBody.innerHTML = "";
-  cardContainer.innerHTML = "";
+    const tbodyFrag = document.createDocumentFragment();
+    const cardsFrag = document.createDocumentFragment();
 
-  customers.forEach((c, index) => {
-    const fullName = `${c.first_name} ${c.last_name}`;
-    // Table Row
-    const row = document.createElement("tr");
-    row.innerHTML = `
-        <td>${c.code}</td>
-        <td>${fullName}</td>
-        <td>${c.phone || "-"}</td>
+    for (const c of customers) {
+      const fullName = `${c.first_name || ""} ${c.last_name || ""}`.trim();
+      const phone = c.phone || "-";
+      const id = c.customer_id;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${esc(c.code || "")}</td>
+        <td>${esc(fullName)}</td>
+        <td>${esc(phone)}</td>
         <td>
-          <button class="btn-view" onclick="window.location.href='view-customer.html?customer_id=${
-            c.customer_id
-          }'">View</button>
+          <button class="btn-view" data-customer-id="${id}">View</button>
         </td>`;
-    tableBody.appendChild(row);
+      tbodyFrag.appendChild(row);
 
-    // Card
-    const card = document.createElement("div");
-    card.className = "customer-card";
-    card.innerHTML = `
+      const card = document.createElement("div");
+      card.className = "customer-card";
+      card.innerHTML = `
         <div class="customer-card-header">
-          <span>${fullName}</span>
-          <span>#${c.customer_id}</span>
+          <span>${esc(fullName)}</span>
+          <span>#${esc(id)}</span>
         </div>
         <div class="customer-card-body">
-          <p><span class="customer-card-label">Phone:</span> ${
-            c.phone || "-"
-          }</p>
+          <p><span class="customer-card-label">Phone:</span> ${esc(phone)}</p>
         </div>
         <div class="customer-card-footer">
-          <button class="btn-view" onclick="window.location.href='view-customer.html?customer_id=${
-            c.customer_id
-          }'">View</button>
+          <button class="btn-view" data-customer-id="${id}">View</button>
         </div>`;
-    cardContainer.appendChild(card);
-  });
-}
+      cardsFrag.appendChild(card);
+    }
 
-function initializeCustomersPage() {
-  const addBtn = document.getElementById("add-customer-btn");
-  const searchInput = document.getElementById("customer-search");
-
-  if (addBtn) {
-    addBtn.addEventListener("click", () => {
-      alert("Add Customer clicked!");
-    });
+    tableBody.replaceChildren(tbodyFrag);
+    cardContainer.replaceChildren(cardsFrag);
   }
 
-  if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      console.log("Searching for:", e.target.value);
-    });
+  function renderPagination() {
+    let container = document.getElementById("pagination");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "pagination";
+      container.className = "pagination-controls";
+      const anchor =
+        window.innerWidth <= 768
+          ? document.querySelector(".card-view")
+          : document.querySelector(".table-responsive");
+      anchor?.after(container);
+    }
+
+    const maxButtons = 10;
+    const half = Math.floor(maxButtons / 2);
+    let start = Math.max(1, state.currentPage - half);
+    let end = Math.min(state.totalPages, start + maxButtons - 1);
+    if (end - start < maxButtons) start = Math.max(1, end - maxButtons + 1);
+
+    const frag = document.createDocumentFragment();
+    const mkBtn = (text, page, disabled, active) => {
+      const btn = document.createElement("button");
+      btn.textContent = text;
+      btn.disabled = disabled;
+      if (active) btn.classList.add("active");
+      btn.addEventListener("click", async () => {
+        const list = await fetchCustomers(page);
+        renderCustomers(list);
+        renderPagination();
+      });
+      return btn;
+    };
+
+    frag.appendChild(mkBtn("◀", state.currentPage - 1, state.currentPage === 1));
+    for (let i = start; i <= end; i++) {
+      frag.appendChild(mkBtn(i, i, false, i === state.currentPage));
+    }
+    frag.appendChild(
+      mkBtn("▶", state.currentPage + 1, state.currentPage === state.totalPages)
+    );
+
+    container.replaceChildren(frag);
   }
-}
-
-function initializeCustomersPage() {
-  const tableBody = document.querySelector("#customers-table tbody");
-
-  const customers = [
-    { name: "Ali", email: "ali@test.com" },
-    { name: "Mona", email: "mona@test.com" }
-  ];
-
-  customers.forEach(c => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${c.name}</td><td>${c.email}</td>`;
-    tableBody.appendChild(row);
-  });
-}
-
-initializeCustomersPage();
+})();
