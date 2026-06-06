@@ -428,6 +428,14 @@
     token() {
       return localStorage.getItem("access_token");
     },
+
+    region() {
+      return (localStorage.getItem("region") || "cairo").toLowerCase();
+    },
+
+    isAlex() {
+      return this.region() === "alex";
+    },
   };
 
   // ────────────────────────────────────────────────────────────────────────────

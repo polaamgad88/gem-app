@@ -107,6 +107,7 @@ async function performLogin(username, password) {
   localStorage.setItem("username", data.username ?? "");
   localStorage.setItem("user_id", data.user_id ?? "");
   localStorage.setItem("is_admin", data.admin ?? "");
+  localStorage.setItem("region", (data.region ?? "cairo").toLowerCase());
   window.location.href = "index.html";
 }
 

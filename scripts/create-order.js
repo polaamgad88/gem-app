@@ -396,7 +396,14 @@ async function fetchList(url, key, token) {
 let allCustomers = [];
 
 function populateCustomerDropdown(customers) {
-  allCustomers = customers.sort((a, b) => {
+  const region = (localStorage.getItem("region") || "cairo").toLowerCase();
+  let filtered = customers;
+  if (region === "alex") {
+    filtered = customers.filter((c) =>
+      ((c.code) || "").toLowerCase().startsWith("ac-")
+    );
+  }
+  allCustomers = filtered.sort((a, b) => {
     const nameA = `${a.first_name} ${a.last_name}`.toLowerCase();
     const nameB = `${b.first_name} ${b.last_name}`.toLowerCase();
     return nameA.localeCompare(nameB);

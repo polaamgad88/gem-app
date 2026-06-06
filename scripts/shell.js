@@ -6,7 +6,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeBtn  = document.getElementById("theme-toggle");
   const logoutBtn = document.getElementById("logout-btn");
   const titleEl   = document.getElementById("page-title");
+  const regionBadge = document.getElementById("region-badge");
   const links     = document.querySelectorAll("#nav a");
+
+  // ── Region badge ───────────────────────────────────
+  const region = (localStorage.getItem("region") || "cairo").toLowerCase();
+  if (regionBadge) {
+    regionBadge.textContent = region === "alex" ? "ALEX" : "CAIRO";
+    regionBadge.dataset.region = region;
+    regionBadge.style.display = "";
+  }
+  if (region === "alex") {
+    document.body.classList.add("region-alex");
+  } else {
+    document.body.classList.add("region-cairo");
+  }
 
   // ── Theme ──────────────────────────────────────────
   function setTheme(mode) {

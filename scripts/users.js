@@ -88,10 +88,14 @@
       const usernameDisplay = `<span class="${userClass}">${esc(user.username)} - ${esc(user.user_id)}${esc(badgeLabel)}</span>`;
       const menuHtml = buildMenu(user.user_id, isActive, isAdmin, dropPos);
 
+      const regionVal = (user.region || "cairo").toLowerCase();
+      const regionPill = `<span class="region-pill region-pill--${regionVal}">${regionVal.toUpperCase()}</span>`;
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${usernameDisplay}</td>
         <td>${esc(user.role || "")}</td>
+        <td>${regionPill}</td>
         <td>${esc(user.assigned_to_username || "—")} - ${esc(user.assigned_to_user_id || "—")}</td>
         <td>${esc(user.phone || "—")}</td>
         <td>
@@ -107,6 +111,7 @@
       card.innerHTML = `
         <p><strong>Username:</strong> ${usernameDisplay}</p>
         <p><strong>Role:</strong> ${esc(user.role || "")}</p>
+        <p><strong>Region:</strong> ${regionPill}</p>
         <p><strong>Assigned To:</strong> ${esc(user.assigned_to_username || "—")} - ${esc(user.assigned_to_user_id || "—")}</p>
         <p><strong>Phone:</strong> ${esc(user.phone || "—")}</p>
         <div class="card-actions">

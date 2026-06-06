@@ -54,7 +54,13 @@
       const data = await Api.get("/customers", { query });
       state.currentPage = data.page || 1;
       state.totalPages = data.pages || 1;
-      return data.customers || [];
+      let list = data.customers || [];
+      if (Utils.Auth.isAlex()) {
+        list = list.filter((c) =>
+          ((c.code) || "").toLowerCase().startsWith("ac-")
+        );
+      }
+      return list;
     } catch (err) {
       console.error("Failed to fetch customers:", err);
       UI.showError("Failed to load customers.");

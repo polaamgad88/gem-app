@@ -81,22 +81,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // ── Load users for "Assigned To" dropdown ──────────────────────────────────
 
+let __ASSIGNABLE_USERS = [];
+
 async function loadAssignableUsers(token) {
   try {
     const res = await fetch("https://order-app.gemegypt.net/api/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
-    const users = data.users || [];
-    const select = document.getElementById("assigned-to");
-    users.forEach((user) => {
-      const option = document.createElement("option");
-      option.value = user.user_id;
-      option.textContent = user.username;
-      select.appendChild(option);
-    });
+    __ASSIGNABLE_USERS = data.users || [];
+    renderAssignableUsers();
+    const regionSel = document.getElementById("region");
+    if (regionSel) {
+      regionSel.addEventListener("change", renderAssignableUsers);
+    }
   } catch (err) {
     console.error("Failed to load users for assignment:", err);
+  }
+}
+
+function renderAssignableUsers() {
+  const select = document.getElementById("assigned-to");
+  if (!select) return;
+  const selectedRegion = (document.getElementById("region")?.value || "cairo").toLowerCase();
+  // Keep the current selection if it still applies after filtering
+  const prev = select.value;
+  select.innerHTML = '<option value="">None</option>';
+  // Admins span both regions; otherwise filter to same region as the new user.
+  __ASSIGNABLE_USERS
+    .filter((u) => u.admin === 1 || (u.region || "cairo").toLowerCase() === selectedRegion)
+    .forEach((u) => {
+      const option = document.createElement("option");
+      option.value = u.user_id;
+      const tag = u.admin === 1 ? " (Admin)" : ` [${(u.region || "cairo")}]`;
+      option.textContent = `${u.username}${tag}`;
+      select.appendChild(option);
+    });
+  if ([...select.options].some((o) => o.value === prev)) {
+    select.value = prev;
   }
 }
 
@@ -108,6 +130,7 @@ async function handleCreateUser(token) {
   const email           = document.getElementById("email").value.trim();
   const password        = document.getElementById("password").value;
   const role            = document.getElementById("role").value;
+  const region          = document.getElementById("region").value || "cairo";
   const assignedTo      = document.getElementById("assigned-to").value.trim();
   const isAdmin         = document.getElementById("is-admin").checked;
   const isDriver        = document.getElementById("is-driver").checked;
@@ -148,6 +171,7 @@ async function handleCreateUser(token) {
   formData.append("email",    email);
   formData.append("password", password);
   formData.append("role",     role);
+  formData.append("region",   region);
 
   // Only send assigned_to when a real user is selected
   if (assignedTo) {

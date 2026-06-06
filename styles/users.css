@@ -242,7 +242,7 @@ table th,
 
 /* Badges */
 .admin-badge::before {
-  content: "ðŸ›¡ï¸ ";
+  content: "🛡️ ";
 }
 
 .admin-badge {
@@ -254,6 +254,19 @@ table th,
   color: var(--danger-color);
   font-weight: 700;
 }
+
+/* Region pill */
+.region-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+}
+.region-pill--cairo { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+.region-pill--alex  { background: linear-gradient(135deg, #7c3aed, #a855f7); }
 
 /* Modal */
 .modal {
