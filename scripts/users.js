@@ -36,6 +36,15 @@
     wireDropdownDelegation();
   });
 
+  // Re-fetch when the page is restored from the back-forward cache (bfcache).
+  // Without this, hitting "back" shows a stale DOM and requires a manual refresh.
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) {
+      Api.invalidate("/users");
+      loadUsers();
+    }
+  });
+
   async function loadUsers() {
     try {
       const data = await Api.get("/users");
@@ -186,6 +195,9 @@
     editForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const userId = document.getElementById("edit-user-id").value;
+      const newRegion = document.getElementById("edit-region").value;
+      const origUser = allUsers.find((u) => String(u.user_id) === String(userId));
+      const regionChanged = origUser && (origUser.region || "cairo").toLowerCase() !== newRegion;
       try {
         // Run info+role+manager in parallel — backend doesn't require ordering
         await Promise.all([
@@ -204,6 +216,11 @@
             assigned_to_user_id: document.getElementById("edit-assigned-to").value,
           }),
         ]);
+        // Region runs after the manager change — set_region validates the
+        // user's manager/subordinate region tree, which the calls above may alter.
+        if (regionChanged) {
+          await Api.postForm(`/users/set_region/${userId}`, { region: newRegion });
+        }
         alert("User updated");
         closeEditModal();
         Api.invalidate("/users");
@@ -240,6 +257,7 @@
     document.getElementById("edit-email").value = user.email || "";
     document.getElementById("edit-phone").value = user.phone || "";
     document.getElementById("edit-role").value = user.role || "";
+    document.getElementById("edit-region").value = (user.region || "cairo").toLowerCase();
     document.getElementById("edit-assigned-to").value = user.assigned_to_user_id || "";
     document.getElementById("edit-admin").checked = !!user.admin;
     document.getElementById("edit-driver").checked = user.driver == 1;

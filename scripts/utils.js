@@ -224,6 +224,10 @@
           body,
           signal: ctrl.signal,
           credentials: opts.credentials,
+          // Never serve API responses from the browser HTTP cache — app-level
+          // memCache (getCached) handles intentional caching. Prevents stale
+          // data after create/edit/delete + on bfcache restore.
+          cache: opts.cache ?? "no-store",
         });
         clearTimeout(timer);
 
