@@ -85,10 +85,7 @@ let __ASSIGNABLE_USERS = [];
 
 async function loadAssignableUsers(token) {
   try {
-    const res = await fetch("https://order-app.gemegypt.net/api/users", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
+    const data = await Utils.Api.get("/users");
     __ASSIGNABLE_USERS = data.users || [];
     renderAssignableUsers();
     const regionSel = document.getElementById("region");
@@ -136,6 +133,7 @@ async function handleCreateUser(token) {
   const isDriver        = document.getElementById("is-driver").checked;
   const isStorage       = document.getElementById("is-storage").checked;
   const isStorageAdmin  = document.getElementById("is-storage-admin").checked;
+  const trackLocations  = document.getElementById("is-track-locations")?.checked;
 
   // ── Client-side validation ─────────────────────────────────────────────
 
@@ -190,6 +188,9 @@ async function handleCreateUser(token) {
     formData.append("storage_admin", "on");
   } else if (isStorage) {
     formData.append("storage", "on");
+  }
+  if (trackLocations) {
+    formData.append("track_locations", "on");
   }
 
   // ── Send ───────────────────────────────────────────────────────────────

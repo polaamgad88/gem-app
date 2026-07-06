@@ -67,33 +67,18 @@ async function verifyToken(token) {
 function setupLogoutButton() {
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      // Best-effort server revoke; local session is always cleared and the
+      // user is redirected regardless of the server response (the /logout
+      // call can fail/return non-2xx without meaning the user stays logged in).
       try {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-          window.location.href = "login.html";
-          return;
-        }
-
-        const logoutRes = await fetch(
-          "https://order-app.gemegypt.net/api/logout",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (logoutRes.ok) {
-          localStorage.clear();
-          window.location.href = "login.html";
-        } else {
-          alert("Logout failed");
-        }
+        await Utils.Auth.logout();
       } catch (err) {
-        alert("Logout error");
-        console.error(err);
+        console.error("Logout error:", err);
+      } finally {
+        localStorage.clear();
+        window.location.href = "login.html";
       }
     });
   }
