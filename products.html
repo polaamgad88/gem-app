@@ -35,170 +35,199 @@
 </head>
 
 <body>
-  <h1 class="page-heading">Products</h1>
-
-  <!-- Filters -->
-  <div class="filters-row">
-    <div class="filter-group">
-      <select id="brand-filter">
-        <option value="">All Brands</option>
-      </select>
-      <select id="category-filter">
-        <option value="">All Categories</option>
-      </select>
-      <input id="barcode-search" type="search" placeholder="Enter barcode..." />
+  <div class="page-head">
+    <h1 class="page-heading">Products</h1>
+    <div class="head-actions">
+      <button type="button" class="ghost-btn" id="export-open-btn">Export</button>
+      <button type="button" class="ghost-btn" id="import-open-btn">Import</button>
+      <button type="button" class="primary-btn" id="add-product-btn">
+        <i>+</i><span>Add Product</span>
+      </button>
     </div>
   </div>
 
-  <div class="actions-row text-right mb-4">
-    <button class="btn btn-add" onclick="openAddProductDialog()">
-      Add Product
-    </button>
-    <button id="export-open-btn" class="btn btn-add">
-      Export Products
-    </button>
-    <button class="btn edit-btn" onclick="openImportDialog()">
-      Import Products
-    </button>
+  <div id="summary-row" class="summary-row"></div>
+
+  <div class="products-toolbar">
+    <div class="toolbar-field toolbar-field--grow">
+      <label for="product-search">Search</label>
+      <input type="search" id="product-search" placeholder="Name, barcode or item no..." />
+    </div>
+
+    <div class="toolbar-field">
+      <label for="brand-filter">Brand</label>
+      <select id="brand-filter">
+        <option value="">All brands</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field">
+      <label for="category-filter">Category</label>
+      <select id="category-filter">
+        <option value="">All categories</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field toolbar-field--narrow">
+      <label for="availability-filter">Stock</label>
+      <select id="availability-filter">
+        <option value="">All</option>
+        <option value="Available">Available</option>
+        <option value="Limited">Limited</option>
+        <option value="Unavailable">Unavailable</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field toolbar-field--narrow">
+      <label for="visibility-filter">Visible</label>
+      <select id="visibility-filter">
+        <option value="">All</option>
+        <option value="1">Visible</option>
+        <option value="0">Hidden</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field toolbar-field--btn">
+      <button id="reset-filters-btn" type="button">Reset</button>
+    </div>
   </div>
 
-  <!-- Table View -->
+  <p id="result-meta" class="result-meta"></p>
+
   <div class="table-responsive">
     <table class="table">
       <thead>
         <tr>
-          <th>Image</th>
-          <th>Product Name</th>
-          <th>Item No.</th>
-          <th>Brand</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Availability</th>
-          <th>Actions</th>
+          <th class="col-img"></th>
+          <th>Product</th>
+          <th class="col-item">Item No.</th>
+          <th class="col-brand">Brand / Category</th>
+          <th class="col-price">Price</th>
+          <th class="col-stock">Stock</th>
+          <th class="col-action"></th>
         </tr>
       </thead>
       <tbody id="productsTable"></tbody>
     </table>
   </div>
 
-  <!-- Card View -->
   <div class="card-view" style="display: none">
     <div id="productCards"></div>
   </div>
 
-  <div class="pagination" id="pagination"></div>
+  <p id="products-empty" class="empty-state hidden">No products match these filters.</p>
+  <div id="products-loading" class="loading-state">
+    <div class="spinner"></div><span>Loading products...</span>
+  </div>
 
-  <!-- Product Modal -->
-  <div id="product-modal" class="modal" style="display: none">
-    <div class="modal-content">
+  <div class="pagination-controls" id="pagination"></div>
+
+  <div id="product-modal" class="modal hidden">
+    <div class="modal-content modal-content--wide">
+      <h2 id="product-modal-title">Product</h2>
       <form id="product-form">
         <input type="hidden" id="product-id" />
-        <div>
-          <label>Product Name:</label>
+
+        <div class="form-group">
+          <label for="product-name">Product Name <span class="req">*</span></label>
           <input type="text" id="product-name" required />
         </div>
-        <div>
-          <label>Barcode:</label>
-          <input type="number" id="bar-code" required />
-        </div>
-        <div>
-          <label>Item Number:</label>
-          <input type="text" id="item-number" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bar-code">Barcode <span class="req">*</span></label>
+            <input type="number" id="bar-code" required />
+          </div>
+          <div class="form-group">
+            <label for="item-number">Item Number</label>
+            <input type="text" id="item-number" />
+          </div>
         </div>
 
-        <div>
-          <label>Brand:</label>
-          <input type="text" id="brand" required />
-        </div>
-        <div>
-          <label>Category:</label>
-          <input type="text" id="category" required />
-        </div>
-        <div>
-          <label>Description:</label>
-          <textarea id="description"></textarea>
-        </div>
-        <div>
-          <label>Price:</label>
-          <input type="number" step="0.01" id="price" required />
-        </div>
-        <div>
-          <label>Order Limit:</label>
-          <input type="number" id="product-order-limit" />
-        </div>
-        <div>
-          <label>Availability Limit:</label>
-          <input type="number" id="availability-limit" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="brand">Brand <span class="req">*</span></label>
+            <input type="text" id="brand" required />
+          </div>
+          <div class="form-group">
+            <label for="category">Category <span class="req">*</span></label>
+            <input type="text" id="category" required />
+          </div>
         </div>
 
-        <div>
-          <label>Image:</label>
-          <input type="file" id="image" />
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" rows="3"></textarea>
         </div>
-        <div class="note-text" id="image-note">
-          If you don't choose a new image, the existing image will be kept.
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="price">Price <span class="req">*</span></label>
+            <input type="number" step="0.01" id="price" required />
+          </div>
+          <div class="form-group">
+            <label for="product-order-limit">Order Limit</label>
+            <input type="number" id="product-order-limit" />
+          </div>
+          <div class="form-group">
+            <label for="availability-limit">Availability Limit</label>
+            <input type="number" id="availability-limit" />
+          </div>
         </div>
-        <div id="modal-error-message" class="note-text" style="color: var(--danger-color); display: none;"></div>
+
+        <div class="form-group">
+          <label for="image">Image</label>
+          <input type="file" id="image" accept="image/*" />
+        </div>
+
+        <div id="modal-error-message" class="form-error hidden"></div>
 
         <div class="modal-actions">
-          <button type="submit" class="btn btn-add">Save</button>
-          <button type="button" class="btn delete-btn" onclick="closeModal()">
-            Cancel
-          </button>
+          <button type="submit" class="btn primary-btn">Save</button>
+          <button type="button" class="btn cancel-btn" id="product-cancel-btn">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div id="export-modal" class="modal" style="display: none">
+  <div id="export-modal" class="modal hidden">
     <div class="modal-content">
       <h2>Export Products</h2>
-      <p>Choose what to export:</p>
       <div class="option-buttons">
-        <button type="button" class="option-btn" data-value="all" onclick="selectExportOption(this)">
-          All Products
-        </button>
-        <button type="button" class="option-btn" data-value="filtered" onclick="selectExportOption(this)">
-          Filtered (Viewed) Products
-        </button>
+        <button type="button" class="option-btn selected" data-value="all">All Products</button>
+        <button type="button" class="option-btn" data-value="filtered">Current Filters</button>
       </div>
       <div class="modal-actions">
-        <button id="export-go-btn" class="btn btn-add">Export</button>
-        <button class="btn delete-btn" onclick="closeExportDialog()">
-          Cancel
-        </button>
+        <button id="export-go-btn" type="button" class="btn primary-btn">Export</button>
+        <button type="button" class="btn cancel-btn" data-close="export-modal">Cancel</button>
       </div>
     </div>
   </div>
 
-  <div id="import-modal" class="modal" style="display: none">
+  <div id="import-modal" class="modal hidden">
     <div class="modal-content">
       <h2>Import Products</h2>
-      <p>Select Import Mode:</p>
       <div class="option-buttons">
-        <button type="button" class="option-btn" data-value="update" onclick="selectImportOption(this)">
-          Patch Edit Existing
-        </button>
-        <button type="button" class="option-btn" data-value="add" onclick="selectImportOption(this)">
-          Patch Add New
-        </button>
+        <button type="button" class="option-btn selected" data-value="update">Patch Existing</button>
+        <button type="button" class="option-btn" data-value="add">Add New</button>
       </div>
-      <div style="margin-top: var(--spacing-md)">
-        <label>Select File (Excel / CSV):</label>
-        <input type="file" id="import-file" />
+
+      <div class="form-group">
+        <label for="import-file">Excel / CSV file</label>
+        <input type="file" id="import-file" accept=".xlsx,.xls,.csv" />
       </div>
-      <div style="margin-top: var(--spacing-md)">
-        <label>Select Images ZIP:</label>
+
+      <div class="form-group">
+        <label for="images-zip">Images ZIP</label>
         <input type="file" id="images-zip" accept=".zip" />
       </div>
 
+      <div id="import-error-message" class="form-error hidden"></div>
+
       <div class="modal-actions">
-        <button class="btn btn-add" onclick="handleImport()">Upload</button>
-        <button class="btn delete-btn" onclick="closeImportDialog()">
-          Cancel
-        </button>
+        <button type="button" class="btn primary-btn" id="import-go-btn">Upload</button>
+        <button type="button" class="btn cancel-btn" data-close="import-modal">Cancel</button>
       </div>
-      <div id="import-error-message" class="note-text" style="color: var(--danger-color); display: none;"></div>
     </div>
   </div>
 </body>

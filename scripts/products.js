@@ -1,896 +1,613 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const token = await Utils.Auth.requireAuth();
-  if (!token) return;
-  // expose it to the rest of this module
-  window.__API_TOKEN = token;
+(function () {
+  const { Api, Auth, UI, Async, DOM, Format, API_BASE } = window.Utils;
+  const esc = DOM.escapeHtml;
 
-  // open the modal
-  document
-    .getElementById("export-open-btn")
-    .addEventListener("click", openExportDialog);
+  const FILTER_IDS = [
+    "product-search",
+    "brand-filter",
+    "category-filter",
+    "availability-filter",
+    "visibility-filter",
+  ];
 
-  // wire up the actual export button,
-  document
-    .getElementById("export-go-btn")
-    .addEventListener("click", () => handleExport(window.__API_TOKEN));
+  const state = {
+    page: 1,
+    limit: 20,
+    pages: 1,
+    total: 0,
+    products: [],
+  };
 
-  Utils.UI.checkScreenSize();
-  window.addEventListener("resize", Utils.UI.checkScreenSize);
+  let currentAction = "edit";
+  let exportType = "all";
+  let importMode = "update";
 
-  await populateBrands(token);
-  await populateCategories(token); // Load all categories initially
-  await fetchAndRenderProducts(token);
+  document.addEventListener("DOMContentLoaded", async () => {
+    const token = await Auth.requireAuth();
+    if (!token) return;
 
-  document
-    .getElementById("brand-filter")
-    .addEventListener("change", async () => {
-      await populateCategories(token); // Refresh categories based on selected brand
-      await fetchAndRenderProducts(token); // Re-filter products
-    });
+    UI.checkScreenSize();
+    window.addEventListener("resize", Async.throttle(UI.checkScreenSize, 150));
 
-  document.getElementById("category-filter").addEventListener("change", () => {
-    fetchAndRenderProducts(token); // Filter products on category change
-  });
-});
+    wireToolbar();
+    wireModals();
+    wireRowActions();
 
-async function populateBrands(token) {
-  const res = await fetch(
-    "https://order-app.gemegypt.net/api/products/brands",
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-  const brands = (await res.json()).brands || [];
-  const brandSelect = document.getElementById("brand-filter");
-  brandSelect.innerHTML =
-    `<option value="">All Brands</option>` +
-    brands.map((b) => `<option value="${b}">${b}</option>`).join("");
-}
-
-async function populateCategories(token) {
-  const brand = document.getElementById("brand-filter").value;
-  const categoryEndpoint = brand
-    ? `https://order-app.gemegypt.net/api/products/categories?brand=${encodeURIComponent(
-        brand
-      )}`
-    : `https://order-app.gemegypt.net/api/products/categories`;
-
-  const res = await fetch(categoryEndpoint, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const categories = (await res.json()).categories || [];
-  const categorySelect = document.getElementById("category-filter");
-  categorySelect.innerHTML =
-    `<option value="">All Categories</option>` +
-    categories.map((c) => `<option value="${c}">${c}</option>`).join("");
-}
-
-let currentPage = 1;
-const pageLimit = 20;
-
-async function fetchAndRenderProducts(token) {
-  const brand = document.getElementById("brand-filter").value;
-  const category = document.getElementById("category-filter").value;
-  const barcodeSearch = document.getElementById("barcode-search").value.trim();
-
-  const params = new URLSearchParams();
-  if (brand) params.append("brand", brand);
-  if (category) params.append("category", category);
-  if (barcodeSearch) params.append("barcode", barcodeSearch);
-  params.append("page", currentPage);
-  params.append("limit", pageLimit);
-
-  const res = await fetch(
-    `https://order-app.gemegypt.net/api/products?${params.toString()}`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-
-  const data = await res.json();
-  const products = data.data || [];
-
-  const tableBody = document.getElementById("productsTable");
-  const cardContainer = document.getElementById("productCards");
-
-  tableBody.innerHTML = "";
-  cardContainer.innerHTML = "";
-
-  products.forEach((product) => {
-    const imageUrl = `https://order-app.gemegypt.net/api/images/${product.image_path}`;
-
-    // Table Row
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td><img src="${imageUrl}" alt="${product.product_name}" /></td>
-     <td style="font-family: sans-serif; font-size: 13px; line-height: 1.4;">
-  <div style="font-weight: 600; margin-bottom: 2px;">
-    ${product.product_name}
-  </div>
-
-  <div style="color: #666; font-size: 12px; margin-bottom: 4px;">
-    <span style="opacity: 0.8;">Barcode:</span>
-    <span>${product.bar_code || "-"}</span>
-  </div>
-
-  <span style="
-    display: inline-block;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: 500;
-    color: white;
-    background-color: ${product.visability === 1 ? "#28a745" : "#999"};
-  ">
-    ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
-  </span>
-</td>
-
-      <td>${product.Item_number || "-"}</td>
-      <td>${product.brand}</td>
-      <td>${product.category}</td>
-      <td>${Utils.Format.currency(product.price)}</td>
-      <td>
-        <span style="color:black; font-weight: bold; font-size: 16px;" class="${
-          product.availability == "Available"
-            ? "available-badge"
-            : "not-available-badge"
-        }">
-          ${
-            product.availability === "Available"
-              ? "🟢"
-              : product.availability === "Limited"
-              ? "🟡" + (product.stock_quantity ? product.stock_quantity : "")
-              : "🔴"
-          }
-          
-        </span>
-      </td>
-     <td>
-  <style>
-td {
-  vertical-align: middle; 
-  text-align: center; 
-}
-
-.action-container, 
-.available-badge, 
-.not-available-badge {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
-td:nth-child(3), 
-td:nth-child(4), 
-td:nth-child(5), 
-td:nth-child(6), 
-td:nth-child(7), 
-td:nth-child(8)   {
-  vertical-align: middle;
-  text-align: center;
-}
-
-td:nth-child(7) span,
-td:nth-child(8) .action-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
-
-    .action-container {
-      position: relative;
-       display: flex;
-  justify-content: center; 
-  align-items: center;    
-  height: 100%;   
-      font-family: sans-serif;
-    }
-
-    .action-btn {
-      background-color: #f5f5f5;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 6px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #333;
-      transition: background-color 0.2s ease;
-    }
-
-    .action-btn:hover {
-      background-color: #e0e0e0;
-    }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background-color: white;
-      min-width: 130px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
-      z-index: 100;
-    }
-
-    .dropdown-menu button {
-      display: block;
-      width: 100%;
-      padding: 8px 12px;
-      background: none;
-      border: none;
-      text-align: left;
-      font-size: 13px;
-      color: #333;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .dropdown-menu button:hover {
-      background-color: #d3d3d3;
-      color: black;
-    }
-
-    .dropdown-menu .btn-delete:hover {
-      background-color: #f8d7da;
-      color: #c00;
-    }
-
-    .action-container:hover .dropdown-menu,
-    .action-container:focus-within .dropdown-menu {
-      display: block;
-    }
-  </style>
-
-  <div class="action-container" style="display: flex; justify-content: center;align-items: center;">
-    <button class="action-btn">⋮</button>
-    <div class="dropdown-menu">
-        <div class="action-container" style="display: flex; justify-content: center;align-items: center;">
-    <div class="dropdown-menu">
-      <button onclick="openProductDialog('edit', ${
-        product.product_id
-      })">Edit</button>
-      <button onclick="openProductDialog('copy', ${
-        product.product_id
-      })">Copy</button>
-      <button onclick="toggleVisability(${product.product_id}, ${
-      product.visability
-    })">
-        ${product.visability === 1 ? "Hide" : "Show"}
-      </button>
-      <button class="btn-delete" onclick="deleteProduct(${
-        product.product_id
-      })">Delete</button>
-    </div>
-  </div>b
-      <button onclick="openProductDialog('copy', ${
-        product.product_id
-      })">Copy</button>
-      <button onclick="toggleVisability(${product.product_id}, ${
-      product.visability
-    })">
-        ${product.visability === 1 ? "Hide" : "Show"}
-      </button>
-      <button class="btn-delete" onclick="deleteProduct(${
-        product.product_id
-      })">Delete</button>
-    </div>
-  </div>
-</td>
-`;
-    tableBody.appendChild(row);
-
-    // Card View
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-    <div style="position: relative;">
- <span style="
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 18px;
-    ">
-      ${
-        product.availability === "Available"
-          ? "🟢"
-          : product.availability === "Limited"
-          ? "🟡"
-          : "🔴"
-      }
-    </span>
-
-       <img src="${imageUrl}" alt="${product.product_name}" style="
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin-bottom: 6px;
-  "/>
-           <div class="barcode-text text-center "><strong>${
-             product.bar_code || "-"
-           }</strong></div>
-            <hr style="margin: 20px 0;" />
-
-
-<div class="product-card-header" style="
-  font-family: sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;  
-">
-  <span style="flex-grow: 1; word-break: break-word;">
-    ${product.product_name}
-  </span>
-  <span style="
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 500;
-    color: white;
-    background-color: ${product.visability === 1 ? "#28a745" : "#999"};
-    white-space: nowrap;
-    margin-left: auto;
-  ">
-    ${product.visability === 1 ? "🟢 Visible" : "🔒 Hidden"}
-  </span>
-</div>
-
-
-      
-      <div class="product-card-body">
-        <p>${product.Item_number || "-"}</p>
-        <p>${product.brand}</p>
-        <p>${product.category}</p>
-        <p>${Utils.Format.currency(product.price)}</p>
-       
-      </div>
-
-      
-    <div class="product-card-footer text-right">
-  <style>
-    .action-container-mobile {
-      position: relative;
-      display: inline-block;
-      width: 100%;
-      text-align: right;
-      font-family: sans-serif;
-    }
-
-    .action-btn-mobile {
-      background-color: #f5f5f5;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 6px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #333;
-      transition: background-color 0.2s ease;
-    }
-
-    .action-btn-mobile:hover {
-      background-color: #e0e0e0;
-    }
-
-    .dropdown-menu-mobile {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background-color: white;
-      min-width: 130px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
-      overflow: hidden;
-      z-index: 100;
-    }
-
-    .dropdown-menu-mobile button {
-      display: block;
-      width: 100%;
-      padding: 8px 12px;
-      background: none;
-      border: none;
-      text-align: left;
-      font-size: 13px;
-      color: #333;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .dropdown-menu-mobile button:hover {
-      background-color: #d3d3d3;
-      color: black;
-    }
-
-    .dropdown-menu-mobile .btn-delete:hover {
-      background-color: #f8d7da;
-      color: #c00;
-    }
-  </style>
-
-  <div class="action-container-mobile">
-    <button class="action-btn-mobile" data-dropdown-id="dropdown-${
-      product.product_id
-    }">
-      ⋮
-    </button>
-    <div class="dropdown-menu-mobile" id="dropdown-${product.product_id}">
-      <button onclick="openProductDialog('edit', ${
-        product.product_id
-      })">Edit</button>
-      <button onclick="openProductDialog('copy', ${
-        product.product_id
-      })">Copy</button>
-      <button onclick="toggleVisability(${product.product_id}, ${
-      product.visability
-    })">
-        ${product.visability === 1 ? "Hide" : "Show"}
-      </button>
-      <button class="btn-delete" onclick="deleteProduct(${
-        product.product_id
-      })">Delete</button>
-    </div>
-  </div>
-</div>
-`;
-    document.addEventListener("click", function (e) {
-      const isButton = e.target.matches(".action-btn-mobile");
-      const openMenus = document.querySelectorAll(".dropdown-menu-mobile");
-
-      // Close all menus first
-      openMenus.forEach((menu) => (menu.style.display = "none"));
-
-      // If it's the Actions button
-      if (isButton) {
-        e.stopPropagation();
-        const dropdownId = e.target.getAttribute("data-dropdown-id");
-        const menu = document.getElementById(dropdownId);
-        if (menu) {
-          menu.style.display = "block";
-        }
-      }
-    });
-
-    cardContainer.appendChild(card);
+    await Promise.all([populateBrands(), populateCategories()]);
+    await load();
   });
 
-  renderPagination(data.page, data.pages);
-}
-
-document.getElementById("barcode-search").addEventListener("input", () => {
-  currentPage = 1;
-  const token = localStorage.getItem("access_token");
-  fetchAndRenderProducts(token);
-});
-
-async function deleteProduct(id) {
-  if (!confirm("Are you sure you want to delete this product?")) return;
-
-  const token = localStorage.getItem("access_token");
-  try {
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/product/delete/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    if (res.ok) {
-      alert("Product deleted successfully.");
-      fetchAndRenderProducts(token);
-    } else {
-      const err = await res.json();
-      alert(`Failed to delete: ${err.message}`);
-    }
-  } catch (error) {
-    alert("Something went wrong during deletion.");
-    console.error(error);
+  function imageUrl(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    return `${API_BASE}/images/${String(path).replace(/^\/+/, "")}`;
   }
-}
 
-let currentAction = "edit";
+  function filterValues() {
+    return {
+      search: document.getElementById("product-search").value.trim(),
+      brand: document.getElementById("brand-filter").value,
+      category: document.getElementById("category-filter").value,
+      availability: document.getElementById("availability-filter").value,
+      visability: document.getElementById("visibility-filter").value,
+    };
+  }
 
-function openProductDialog(action, productId) {
-  currentAction = action;
-  const modal = document.getElementById("product-modal");
-  const form = document.getElementById("product-form");
-  const title = document.getElementById("modal-title");
-  const errorMsg = document.getElementById("modal-error-message");
+  function wireToolbar() {
+    const reload = Async.debounce(() => {
+      state.page = 1;
+      load();
+    }, 300);
+    document.getElementById("product-search").addEventListener("input", reload);
 
-  const token = localStorage.getItem("access_token");
+    document.getElementById("brand-filter").addEventListener("change", async () => {
+      await populateCategories();
+      state.page = 1;
+      load();
+    });
 
-  errorMsg.style.display = "none"; // Clear previous error
+    ["category-filter", "availability-filter", "visibility-filter"].forEach((id) => {
+      document.getElementById(id).addEventListener("change", () => {
+        state.page = 1;
+        load();
+      });
+    });
 
-  fetch(`https://order-app.gemegypt.net/api/product/find/${productId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-    .then((res) => res.json())
-    .then(({ data }) => {
+    document.getElementById("reset-filters-btn").addEventListener("click", async () => {
+      FILTER_IDS.forEach((id) => {
+        document.getElementById(id).value = "";
+      });
+      await populateCategories();
+      state.page = 1;
+      load();
+    });
+  }
+
+  async function populateBrands() {
+    try {
+      const data = await Api.get("/products/brands");
+      const select = document.getElementById("brand-filter");
+      select.innerHTML =
+        `<option value="">All brands</option>` +
+        (data.brands || []).map((b) => `<option value="${esc(b)}">${esc(b)}</option>`).join("");
+    } catch (err) {
+      console.error("Failed to load brands:", err);
+    }
+  }
+
+  async function populateCategories() {
+    try {
+      const brand = document.getElementById("brand-filter").value;
+      const data = await Api.get("/products/categories", {
+        query: brand ? { brand } : {},
+      });
+      const select = document.getElementById("category-filter");
+      const previous = select.value;
+      select.innerHTML =
+        `<option value="">All categories</option>` +
+        (data.categories || [])
+          .map((c) => `<option value="${esc(c)}">${esc(c)}</option>`)
+          .join("");
+      if (Array.from(select.options).some((o) => o.value === previous)) {
+        select.value = previous;
+      }
+    } catch (err) {
+      console.error("Failed to load categories:", err);
+    }
+  }
+
+  async function load(page = state.page) {
+    const loading = document.getElementById("products-loading");
+    loading?.classList.remove("hidden");
+    try {
+      const query = { page, limit: state.limit, ...filterValues() };
+      Object.keys(query).forEach((k) => {
+        if (query[k] === "" || query[k] == null) delete query[k];
+      });
+
+      const data = await Api.get("/products", { query });
+      state.products = data.data || [];
+      state.page = data.page || 1;
+      state.pages = data.pages || 1;
+      state.total = data.total ?? state.products.length;
+
+      render();
+      renderMeta();
+      renderSummary();
+      renderPagination();
+    } catch (err) {
+      console.error("Failed to load products:", err);
+      alert(err.data?.message || err.message || "Could not load products.");
+    } finally {
+      loading?.classList.add("hidden");
+    }
+  }
+
+  function availabilityPill(product) {
+    const value = product.availability || "Unavailable";
+    const slug = String(value).toLowerCase();
+    const stock = product.stock_quantity;
+    const count = stock == null ? "" : ` <span class="stock-count">${esc(stock)}</span>`;
+    return `<span class="avail-pill avail-pill--${esc(slug)}">${esc(value)}</span>${count}`;
+  }
+
+  function thumb(product) {
+    const url = imageUrl(product.image_path);
+    const initial = esc((product.product_name || "?").trim().charAt(0).toUpperCase());
+    if (!url) return `<span class="thumb thumb--empty">${initial}</span>`;
+    return `<span class="thumb"><img src="${esc(url)}" alt="" loading="lazy"
+              onerror="this.parentNode.classList.add('thumb--empty');this.remove()" /></span>`;
+  }
+
+  function actionsMenu(product) {
+    const id = product.product_id;
+    return `
+      <div class="action-container">
+        <button type="button" class="action-btn" data-menu="${id}" aria-label="Actions">⋮</button>
+        <div class="dropdown-menu" id="menu-${id}">
+          <button type="button" data-act="edit" data-id="${id}">Edit</button>
+          <button type="button" data-act="copy" data-id="${id}">Duplicate</button>
+          <button type="button" data-act="visibility" data-id="${id}" data-visible="${product.visability}">
+            ${product.visability === 1 ? "Hide" : "Show"}
+          </button>
+          <button type="button" class="danger" data-act="delete" data-id="${id}">Delete</button>
+        </div>
+      </div>`;
+  }
+
+  function render() {
+    const tbody = document.getElementById("productsTable");
+    const cards = document.getElementById("productCards");
+    const empty = document.getElementById("products-empty");
+    if (!tbody || !cards) return;
+
+    empty?.classList.toggle("hidden", state.products.length > 0);
+
+    const rowFrag = document.createDocumentFragment();
+    const cardFrag = document.createDocumentFragment();
+
+    for (const p of state.products) {
+      const hidden = p.visability !== 1;
+      const name = p.product_name || "—";
+
+      const tr = document.createElement("tr");
+      if (hidden) tr.className = "is-hidden-product";
+      tr.innerHTML = `
+        <td class="col-img">${thumb(p)}</td>
+        <td>
+          <div class="prod-name">${esc(name)}</div>
+          <div class="prod-sub">
+            <span class="barcode">${esc(p.bar_code || "-")}</span>
+            ${hidden ? `<span class="hidden-pill">Hidden</span>` : ""}
+          </div>
+        </td>
+        <td class="col-item">${esc(p.Item_number || "-")}</td>
+        <td class="col-brand">
+          <div>${esc(p.brand || "-")}</div>
+          <div class="prod-sub">${esc(p.category || "-")}</div>
+        </td>
+        <td class="col-price">${esc(Format.currency(p.price))}</td>
+        <td class="col-stock">${availabilityPill(p)}</td>
+        <td class="col-action">${actionsMenu(p)}</td>`;
+      rowFrag.appendChild(tr);
+
+      const card = document.createElement("div");
+      card.className = `product-card${hidden ? " is-hidden-product" : ""}`;
+      card.innerHTML = `
+        <div class="product-card-top">
+          ${thumb(p)}
+          <div class="product-card-title">
+            <div class="prod-name">${esc(name)}</div>
+            <div class="prod-sub">
+              <span class="barcode">${esc(p.bar_code || "-")}</span>
+              ${hidden ? `<span class="hidden-pill">Hidden</span>` : ""}
+            </div>
+          </div>
+          ${actionsMenu(p)}
+        </div>
+        <div class="product-card-body">
+          <div><small>Item No.</small><span>${esc(p.Item_number || "-")}</span></div>
+          <div><small>Brand</small><span>${esc(p.brand || "-")}</span></div>
+          <div><small>Category</small><span>${esc(p.category || "-")}</span></div>
+          <div><small>Price</small><span>${esc(Format.currency(p.price))}</span></div>
+          <div><small>Stock</small><span>${availabilityPill(p)}</span></div>
+        </div>`;
+      cardFrag.appendChild(card);
+    }
+
+    tbody.replaceChildren(rowFrag);
+    cards.replaceChildren(cardFrag);
+  }
+
+  function renderMeta() {
+    const meta = document.getElementById("result-meta");
+    if (!meta) return;
+    if (!state.total) {
+      meta.textContent = "";
+      return;
+    }
+    const from = (state.page - 1) * state.limit + 1;
+    const to = from + state.products.length - 1;
+    meta.innerHTML = `Showing <strong>${from}–${to}</strong> of <strong>${state.total}</strong> products`;
+  }
+
+  function renderSummary() {
+    const box = document.getElementById("summary-row");
+    if (!box) return;
+    if (!state.products.length) {
+      box.innerHTML = "";
+      return;
+    }
+    const count = (fn) => state.products.filter(fn).length;
+    const tiles = [
+      ["On this page", state.products.length, ""],
+      ["Available", count((p) => p.availability === "Available"), "ok"],
+      ["Limited", count((p) => p.availability === "Limited"), "warn"],
+      ["Unavailable", count((p) => p.availability === "Unavailable"), "off"],
+      ["Hidden", count((p) => p.visability !== 1), "off"],
+    ];
+    box.innerHTML = tiles
+      .map(
+        ([label, value, mod]) =>
+          `<div class="stat-tile${mod ? ` stat-tile--${mod}` : ""}"><span>${value}</span><small>${label}</small></div>`
+      )
+      .join("");
+  }
+
+  function renderPagination() {
+    const container = document.getElementById("pagination");
+    if (!container) return;
+    if (state.pages <= 1) {
+      container.replaceChildren();
+      return;
+    }
+
+    const maxButtons = 7;
+    let start = Math.max(1, state.page - Math.floor(maxButtons / 2));
+    const end = Math.min(state.pages, start + maxButtons - 1);
+    start = Math.max(1, end - maxButtons + 1);
+
+    const frag = document.createDocumentFragment();
+    const mkBtn = (text, page, disabled, active) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = text;
+      btn.disabled = disabled;
+      if (active) btn.classList.add("active");
+      if (!disabled) btn.addEventListener("click", () => load(page));
+      return btn;
+    };
+    const gap = () => {
+      const s = document.createElement("span");
+      s.className = "page-gap";
+      s.textContent = "…";
+      return s;
+    };
+
+    frag.appendChild(mkBtn("‹", state.page - 1, state.page === 1));
+    if (start > 1) {
+      frag.appendChild(mkBtn("1", 1, false, false));
+      if (start > 2) frag.appendChild(gap());
+    }
+    for (let i = start; i <= end; i++) {
+      frag.appendChild(mkBtn(String(i), i, false, i === state.page));
+    }
+    if (end < state.pages) {
+      if (end < state.pages - 1) frag.appendChild(gap());
+      frag.appendChild(mkBtn(String(state.pages), state.pages, false, false));
+    }
+    frag.appendChild(mkBtn("›", state.page + 1, state.page === state.pages));
+
+    container.replaceChildren(frag);
+  }
+
+  function closeMenus() {
+    document.querySelectorAll(".dropdown-menu.open").forEach((m) => m.classList.remove("open"));
+  }
+
+  function wireRowActions() {
+    document.body.addEventListener("click", (e) => {
+      const trigger = e.target.closest("[data-menu]");
+      if (trigger) {
+        const menu = document.getElementById(`menu-${trigger.dataset.menu}`);
+        const wasOpen = menu?.classList.contains("open");
+        closeMenus();
+        if (menu && !wasOpen) menu.classList.add("open");
+        return;
+      }
+
+      const action = e.target.closest("[data-act]");
+      if (!action) {
+        closeMenus();
+        return;
+      }
+
+      closeMenus();
+      const id = parseInt(action.dataset.id, 10);
+      switch (action.dataset.act) {
+        case "edit":
+          openProductDialog("edit", id);
+          break;
+        case "copy":
+          openProductDialog("copy", id);
+          break;
+        case "visibility":
+          toggleVisibility(id, parseInt(action.dataset.visible, 10));
+          break;
+        case "delete":
+          deleteProduct(id);
+          break;
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenus();
+    });
+  }
+
+  function openModal(id) {
+    document.getElementById(id)?.classList.remove("hidden");
+  }
+
+  function closeModal(id) {
+    document.getElementById(id)?.classList.add("hidden");
+  }
+
+  function wireModals() {
+    document.getElementById("add-product-btn").addEventListener("click", openAddProductDialog);
+    document.getElementById("product-cancel-btn").addEventListener("click", () => {
+      closeModal("product-modal");
+      document.getElementById("product-form").reset();
+    });
+
+    document.getElementById("export-open-btn").addEventListener("click", () => openModal("export-modal"));
+    document.getElementById("import-open-btn").addEventListener("click", () => {
+      document.getElementById("import-error-message").classList.add("hidden");
+      openModal("import-modal");
+    });
+
+    document.querySelectorAll("[data-close]").forEach((btn) => {
+      btn.addEventListener("click", () => closeModal(btn.dataset.close));
+    });
+
+    document.querySelectorAll(".modal").forEach((modal) => {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal(modal.id);
+      });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal:not(.hidden)").forEach((m) => closeModal(m.id));
+      }
+    });
+
+    document.querySelectorAll("#export-modal .option-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document
+          .querySelectorAll("#export-modal .option-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        exportType = btn.dataset.value;
+      });
+    });
+
+    document.querySelectorAll("#import-modal .option-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document
+          .querySelectorAll("#import-modal .option-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        importMode = btn.dataset.value;
+      });
+    });
+
+    document.getElementById("export-go-btn").addEventListener("click", handleExport);
+    document.getElementById("import-go-btn").addEventListener("click", handleImport);
+    document.getElementById("product-form").addEventListener("submit", submitProduct);
+  }
+
+  function showModalError(id, message) {
+    const el = document.getElementById(id);
+    el.textContent = message;
+    el.classList.remove("hidden");
+  }
+
+  function openAddProductDialog() {
+    currentAction = "add";
+    const form = document.getElementById("product-form");
+    form.reset();
+    document.getElementById("modal-error-message").classList.add("hidden");
+    document.getElementById("product-modal-title").textContent = "Add Product";
+    document.getElementById("product-id").value = "";
+    document.getElementById("product-order-limit").value = -1;
+    document.getElementById("availability-limit").value = 100;
+    openModal("product-modal");
+  }
+
+  async function openProductDialog(action, productId) {
+    currentAction = action;
+    document.getElementById("modal-error-message").classList.add("hidden");
+    document.getElementById("product-modal-title").textContent =
+      action === "copy" ? "Duplicate Product" : "Edit Product";
+
+    try {
+      const { data } = await Api.get(`/product/find/${productId}`);
       document.getElementById("product-id").value = productId;
 
-      if (action === "edit") {
-        document.getElementById("product-name").value = data.product_name;
-        document.getElementById("bar-code").value = data.bar_code;
-        document.getElementById("item-number").value = data.Item_number || "";
-      } else {
-        // Clear name and barcode for copy
-        document.getElementById("product-name").value = "";
-        document.getElementById("bar-code").value = "";
-        document.getElementById("item-number").value = "";
-      }
+      const isCopy = action === "copy";
+      document.getElementById("product-name").value = isCopy ? "" : data.product_name || "";
+      document.getElementById("bar-code").value = isCopy ? "" : data.bar_code || "";
+      document.getElementById("item-number").value = isCopy ? "" : data.Item_number || "";
+      document.getElementById("brand").value = data.brand || "";
+      document.getElementById("category").value = data.category || "";
+      document.getElementById("description").value = data.description || "";
+      document.getElementById("price").value = data.price ?? "";
+      document.getElementById("product-order-limit").value = data.product_order_limit ?? "";
+      document.getElementById("availability-limit").value = data.availability_limit ?? "";
 
-      document.getElementById("brand").value = data.brand;
-      document.getElementById("category").value = data.category;
-      document.getElementById("description").value = data.description;
-      document.getElementById("price").value = data.price;
-      document.getElementById("product-order-limit").value =
-        data.product_order_limit || "";
-      document.getElementById("availability-limit").value =
-        data.availability_limit || "";
+      openModal("product-modal");
+    } catch (err) {
+      console.error("Error fetching product data:", err);
+      alert(err.data?.message || "Failed to load product data.");
+    }
+  }
 
-      modal.style.display = "flex";
-    })
-    .catch((error) => {
-      console.error("Error fetching product data:", error);
-      errorMsg.textContent = "Failed to load product data. Please try again.";
-      errorMsg.style.display = "block";
-    });
-}
-
-function closeModal() {
-  document.getElementById("product-modal").style.display = "none";
-  document.getElementById("product-form").reset();
-}
-document
-  .getElementById("product-form")
-  .addEventListener("submit", async (e) => {
+  async function submitProduct(e) {
     e.preventDefault();
 
-    const token = localStorage.getItem("access_token");
-    const formData = new FormData();
-
     const id = document.getElementById("product-id").value;
-    formData.append(
-      "product_name",
-      document.getElementById("product-name").value
-    );
+    const formData = new FormData();
+    formData.append("product_name", document.getElementById("product-name").value);
     formData.append("bar_code", document.getElementById("bar-code").value);
-    formData.append(
-      "item_number",
-      document.getElementById("item-number").value
-    );
+    formData.append("item_number", document.getElementById("item-number").value);
     formData.append("brand", document.getElementById("brand").value);
     formData.append("category", document.getElementById("category").value);
-    formData.append(
-      "description",
-      document.getElementById("description").value
-    );
+    formData.append("description", document.getElementById("description").value);
     formData.append("price", document.getElementById("price").value);
-    formData.append(
-      "product_order_limit",
-      document.getElementById("product-order-limit").value
-    );
-    formData.append(
-      "availability_limit",
-      document.getElementById("availability-limit").value
-    );
+    formData.append("product_order_limit", document.getElementById("product-order-limit").value);
+    formData.append("availability_limit", document.getElementById("availability-limit").value);
 
     const file = document.getElementById("image").files[0];
     if (file) formData.append("image", file);
 
-    const url =
+    const path =
       currentAction === "add"
-        ? `https://order-app.gemegypt.net/api/add_product`
+        ? "/add_product"
         : currentAction === "edit"
-        ? `https://order-app.gemegypt.net/api/product/edit/${id}`
-        : `https://order-app.gemegypt.net/api/product/copy/${id}`;
-    if (currentAction === "add") {
-      document.getElementById("image-note").style.display = "none";
-    } else {
-      document.getElementById("image-note").style.display = "block";
+        ? `/product/edit/${id}`
+        : `/product/copy/${id}`;
+
+    try {
+      const result = await Api.post(path, formData);
+      alert(result?.message || "Saved");
+      closeModal("product-modal");
+      document.getElementById("product-form").reset();
+      Api.invalidate("/products");
+      await load();
+    } catch (err) {
+      showModalError("modal-error-message", err.data?.message || err.message || "Something went wrong.");
     }
+  }
+
+  async function deleteProduct(id) {
+    if (!confirm("Delete this product?")) return;
+    try {
+      const result = await Api.del(`/product/delete/${id}`);
+      alert(result?.message || "Product deleted.");
+      Api.invalidate("/products");
+      await load();
+    } catch (err) {
+      alert(err.data?.message || err.message || "Failed to delete product.");
+    }
+  }
+
+  async function toggleVisibility(productId, currentVisibility) {
+    const next = currentVisibility === 1 ? 0 : 1;
+    if (!confirm(next === 1 ? "Show this product?" : "Hide this product?")) return;
+    try {
+      const result = await Api.post(`/products/set_visibility/${productId}/${next}`);
+      alert(result?.message || "Visibility updated.");
+      Api.invalidate("/products");
+      await load();
+    } catch (err) {
+      alert(err.data?.message || err.message || "Failed to update visibility.");
+    }
+  }
+
+  async function handleExport() {
+    const query = {};
+    if (exportType === "filtered") {
+      const f = filterValues();
+      if (f.brand) query.brand = f.brand;
+      if (f.category) query.category = f.category;
+      if (f.search) query.bar_code = f.search;
+    }
+
+    const params = new URLSearchParams(query).toString();
+    const url = `${API_BASE}/products/export${params ? `?${params}` : ""}`;
 
     try {
       const res = await fetch(url, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
       });
+      if (!res.ok) throw new Error("Export failed");
 
-      const result = await res.json();
-      const errorMsg = document.getElementById("modal-error-message");
-
-      if (res.ok) {
-        alert(result.message);
-        closeModal();
-        fetchAndRenderProducts(token);
-      } else {
-        errorMsg.textContent = result.message || "Something went wrong.";
-        errorMsg.style.display = "block";
-      }
-    } catch (error) {
-      const errorMsg = document.getElementById("modal-error-message");
-      errorMsg.textContent = "Network error. Please try again.";
-      errorMsg.style.display = "block";
-    }
-  });
-// EXPORT Logic
-function openExportDialog() {
-  document.getElementById("export-modal").style.display = "flex";
-}
-
-function closeExportDialog() {
-  document.getElementById("export-modal").style.display = "none";
-}
-let selectedExportType = "all";
-let selectedImportMode = "update";
-
-function selectExportOption(button) {
-  document
-    .querySelectorAll("#export-modal .option-btn")
-    .forEach((btn) => btn.classList.remove("selected"));
-  button.classList.add("selected");
-  selectedExportType = button.getAttribute("data-value");
-}
-
-function selectImportOption(button) {
-  document
-    .querySelectorAll("#import-modal .option-btn")
-    .forEach((btn) => btn.classList.remove("selected"));
-  button.classList.add("selected");
-  selectedImportMode = button.getAttribute("data-value");
-}
-
-async function handleExport(token) {
-  const params = new URLSearchParams();
-  if (selectedExportType === "filtered") {
-    const brand = document.getElementById("brand-filter").value;
-    const category = document.getElementById("category-filter").value;
-    const barcode = document.getElementById("barcode-search").value.trim();
-    if (brand) params.append("brand", brand);
-    if (category) params.append("category", category);
-    if (barcode) params.append("bar_code", barcode);
-  }
-
-  const url = `https://order-app.gemegypt.net/api/products/export?${params.toString()}`;
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error("Export failed");
-
-    const blob = await res.blob();
-    const filename = "products_export.xlsx";
-
-    // 1) try the normal URL API
-    const URLobj = window.URL || window.webkitURL;
-    if (URLobj && typeof URLobj.createObjectURL === "function") {
-      const dlUrl = URLobj.createObjectURL(blob);
+      const blob = await res.blob();
+      const dlUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = dlUrl;
-      a.download = filename;
+      a.download = "products_export.xlsx";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URLobj.revokeObjectURL(dlUrl);
-
-      // 2) fallback: read as data URL
-    } else {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const a = document.createElement("a");
-        a.href = reader.result; // this is a data: URI
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      };
-      reader.readAsDataURL(blob);
+      URL.revokeObjectURL(dlUrl);
+    } catch (err) {
+      console.error(err);
+      alert("Export failed.");
+    } finally {
+      closeModal("export-modal");
     }
-  } catch (err) {
-    alert("Export failed. Are you logged in as an admin?");
-    console.error(err);
-  } finally {
-    closeExportDialog();
-  }
-}
-
-// IMPORT Logic
-function openImportDialog() {
-  document.getElementById("import-modal").style.display = "flex";
-  document.getElementById("import-error-message").style.display = "none";
-}
-
-function closeImportDialog() {
-  document.getElementById("import-modal").style.display = "none";
-  document.getElementById("import-file").value = ""; // Reset file input
-}
-
-async function handleImport() {
-  const token = localStorage.getItem("access_token");
-  const xlsxInput = document.getElementById("import-file");
-  const zipInput = document.getElementById("images-zip");
-  const errorMsg = document.getElementById("import-error-message");
-
-  errorMsg.style.display = "none";
-
-  const hasXlsx = xlsxInput.files.length > 0;
-  const hasZip = zipInput.files.length > 0;
-
-  if (!hasXlsx && !hasZip) {
-    errorMsg.textContent =
-      "Please select at least one file to upload (Excel or ZIP).";
-    errorMsg.style.display = "block";
-    return;
   }
 
-  const formData = new FormData();
+  async function handleImport() {
+    const xlsxInput = document.getElementById("import-file");
+    const zipInput = document.getElementById("images-zip");
+    const hasXlsx = xlsxInput.files.length > 0;
+    const hasZip = zipInput.files.length > 0;
 
-  if (hasXlsx) {
-    formData.append("file", xlsxInput.files[0]);
-    formData.append("mode", selectedImportMode); // "update" or "add"
-  }
+    document.getElementById("import-error-message").classList.add("hidden");
 
-  if (hasZip) {
-    formData.append("images_zip", zipInput.files[0]);
-  }
+    if (!hasXlsx && !hasZip) {
+      showModalError("import-error-message", "Select at least one file (Excel or ZIP).");
+      return;
+    }
 
-  try {
-    let endpoint = "";
+    const formData = new FormData();
     if (hasXlsx) {
-      endpoint = `https://order-app.gemegypt.net/api/products/import?mode=${selectedImportMode}`;
-    } else {
-      endpoint = `https://order-app.gemegypt.net/api/products/images/import`;
+      formData.append("file", xlsxInput.files[0]);
+      formData.append("mode", importMode);
     }
+    if (hasZip) formData.append("images_zip", zipInput.files[0]);
 
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
+    const path = hasXlsx
+      ? `/products/import?mode=${encodeURIComponent(importMode)}`
+      : "/products/images/import";
 
-    const result = await res.json();
-
-    if (res.ok) {
+    try {
+      const result = await Api.post(path, formData);
       if (hasXlsx) {
-        alert(
-          `Import successful: Added ${result.added}, Updated ${result.updated}`
-        );
+        alert(`Import successful: Added ${result.added}, Updated ${result.updated}`);
       } else {
-        alert(
-          `Image import successful. Updated: ${result.updated}. Skipped: ${result.skipped.length}`
-        );
+        alert(`Images updated: ${result.updated}. Skipped: ${(result.skipped || []).length}`);
       }
-
-      closeImportDialog();
-      fetchAndRenderProducts(token);
-    } else {
-      errorMsg.textContent = result.message || "Import failed.";
-      errorMsg.style.display = "block";
+      closeModal("import-modal");
+      xlsxInput.value = "";
+      zipInput.value = "";
+      Api.invalidate("/products");
+      await load();
+    } catch (err) {
+      showModalError("import-error-message", err.data?.message || err.message || "Import failed.");
     }
-  } catch (err) {
-    errorMsg.textContent = "Network error. Please try again.";
-    errorMsg.style.display = "block";
   }
-}
-
-async function toggleVisability(productId, currentVisability) {
-  const token = localStorage.getItem("access_token");
-  const newVisability = currentVisability === 1 ? 0 : 1;
-
-  if (
-    !confirm(
-      `Are you sure you want to ${
-        newVisability === 1 ? "Show" : "Hide"
-      } this product?`
-    )
-  )
-    return;
-
-  try {
-    const res = await fetch(
-      `https://order-app.gemegypt.net/api/products/set_visibility/${productId}/${newVisability}`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    const result = await res.json();
-
-    if (res.ok) {
-      alert(result.message);
-      fetchAndRenderProducts(token);
-    } else {
-      alert(result.message || "Failed to update visibility.");
-    }
-  } catch (error) {
-    alert("Network error. Please try again.");
-    console.error(error);
-  }
-}
-
-function openAddProductDialog() {
-  currentAction = "add";
-  const modal = document.getElementById("product-modal");
-  const errorMsg = document.getElementById("modal-error-message");
-  errorMsg.style.display = "none"; // Clear any previous error
-
-  // Reset form and fields
-  const form = document.getElementById("product-form");
-  form.reset();
-
-  // Set default values for limits
-  document.getElementById("product-order-limit").value = -1;
-  document.getElementById("availability-limit").value = 100;
-
-  document.getElementById("product-id").value = "";
-  document.getElementById("image-note").style.display = "none";
-
-  modal.style.display = "flex";
-}
-
-function renderPagination(current, totalPages) {
-  const container = document.getElementById("pagination");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  const maxPagesToShow = 10;
-  let startPage = Math.max(current - Math.floor(maxPagesToShow / 2), 1);
-  let endPage = startPage + maxPagesToShow - 1;
-
-  if (endPage > totalPages) {
-    endPage = totalPages;
-    startPage = Math.max(endPage - maxPagesToShow + 1, 1);
-  }
-
-  // Previous Button
-  const prevBtn = document.createElement("button");
-  prevBtn.textContent = "◀";
-  prevBtn.disabled = current === 1;
-  prevBtn.className = "btn";
-  prevBtn.onclick = () => {
-    if (current > 1) {
-      currentPage = current - 1;
-      fetchAndRenderProducts(window.__API_TOKEN);
-    }
-  };
-  container.appendChild(prevBtn);
-
-  // Page Numbers
-  for (let i = startPage; i <= endPage; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    btn.className = i === current ? "btn selected" : "btn";
-    btn.onclick = () => {
-      currentPage = i;
-      fetchAndRenderProducts(window.__API_TOKEN);
-    };
-    container.appendChild(btn);
-  }
-
-  // Next Button
-  const nextBtn = document.createElement("button");
-  nextBtn.textContent = "▶";
-  nextBtn.disabled = current === totalPages;
-  nextBtn.className = "btn";
-  nextBtn.onclick = () => {
-    if (current < totalPages) {
-      currentPage = current + 1;
-      fetchAndRenderProducts(window.__API_TOKEN);
-    }
-  };
-  container.appendChild(nextBtn);
-}
+})();
