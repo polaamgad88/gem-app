@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Deliveries</title>
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/deliveries.css" />
+  <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
+  <script src="./scripts/utils.js" defer></script>
+  <script src="./scripts/deliveries.js" defer></script>
+  <script>
+    function applyTheme(mode) {
+      document.body.classList.toggle("dark-mode", mode === "dark");
+    }
+
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      applyTheme(localStorage.getItem("theme") || "light");
+    });
+
+    if (window.self === window.top) {
+      const page = location.pathname.split("/").pop() || "deliveries.html";
+      window.location.replace("index.html?page=" + encodeURIComponent(page));
+    }
+  </script>
+</head>
+
+<body>
+  <div class="page-head">
+    <h1 class="page-heading" id="page-heading">Deliveries</h1>
+    <a href="cars.html" id="back-to-fleet" class="back-link hidden">Back to Fleet</a>
+  </div>
+
+  <div id="summary-row" class="summary-row"></div>
+
+  <div class="filters-bar">
+    <button id="filters-toggle" type="button" class="filters-toggle" aria-expanded="false">
+      <span class="chev" aria-hidden="true"></span>
+      <span>Filters</span>
+      <span id="filters-count" class="filters-count hidden">0</span>
+    </button>
+    <div class="filters-actions">
+      <button id="expand-all-btn" type="button" class="ghost-btn">Expand all</button>
+      <button id="refresh-btn" type="button" class="ghost-btn">Refresh</button>
+    </div>
+  </div>
+
+  <div id="filters-panel" class="deliveries-toolbar hidden">
+    <div class="toolbar-field">
+      <label for="filter-status">Result</label>
+      <select id="filter-status">
+        <option value="">All</option>
+        <option value="delivered">Delivered</option>
+        <option value="partial delivered">Partial Delivered</option>
+        <option value="partial refund">Partial Refund</option>
+        <option value="refund">Refund</option>
+        <option value="delay">Delay</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field" id="driver-field">
+      <label for="filter-driver">Driver</label>
+      <select id="filter-driver">
+        <option value="">All drivers</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field">
+      <label for="filter-sap-order">Order No</label>
+      <input type="number" id="filter-sap-order" placeholder="SAP order" />
+    </div>
+
+    <div class="toolbar-field">
+      <label for="filter-date-start">From</label>
+      <input type="date" id="filter-date-start" />
+    </div>
+
+    <div class="toolbar-field">
+      <label for="filter-date-end">To</label>
+      <input type="date" id="filter-date-end" />
+    </div>
+
+    <div class="toolbar-field toolbar-field--btn">
+      <button id="reset-filters-btn" type="button">Reset</button>
+    </div>
+  </div>
+
+  <div id="delivery-list" class="delivery-list"></div>
+
+  <p id="deliveries-empty" class="empty-state hidden">No deliveries found.</p>
+  <div id="deliveries-loading" class="loading-state">
+    <div class="spinner"></div><span>Loading deliveries...</span>
+  </div>
+</body>
+
+</html>

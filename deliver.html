@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Deliver</title>
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/deliver.css" />
+  <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
+  <script src="./scripts/utils.js" defer></script>
+  <script src="./scripts/deliver.js" defer></script>
+  <script>
+    function applyTheme(mode) {
+      document.body.classList.toggle("dark-mode", mode === "dark");
+    }
+
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      applyTheme(localStorage.getItem("theme") || "light");
+    });
+
+    if (window.self === window.top) {
+      const page = location.pathname.split("/").pop() || "deliver.html";
+      window.location.replace("index.html?page=" + encodeURIComponent(page));
+    }
+  </script>
+</head>
+
+<body>
+  <main class="deliver-page">
+    <section class="deliver-container">
+
+      <section class="card my-car-card">
+        <div class="section-title">My Car</div>
+        <div id="myCarBody" class="my-car-body">
+          <div class="my-car-loading">
+            <div class="spinner"></div><span>Loading your car...</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">1 · Customer &amp; Address</div>
+
+        <div class="field-group">
+          <label for="customerSearch">Search customer</label>
+          <input type="search" id="customerSearch" class="input" placeholder="Name, code or phone..."
+            autocomplete="off" />
+        </div>
+
+        <div class="field-group">
+          <label for="customerSelect">Customer</label>
+          <select id="customerSelect" class="input">
+            <option value="">Search above, then pick a customer...</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="addressSelect">Address</label>
+          <select id="addressSelect" class="input" disabled>
+            <option value="">Select a customer first</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">2 · Order Number</div>
+
+        <div class="order-search-row">
+          <div class="field-group order-id-group">
+            <label for="orderIdInput">SAP Order Number</label>
+            <input type="text" id="orderIdInput" class="input" inputmode="numeric"
+              placeholder="Type the order number" />
+          </div>
+          <div class="search-btn-group">
+            <button type="button" id="searchOrderBtn" class="btn btn-primary">Load Order</button>
+            <button type="button" id="clearOrderBtn" class="btn btn-light hidden">Clear</button>
+          </div>
+        </div>
+
+        <div id="orderLoader" class="search-loader hidden">
+          <div class="spinner"></div><span>Loading order...</span>
+        </div>
+        <div id="orderMessage" class="search-message hidden"></div>
+      </section>
+
+      <section id="orderSection" class="card hidden">
+        <div class="section-title">3 · Order Contents</div>
+
+        <div id="reviewWarning" class="review-warning hidden">
+          <strong>Not reviewed.</strong>
+          <span id="reviewWarningText"></span>
+        </div>
+
+        <div class="order-summary">
+          <div><strong>Order:</strong> <span id="sumOrderId">-</span></div>
+          <div><strong>Status:</strong> <span id="sumStatus" class="status-badge">-</span></div>
+          <div><strong>Prepared By:</strong> <span id="sumPreparedBy">-</span></div>
+          <div><strong>Reviewed By:</strong> <span id="sumReviewedBy">-</span></div>
+          <div><strong>Reviewed At:</strong> <span id="sumReviewedAt">-</span></div>
+          <div><strong>Items:</strong> <span id="sumItems">-</span></div>
+        </div>
+
+        <div id="previousDeliveries" class="prev-deliveries hidden"></div>
+
+        <div class="table-wrapper">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>Barcode</th>
+                <th>Ordered</th>
+                <th>Delivered</th>
+                <th>Returned</th>
+              </tr>
+            </thead>
+            <tbody id="itemsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="outcomeSection" class="card hidden">
+        <div class="section-title">4 · Delivery Result</div>
+
+        <div class="field-group">
+          <label>Result</label>
+          <div class="status-choice" id="statusChoice" role="radiogroup">
+            <button type="button" class="choice-btn" data-status="delivered">Delivered</button>
+            <button type="button" class="choice-btn" data-status="partial delivered">Partial Delivered</button>
+            <button type="button" class="choice-btn" data-status="partial refund">Partial Refund</button>
+            <button type="button" class="choice-btn" data-status="refund">Refund</button>
+            <button type="button" class="choice-btn" data-status="delay">Delay</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="noteInput">Note</label>
+          <textarea id="noteInput" class="input" rows="3"
+            placeholder="Anything the office should know about this delivery"></textarea>
+        </div>
+
+        <div class="finish-row">
+          <button type="button" id="submitDeliveryBtn" class="btn btn-success" disabled>
+            Confirm Delivery
+          </button>
+        </div>
+
+        <div id="submitMessage" class="search-message hidden"></div>
+      </section>
+
+    </section>
+  </main>
+</body>
+
+</html>

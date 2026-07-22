@@ -108,6 +108,11 @@ async function performLogin(username, password) {
   localStorage.setItem("user_id", data.user_id ?? "");
   localStorage.setItem("is_admin", data.admin ?? "");
   localStorage.setItem("region", (data.region ?? "cairo").toLowerCase());
+  // Capability flags drive which nav entries and pages are available.
+  localStorage.setItem("driver", data.driver ? "1" : "0");
+  localStorage.setItem("driver_manager", data.driver_manager ? "1" : "0");
+  localStorage.setItem("storage", data.storage ? "1" : "0");
+  localStorage.setItem("storage_manager", data.storage_manager ? "1" : "0");
   window.location.href = "index.html";
 }
 

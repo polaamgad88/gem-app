@@ -3,7 +3,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!token) return;
 
   const isAdmin = localStorage.getItem("is_admin") === "1";
-  if (!isAdmin) {
+  const isDriverManager = localStorage.getItem("driver_manager") === "1";
+  if (!isAdmin && !isDriverManager) {
     alert("You do not have permission to access this page.");
     window.location.href = "users.html";
     return;
@@ -11,66 +12,79 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await loadAssignableUsers(token);
 
-  // ── Mutual-exclusion logic ──────────────────────────────────────────────
-
-  const isAdminChk       = document.getElementById("is-admin");
-  const isDriverChk      = document.getElementById("is-driver");
-  const isStorageChk     = document.getElementById("is-storage");
+  const isAdminChk        = document.getElementById("is-admin");
+  const isDriverChk       = document.getElementById("is-driver");
+  const isDriverAdminChk  = document.getElementById("is-driver-admin");
+  const isStorageChk      = document.getElementById("is-storage");
   const isStorageAdminChk = document.getElementById("is-storage-admin");
-  const assignedToSelect = document.getElementById("assigned-to");
-  const roleSelect       = document.getElementById("role");
+  const assignedToSelect  = document.getElementById("assigned-to");
+  const roleSelect        = document.getElementById("role");
 
-  // Admin ⇒ clear assigned-to
+  const capabilityBoxes = [isDriverChk, isDriverAdminChk, isStorageChk, isStorageAdminChk];
+
+  function activeCapability() {
+    if (isDriverChk.checked || isDriverAdminChk.checked) return "driver";
+    if (isStorageChk.checked || isStorageAdminChk.checked) return "storage";
+    return null;
+  }
+
+  function syncCapability(changed) {
+    if (changed && changed.checked) {
+      capabilityBoxes.filter((box) => box !== changed).forEach((box) => (box.checked = false));
+      isAdminChk.checked = false;
+    }
+
+    const capability = activeCapability();
+    const locked = capability !== null;
+
+    if (locked) {
+      roleSelect.value = capability === "driver" ? "car" : "storage";
+      assignedToSelect.value = "";
+    } else if (roleSelect.value === "car" || roleSelect.value === "storage") {
+      roleSelect.value = "";
+    }
+
+    roleSelect.disabled = locked;
+    assignedToSelect.disabled = locked;
+  }
+
+  capabilityBoxes.forEach((box) => {
+    box.addEventListener("change", () => syncCapability(box));
+  });
+
   isAdminChk.addEventListener("change", () => {
-    if (isAdminChk.checked) {
-      alert("⚠️ You are giving admin access to this user!");
-      assignedToSelect.value = "";
-    }
+    if (!isAdminChk.checked) return;
+    alert("⚠️ You are giving admin access to this user!");
+    capabilityBoxes.forEach((box) => (box.checked = false));
+    assignedToSelect.value = "";
+    syncCapability();
   });
 
-  // Driver ⇒ clear storage flags; role must be "car"
-  isDriverChk.addEventListener("change", () => {
-    if (isDriverChk.checked) {
-      isStorageChk.checked      = false;
-      isStorageAdminChk.checked = false;
-      assignedToSelect.value    = "";
-      if (roleSelect.value !== "car") {
-        roleSelect.value = "car";
-      }
-    }
-  });
-
-  // Storage ⇒ clear driver; storage_admin overrides
-  isStorageChk.addEventListener("change", () => {
-    if (isStorageChk.checked) {
-      isDriverChk.checked       = false;
-      isStorageAdminChk.checked = false; // only one active at a time
-      assignedToSelect.value    = "";
-    }
-  });
-
-  // Storage Admin ⇒ clear driver & regular storage
-  isStorageAdminChk.addEventListener("change", () => {
-    if (isStorageAdminChk.checked) {
-      isDriverChk.checked    = false;
-      isStorageChk.checked   = false;
-      assignedToSelect.value = "";
-    }
-  });
-
-  // Role = car ⇒ auto-tick driver
   roleSelect.addEventListener("change", () => {
-    if (roleSelect.value === "car") {
-      isDriverChk.checked       = true;
-      isStorageChk.checked      = false;
-      isStorageAdminChk.checked = false;
-      assignedToSelect.value    = "";
-    } else if (roleSelect.value !== "car" && isDriverChk.checked) {
-      isDriverChk.checked = false;
-    }
+    if (roleSelect.value === "car") isDriverChk.checked = true;
+    else if (roleSelect.value === "storage") isStorageChk.checked = true;
+    else capabilityBoxes.forEach((box) => (box.checked = false));
+    syncCapability();
   });
 
-  // ── Form submit ─────────────────────────────────────────────────────────
+  if (!isAdmin && isDriverManager) {
+    document.querySelector(".page-heading").textContent = "Add Driver";
+    isDriverChk.checked = true;
+    [isAdminChk, isDriverAdminChk, isStorageChk, isStorageAdminChk].forEach((chk) => {
+      chk.checked = false;
+      chk.disabled = true;
+      chk.closest(".checkbox-group").style.display = "none";
+    });
+    isDriverChk.disabled = true;
+    assignedToSelect.closest(".form-field").style.display = "none";
+  }
+
+  if (new URLSearchParams(location.search).get("driver") === "1") {
+    isDriverChk.checked = true;
+  }
+
+  syncCapability();
+
   document
     .getElementById("create-user-form")
     .addEventListener("submit", async (e) => {
@@ -78,8 +92,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       await handleCreateUser(token);
     });
 });
-
-// ── Load users for "Assigned To" dropdown ──────────────────────────────────
 
 let __ASSIGNABLE_USERS = [];
 
@@ -101,10 +113,8 @@ function renderAssignableUsers() {
   const select = document.getElementById("assigned-to");
   if (!select) return;
   const selectedRegion = (document.getElementById("region")?.value || "cairo").toLowerCase();
-  // Keep the current selection if it still applies after filtering
   const prev = select.value;
   select.innerHTML = '<option value="">None</option>';
-  // Admins span both regions; otherwise filter to same region as the new user.
   __ASSIGNABLE_USERS
     .filter((u) => u.admin === 1 || (u.region || "cairo").toLowerCase() === selectedRegion)
     .forEach((u) => {
@@ -119,8 +129,6 @@ function renderAssignableUsers() {
   }
 }
 
-// ── Create user ────────────────────────────────────────────────────────────
-
 async function handleCreateUser(token) {
   const username        = document.getElementById("username").value.trim();
   const phone           = document.getElementById("phone").value.trim();
@@ -131,37 +139,25 @@ async function handleCreateUser(token) {
   const assignedTo      = document.getElementById("assigned-to").value.trim();
   const isAdmin         = document.getElementById("is-admin").checked;
   const isDriver        = document.getElementById("is-driver").checked;
+  const isDriverAdmin   = document.getElementById("is-driver-admin").checked;
   const isStorage       = document.getElementById("is-storage").checked;
   const isStorageAdmin  = document.getElementById("is-storage-admin").checked;
   const trackLocations  = document.getElementById("is-track-locations")?.checked;
-
-  // ── Client-side validation ─────────────────────────────────────────────
 
   if (!username || !phone || !email || !role) {
     alert("Please fill in all required fields (username, phone, email, role).");
     return;
   }
 
-  if (isDriver && role !== "car") {
-    alert('Driver flag requires the role to be "Car (Driver)".');
-    return;
-  }
-
-  if (isDriver && (isStorage || isStorageAdmin)) {
+  if ((isDriver || isDriverAdmin) && (isStorage || isStorageAdmin)) {
     alert("A user cannot be both a Driver and a Storage user.");
     return;
   }
 
-  if (isStorage && isStorageAdmin) {
-    // storage_admin takes precedence — silently correct
-    // (backend handles this too, but be explicit to the user)
-    const ok = confirm(
-      "Both Storage User and Storage Admin are checked. Only Storage Admin will be applied. Continue?"
-    );
-    if (!ok) return;
+  if (isAdmin && (isDriver || isDriverAdmin || isStorage || isStorageAdmin)) {
+    alert("A system admin cannot also be a driver or a storage user.");
+    return;
   }
-
-  // ── Build form payload ─────────────────────────────────────────────────
 
   const formData = new URLSearchParams();
   formData.append("username", username);
@@ -171,19 +167,18 @@ async function handleCreateUser(token) {
   formData.append("role",     role);
   formData.append("region",   region);
 
-  // Only send assigned_to when a real user is selected
   if (assignedTo) {
     formData.append("assigned_to", assignedTo);
   }
 
-  // Flags — backend detects by KEY PRESENCE, not value
   if (isAdmin) {
     formData.append("admin", "on");
   }
-  if (isDriver) {
+  if (isDriverAdmin) {
+    formData.append("driver_admin", "on");
+  } else if (isDriver) {
     formData.append("driver", "on");
   }
-  // storage_admin takes priority over storage (backend checks storage_admin first)
   if (isStorageAdmin) {
     formData.append("storage_admin", "on");
   } else if (isStorage) {
@@ -193,10 +188,7 @@ async function handleCreateUser(token) {
     formData.append("track_locations", "on");
   }
 
-  // ── Send ───────────────────────────────────────────────────────────────
-
   try {
-    // Backend now accepts JSON or form, and returns JSON.
     const payload = Object.fromEntries(formData.entries());
     const data = await Utils.Api.postForm("/register", payload);
     alert(data?.message || "User created successfully!");

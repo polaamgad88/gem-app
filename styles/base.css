@@ -717,3 +717,80 @@ h6, .h6 { font-size: 0.875rem;}
   background: linear-gradient(180deg, #2563eb, #6366f1);
   flex-shrink: 0;
 }
+
+.region-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #fff;
+}
+
+.region-pill--cairo {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+.region-pill--alex {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+/* ── Modal dialog ─────────────────────────
+   Shared base so a page that only styles .modal-content still gets a centred,
+   fixed overlay. Without this the dialog renders in normal document flow and
+   lands at the very bottom of the page. Pages that define their own .modal
+   (dashboard, orders, products, view-customer) load after this and win. */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  padding-top: max(20px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modal.hidden,
+.hidden {
+  display: none !important;
+}
+
+/* Single-class selectors on purpose: a page stylesheet loads after base.css,
+   so its own .modal-content rules win on source order. A `.modal >` descendant
+   selector here would outrank them and clamp wider dialogs. */
+.modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--box-shadow-lg);
+}
+
+.modal-content h2 {
+  margin-bottom: 18px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0b2a59;
+}
+
+@media (max-width: 768px) {
+  .modal {
+    padding: 14px;
+  }
+
+  .modal-content {
+    padding: 20px 18px;
+    border-radius: 18px;
+  }
+}

@@ -35,115 +35,192 @@
 </head>
 
 <body>
-  <h1 class="page-heading">Users</h1>
+  <div class="page-head">
+    <h1 class="page-heading">Users</h1>
+    <button id="create-user-btn" type="button" class="primary-btn">Add User</button>
+  </div>
+
+  <div id="summary-row" class="summary-row"></div>
 
   <div class="users-toolbar">
-    <div class="toolbar-field">
-      <label for="user-search">Search by Username:</label>
-      <input type="search" id="user-search" placeholder="Type username..." />
+    <div class="toolbar-field toolbar-field--grow">
+      <label for="user-search">Search</label>
+      <input type="search" id="user-search" placeholder="Username, email or phone..." />
     </div>
 
     <div class="toolbar-field">
-      <button id="create-user-btn" type="button">
-        Add User
-      </button>
+      <label for="filter-type">Type</label>
+      <select id="filter-type">
+        <option value="">All types</option>
+        <option value="admin">System Admin</option>
+        <option value="delegate">Delegate</option>
+        <option value="supervisor">Supervisor</option>
+        <option value="manager">Manager</option>
+        <option value="financial">Financial</option>
+        <option value="driver">Driver</option>
+        <option value="driver_manager">Driver Manager</option>
+        <option value="storage">Storage User</option>
+        <option value="storage_manager">Storage Admin</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field">
+      <label for="filter-region">Region</label>
+      <select id="filter-region">
+        <option value="">All regions</option>
+        <option value="cairo">Cairo</option>
+        <option value="alex">Alex</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field">
+      <label for="filter-status">Status</label>
+      <select id="filter-status">
+        <option value="">All</option>
+        <option value="1">Active</option>
+        <option value="0">Inactive</option>
+      </select>
+    </div>
+
+    <div class="toolbar-field toolbar-field--btn">
+      <button id="reset-filters-btn" type="button">Reset</button>
     </div>
   </div>
 
-  <!-- Table View -->
-  <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Role</th>
-          <th>Region</th>
-          <th>Assigned To</th>
-          <th>Phone</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="users-table-body">
-        <!-- Filled by JS -->
-      </tbody>
-    </table>
-  </div>
+  <div id="user-list" class="user-list"></div>
 
-  <!-- Card View (Mobile) -->
-  <div class="card-view" style="display: none">
-    <div id="user-cards"></div>
+  <p id="users-empty" class="empty-state hidden">No users match these filters.</p>
+  <div id="users-loading" class="loading-state">
+    <div class="spinner"></div><span>Loading users...</span>
   </div>
 
   <div id="change-password-modal" class="modal hidden">
     <div class="modal-content">
       <h2>Change Password</h2>
+      <p class="modal-sub" id="password-user-label"></p>
       <form id="change-password-form">
         <input type="hidden" id="password-user-id" />
-        <label>New Password: <input type="password" id="new-password" required /></label>
+        <div class="form-group">
+          <label for="new-password">New Password</label>
+          <input type="password" id="new-password" required />
+        </div>
         <div class="modal-actions">
-          <button type="submit" class="btn">Change</button>
-          <button type="button" class="btn cancel-btn" onclick="closePasswordModal()">
-            Cancel
-          </button>
+          <button type="submit" class="btn primary-btn">Change</button>
+          <button type="button" class="btn cancel-btn" onclick="closePasswordModal()">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Assign Number Modal -->
   <div id="assign-number-modal" class="modal hidden">
     <div class="modal-content">
-      <span class="close" onclick="closeAssignNumberModal()">&times;</span>
       <h2>Assign Target</h2>
+      <p class="modal-sub" id="target-user-label"></p>
 
       <input type="hidden" id="assign-user-id" />
 
       <div class="form-group">
-        <label for="local-number">Cairo Target Number</label>
-        <input type="text" id="local-number" placeholder="Enter Target number" />
+        <label for="local-number">Cairo Target</label>
+        <input type="number" id="local-number" placeholder="Enter target" />
       </div>
 
       <div class="form-group">
-        <label for="abroad-number">Region Target Number</label>
-        <input type="text" id="abroad-number" placeholder="Enter Target number" />
+        <label for="abroad-number">Region Target</label>
+        <input type="number" id="abroad-number" placeholder="Enter target" />
       </div>
 
-      <button onclick="submitAssignNumber()">Save</button>
+      <div class="modal-actions">
+        <button type="button" class="btn primary-btn" onclick="submitAssignNumber()">Save</button>
+        <button type="button" class="btn cancel-btn" onclick="closeAssignNumberModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="permissions-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Permissions</h2>
+      <p class="modal-sub" id="permissions-user-label"></p>
+
+      <input type="hidden" id="permissions-user-id" />
+
+      <div class="form-group">
+        <label for="permissions-driver">Driver Level</label>
+        <select id="permissions-driver">
+          <option value="0">Not a driver</option>
+          <option value="1">Driver — delivers orders</option>
+          <option value="2">Driver Manager — manages cars &amp; drivers</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="permissions-storage">Storage Level</label>
+        <select id="permissions-storage">
+          <option value="0">Not storage</option>
+          <option value="1">Storage User — scans &amp; prepares SAP orders</option>
+          <option value="2">Storage Admin — reviews prepared orders</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn primary-btn" id="permissions-save">Save</button>
+        <button type="button" class="btn cancel-btn" onclick="closePermissionsModal()">Cancel</button>
+      </div>
     </div>
   </div>
 
   <div id="edit-user-modal" class="modal hidden">
     <div class="modal-content">
       <h2>Edit User</h2>
+      <p class="modal-sub" id="edit-user-label"></p>
       <form id="edit-user-form">
         <input type="hidden" id="edit-user-id" />
-        <label>Username: <input type="text" id="edit-username" /></label>
-        <label>Email: <input type="email" id="edit-email" /></label>
-        <label>Phone: <input type="text" id="edit-phone" /></label>
-        <label for="edit-region">Region:
-          <select id="edit-region">
-            <option value="cairo">Cairo</option>
-            <option value="alex">Alex</option>
-          </select>
-        </label>
-        <label for="edit-role">Role:
-          <select id="edit-role">
-            <option value="Delegate">Delegate</option>
-            <option value="Supervisor">Supervisor</option>
-            <option value="Manager">Manager</option>
-            <option value="Financial">Financial</option>
-          </select>
-        </label>
-        <label>Assigned To (User ID): <input type="number" id="edit-assigned-to" /></label>
-        <label><input type="checkbox" id="edit-admin" /> Admin</label>
-        <label><input type="checkbox" id="edit-driver" /> Driver</label>
-        <label><input type="checkbox" id="edit-storage" /> Storage</label>
+
+        <div class="form-group">
+          <label for="edit-username">Username</label>
+          <input type="text" id="edit-username" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-email">Email</label>
+          <input type="email" id="edit-email" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-phone">Phone</label>
+          <input type="text" id="edit-phone" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-region">Region</label>
+            <select id="edit-region">
+              <option value="cairo">Cairo</option>
+              <option value="alex">Alex</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-role">Role</label>
+            <select id="edit-role">
+              <option value="">No role</option>
+              <option value="Delegate">Delegate</option>
+              <option value="Supervisor">Supervisor</option>
+              <option value="Manager">Manager</option>
+              <option value="Financial">Financial</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-assigned-to">Assigned To (User ID)</label>
+          <input type="number" id="edit-assigned-to" />
+        </div>
+
+        <label class="check-row"><input type="checkbox" id="edit-admin" /> System Admin</label>
 
         <div class="modal-actions">
-          <button type="submit" class="btn">Save</button>
-          <button type="button" class="btn cancel-btn" onclick="closeEditModal()">
-            Cancel
-          </button>
+          <button type="submit" class="btn primary-btn">Save</button>
+          <button type="button" class="btn cancel-btn" onclick="closeEditModal()">Cancel</button>
         </div>
       </form>
     </div>

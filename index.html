@@ -37,51 +37,76 @@
     <div class="drawer-brand">
       <img src="./assets/GEM Icon.jpg" alt="GEM" class="drawer-logo" />
       <p class="drawer-welcome">Welcome, <strong id="username"></strong></p>
-      <span class="drawer-version">v3.7.2 Beta</span>
+      <span class="drawer-version">v3.8.0 Beta</span>
     </div>
 
     <nav id="nav" class="drawer-nav">
-      <a href="./dashboard.html" data-page="dashboard.html">
-        <i class="fa-solid fa-chart-pie"></i><span>Overview</span>
-      </a>
-      <a href="./reports.html" data-page="reports.html">
-        <i class="fa-solid fa-chart-line"></i><span>Reports</span>
-      </a>
-      <a href="./orders.html" data-page="orders.html">
-        <i class="fa-solid fa-list"></i><span>View Orders</span>
-      </a>
       <a href="./create-order.html" data-page="create-order.html" class="nav-cta">
-        <i class="fa-solid fa-plus"></i><span>Add New Order</span>
+        <i class="fa-solid fa-plus fa-fw"></i><span>Add New Order</span>
       </a>
-      <a href="./customers.html" data-page="customers.html">
-        <i class="fa-solid fa-users"></i><span>Manage Customers</span>
-      </a>
-      <a href="./users.html" data-page="users.html">
-        <i class="fa-solid fa-user-gear"></i><span>Manage Users</span>
-      </a>
-      <a href="./products.html" data-page="products.html" id="products_page" style="display:none">
-        <i class="fa-solid fa-box"></i><span>Manage Products</span>
-      </a>
-      <a href="./customer-visit.html" data-page="customer-visit.html">
-        <i class="fa-solid fa-location-dot"></i><span>Customer Visit</span>
-      </a>
-      <a href="./scan-items.html" data-page="scan-items.html">
-        <i class="fa-solid fa-barcode"></i><span>Scan Items</span>
-      </a>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Overview</span>
+        <a href="./dashboard.html" data-page="dashboard.html">
+          <i class="fa-solid fa-chart-pie fa-fw"></i><span>Dashboard</span>
+        </a>
+        <a href="./reports.html" data-page="reports.html">
+          <i class="fa-solid fa-chart-line fa-fw"></i><span>Reports</span>
+        </a>
+        <a href="./orders.html" data-page="orders.html">
+          <i class="fa-solid fa-list fa-fw"></i><span>View Orders</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Management</span>
+        <a href="./customers.html" data-page="customers.html">
+          <i class="fa-solid fa-users fa-fw"></i><span>Customers</span>
+        </a>
+        <a href="./users.html" data-page="users.html">
+          <i class="fa-solid fa-user-gear fa-fw"></i><span>Users</span>
+        </a>
+        <a href="./products.html" data-page="products.html" id="products_page" style="display:none">
+          <i class="fa-solid fa-box fa-fw"></i><span>Products</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Visits</span>
+        <a href="./customer-visit.html" data-page="customer-visit.html">
+          <i class="fa-solid fa-location-dot fa-fw"></i><span>Customer Visit</span>
+        </a>
+        <a href="./scan-items.html" data-page="scan-items.html">
+          <i class="fa-solid fa-barcode fa-fw"></i><span>Scan Items</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">logistics</span>
+        <a href="./deliver.html" data-page="deliver.html" id="deliver_page" style="display:none">
+          <i class="fa-solid fa-truck-fast fa-fw"></i><span>Deliver Order</span>
+        </a>
+        <a href="./cars.html" data-page="cars.html" id="cars_page" style="display:none">
+          <i class="fa-solid fa-car fa-fw"></i><span>Cars &amp; Drivers</span>
+        </a>
+        <a href="./deliveries.html" data-page="deliveries.html" id="deliveries_page" style="display:none">
+          <i class="fa-solid fa-clipboard-check fa-fw"></i><span>Deliveries</span>
+        </a>
+      </div>
     </nav>
   </aside>
 
   <main class="stage">
     <header class="bar">
       <button id="hamburger" class="bar-hamburger" aria-label="Menu">
-        <i class="fa-solid fa-bars"></i>
+        <i class="fa-solid fa-bars fa-fw"></i>
       </button>
       <span id="page-title" class="bar-title">Dashboard</span>
       <span id="region-badge" class="region-badge" style="display:none"></span>
       <div class="bar-right">
         <button id="theme-toggle" class="bar-btn">🌙 Dark</button>
         <a href="#" id="logout-btn" class="bar-btn bar-btn-logout">
-          <i class="fa-solid fa-right-from-bracket"></i>
+          <i class="fa-solid fa-right-from-bracket fa-fw"></i>
           <span class="logout-label">Logout</span>
         </a>
       </div>

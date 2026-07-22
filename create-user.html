@@ -67,6 +67,7 @@
         <option value="Manager">Manager</option>
         <option value="Financial">Financial</option>
         <option value="car">Car (Driver)</option>
+        <option value="storage">Storage</option>
       </select>
     </div>
 
@@ -97,25 +98,26 @@
         <input type="checkbox" id="is-driver" name="driver" />
         <label for="is-driver">Driver</label>
       </div>
-      <p class="mutex-note" id="driver-note">Requires role "Car (Driver)". Cannot combine with Storage.</p>
+
+      <div class="checkbox-group" id="driver-admin-group">
+        <input type="checkbox" id="is-driver-admin" name="driver_admin" />
+        <label for="is-driver-admin">Driver Manager</label>
+      </div>
 
       <div class="checkbox-group" id="storage-group">
         <input type="checkbox" id="is-storage" name="storage" />
         <label for="is-storage">Storage User</label>
       </div>
-      <p class="mutex-note">Can scan and prepare SAP orders. Cannot combine with Driver.</p>
 
       <div class="checkbox-group" id="storage-admin-group">
         <input type="checkbox" id="is-storage-admin" name="storage_admin" />
         <label for="is-storage-admin">Storage Admin</label>
       </div>
-      <p class="mutex-note">Can review/confirm prepared SAP orders. Overrides "Storage User" if both checked.</p>
 
       <div class="checkbox-group" id="track-locations-group">
         <input type="checkbox" id="is-track-locations" name="track_locations" />
         <label for="is-track-locations">Track Locations</label>
       </div>
-      <p class="mutex-note">Records this user's GPS locations. Grants visibility of all users.</p>
     </fieldset>
 
     <button type="submit" class="btn btn-add">

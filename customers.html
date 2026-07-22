@@ -35,37 +35,54 @@
 </head>
 
 <body>
-  <h2 class="page-heading">Customers</h2>
-
-  <div class="search-actions-row">
-    <input id="customer-search" type="search" class="input-full" placeholder="Search by name or code..." />
-    <button id="add-customer-btn" class="btn btn-add full-width">
-      Add Customer
+  <div class="page-head">
+    <h2 class="page-heading">Customers</h2>
+    <button id="add-customer-btn" type="button" class="primary-btn">
+      <i>+</i><span>Add Customer</span>
     </button>
   </div>
 
-  <!-- Table View -->
+  <div class="customers-toolbar">
+    <div class="toolbar-field toolbar-field--grow">
+      <label for="customer-search">Search</label>
+      <input type="search" id="customer-search" placeholder="Name, code or phone..." />
+    </div>
+
+    <div class="toolbar-field toolbar-field--narrow">
+      <label for="page-size">Per page</label>
+      <select id="page-size">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </div>
+
+  <p id="result-meta" class="result-meta"></p>
+
   <div class="table-responsive">
     <table class="table">
       <thead>
         <tr>
-          <th>Code</th>
-          <th>Customer Name</th>
-          <th>Phone</th>
-          <th>Action</th>
+          <th class="col-code">Code</th>
+          <th>Customer</th>
+          <th class="col-phone">Phone</th>
+          <th class="col-reps">Assigned To</th>
+          <th class="col-action"></th>
         </tr>
       </thead>
-      <tbody id="customersTable">
-        <!-- Table content by JS -->
-      </tbody>
+      <tbody id="customersTable"></tbody>
     </table>
   </div>
 
-  <!-- Card View (Mobile) -->
   <div class="card-view" style="display: none">
-    <div id="customerCards">
-      <!-- Card content by JS -->
-    </div>
+    <div id="customerCards"></div>
+  </div>
+
+  <p id="customers-empty" class="empty-state hidden">No customers found.</p>
+  <div id="customers-loading" class="loading-state">
+    <div class="spinner"></div><span>Loading customers...</span>
   </div>
 </body>
 

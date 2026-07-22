@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", async function () {
-  // Check authentication
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
 
@@ -15,8 +14,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       usernameElement.textContent = username;
     }
 
-    setupAdminButtons(admin, role);
     await verifyToken(token);
+    setupAdminButtons(localStorage.getItem("is_admin"), localStorage.getItem("user_role"));
   } catch (err) {
     console.error("Dashboard initialization error:", err);
     window.location.href = "login.html";
@@ -24,54 +23,93 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   setupLogoutButton();
 });
-// Helper function to set up admin buttons
 function setupAdminButtons(admin, role) {
-  const username = localStorage.getItem("username");
-  if (admin == 1 || role !== "Delegate") {
-    const manageUserBtn = document.querySelector(".manage-user");
-    if (manageUserBtn) manageUserBtn.style.display = "block";
+  const isAdmin = admin == 1;
+  const show = (el) => {
+    if (el) el.style.display = "block";
+  };
+
+  if (isAdmin || role !== "Delegate") {
+    show(document.querySelector(".manage-user"));
   }
-  if (admin == 1 || role !== "Delegate") {
-    const manageUserBtn = document.querySelector(".manage-user");
-    if (manageUserBtn) manageUserBtn.style.display = "block";
+  if (isAdmin) {
+    show(document.querySelector(".manage-products"));
+    showNavLink(document.getElementById("products_page"));
   }
-  if (admin == 1) {
-    const productsBtn = document.querySelector(".manage-products");
-    if (productsBtn) productsBtn.style.display = "block";
-  }
-  if (admin == 1) {
-    const productsBtn = document.getElementById("products_page");
-    if (productsBtn) productsBtn.style.display = "block";
-  }
+
+  setupFleetNav(isAdmin);
 }
 
-// Helper function to verify token
-async function verifyToken(token) {
-  const response = await fetch(
-    "https://order-app.gemegypt.net/api/checklogin",
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+// Nav links are flex rows. Showing one with display:block would drop the icon
+// gap and break the alignment of the whole list.
+function showNavLink(el) {
+  if (el) el.style.display = "flex";
+}
+
+function setupFleetNav(isAdmin) {
+  const isDriver = localStorage.getItem("driver") === "1";
+  const isDriverManager = localStorage.getItem("driver_manager") === "1";
+  const isStorageManager = localStorage.getItem("storage_manager") === "1";
+
+  const deliverLink = document.getElementById("deliver_page");
+  const carsLink = document.getElementById("cars_page");
+  const deliveriesLink = document.getElementById("deliveries_page");
+
+  if (isDriver || isAdmin) showNavLink(deliverLink);
+  if (isDriverManager || isAdmin) showNavLink(carsLink);
+  if (isDriver || isDriverManager || isStorageManager || isAdmin) {
+    showNavLink(deliveriesLink);
+  }
+
+  if (isDriver && !isDriverManager && !isAdmin) {
+    const allowed = new Set(["deliver.html", "deliveries.html"]);
+    document.querySelectorAll("#nav a").forEach((link) => {
+      if (allowed.has(link.dataset.page)) showNavLink(link);
+      else link.style.display = "none";
+    });
+
+    const frame = document.getElementById("main-frame");
+    const params = new URLSearchParams(location.search);
+    if (frame && !params.get("page")) {
+      frame.src = "./deliver.html";
+      const title = document.getElementById("page-title");
+      if (title) title.textContent = "Deliver Order";
     }
-  );
-
-  if (response.status !== 200) {
-    // Token is invalid, revoked, or expired
-    throw new Error("Invalid token");
   }
+
+  syncNavGroups();
 }
 
-// Helper function to set up logout button
+// Hide a section header once every link under it is hidden.
+function syncNavGroups() {
+  let first = true;
+  document.querySelectorAll("#nav .nav-group").forEach((group) => {
+    const visible = Array.from(group.querySelectorAll("a")).some(
+      (link) => link.style.display !== "none"
+    );
+    group.style.display = visible ? "flex" : "none";
+    group.classList.toggle("nav-group--first", visible && first);
+    if (visible) first = false;
+  });
+}
+
+async function verifyToken(token) {
+  const data = await Utils.Api.get("/checklogin", { retries: 0, timeout: 10000 });
+
+  localStorage.setItem("is_admin", data.admin ? "1" : "0");
+  localStorage.setItem("user_role", data.role ?? "");
+  localStorage.setItem("driver", data.driver ? "1" : "0");
+  localStorage.setItem("driver_manager", data.driver_manager ? "1" : "0");
+  localStorage.setItem("storage", data.storage ? "1" : "0");
+  localStorage.setItem("storage_manager", data.storage_manager ? "1" : "0");
+  if (data.region) localStorage.setItem("region", String(data.region).toLowerCase());
+}
+
 function setupLogoutButton() {
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-      // Best-effort server revoke; local session is always cleared and the
-      // user is redirected regardless of the server response (the /logout
-      // call can fail/return non-2xx without meaning the user stays logged in).
       try {
         await Utils.Auth.logout();
       } catch (err) {

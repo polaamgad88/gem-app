@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Fleet</title>
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/cars.css" />
+  <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
+  <script src="./scripts/utils.js" defer></script>
+  <script src="./scripts/cars.js" defer></script>
+  <script>
+    function applyTheme(mode) {
+      document.body.classList.toggle("dark-mode", mode === "dark");
+    }
+
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.theme) {
+        applyTheme(event.data.theme);
+        localStorage.setItem("theme", event.data.theme);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      applyTheme(localStorage.getItem("theme") || "light");
+    });
+
+    if (window.self === window.top) {
+      const page = location.pathname.split("/").pop() || "cars.html";
+      window.location.replace("index.html?page=" + encodeURIComponent(page));
+    }
+  </script>
+</head>
+
+<body>
+  <h1 class="page-heading">Fleet</h1>
+
+  <div class="tab-switch" role="tablist">
+    <button type="button" class="tab-btn active" data-tab="cars">Cars</button>
+    <button type="button" class="tab-btn" data-tab="drivers">Drivers</button>
+  </div>
+
+  <section id="tab-cars" class="tab-panel">
+    <div class="fleet-toolbar">
+      <div class="toolbar-field">
+        <label for="car-search">Search by Plate / Brand:</label>
+        <input type="search" id="car-search" placeholder="Type plate or brand..." />
+      </div>
+
+      <div class="toolbar-field toolbar-field--narrow">
+        <label for="car-filter-assigned">Assignment:</label>
+        <select id="car-filter-assigned">
+          <option value="">All</option>
+          <option value="1">Assigned</option>
+          <option value="0">Unassigned</option>
+        </select>
+      </div>
+
+      <div class="toolbar-field toolbar-field--narrow">
+        <label for="car-filter-active">Status:</label>
+        <select id="car-filter-active">
+          <option value="1">Active</option>
+          <option value="0">Inactive</option>
+          <option value="">All</option>
+        </select>
+      </div>
+
+      <div class="toolbar-field toolbar-field--btn">
+        <button id="add-car-btn" type="button">Add Car</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Plate</th>
+            <th>Brand / Model</th>
+            <th>Details</th>
+            <th>Region</th>
+            <th>Assigned Driver</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cars-table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card-view" style="display: none">
+      <div id="car-cards"></div>
+    </div>
+
+    <p id="cars-empty" class="empty-state hidden">No cars found.</p>
+  </section>
+
+  <section id="tab-drivers" class="tab-panel hidden">
+    <div class="fleet-toolbar">
+      <div class="toolbar-field">
+        <label for="driver-search">Search by Username / Phone:</label>
+        <input type="search" id="driver-search" placeholder="Type username or phone..." />
+      </div>
+
+      <div class="toolbar-field toolbar-field--narrow">
+        <label for="driver-filter-active">Status:</label>
+        <select id="driver-filter-active">
+          <option value="">All</option>
+          <option value="1">Active</option>
+          <option value="0">Stopped</option>
+        </select>
+      </div>
+
+      <div class="toolbar-field toolbar-field--btn">
+        <button id="add-driver-btn" type="button">Add Driver</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Phone</th>
+            <th>Region</th>
+            <th>Car</th>
+            <th>Deliveries</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="drivers-table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card-view" style="display: none">
+      <div id="driver-cards"></div>
+    </div>
+
+    <p id="drivers-empty" class="empty-state hidden">No drivers found.</p>
+  </section>
+
+  <div id="car-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="car-modal-title">Add Car</h2>
+      <form id="car-form">
+        <input type="hidden" id="car-id" />
+
+        <div class="form-group">
+          <label for="car-plate">Plate <span class="req">*</span></label>
+          <input type="text" id="car-plate" required placeholder="e.g. ABC 1234" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="car-brand">Brand</label>
+            <input type="text" id="car-brand" placeholder="e.g. Toyota" />
+          </div>
+          <div class="form-group">
+            <label for="car-model">Model</label>
+            <input type="text" id="car-model" placeholder="e.g. Hiace" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="car-year">Year</label>
+            <input type="number" id="car-year" min="1950" max="2100" placeholder="e.g. 2022" />
+          </div>
+          <div class="form-group">
+            <label for="car-region">Region</label>
+            <select id="car-region">
+              <option value="cairo">Cairo</option>
+              <option value="alex">Alex</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="car-notes">Notes</label>
+          <textarea id="car-notes" rows="2" placeholder="Anything worth remembering about this car"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn cancel-btn" data-close="car-modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="assign-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Assign Car</h2>
+      <p class="modal-sub" id="assign-car-label"></p>
+      <form id="assign-form">
+        <input type="hidden" id="assign-car-id" />
+        <div class="form-group">
+          <label for="assign-driver">Driver</label>
+          <select id="assign-driver" required>
+            <option value="">Select a driver...</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">Assign</button>
+          <button type="button" class="btn cancel-btn" data-close="assign-modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

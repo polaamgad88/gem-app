@@ -1,43 +1,31 @@
-/* Users page — perf refactored. Preserves global functions used by inline onclick handlers. */
-
 (function () {
-  const { Api, Auth, UI, Async, DOM } = window.Utils;
+  const { Api, Auth, Async, DOM } = window.Utils;
   const esc = DOM.escapeHtml;
 
   let allUsers = [];
+  let isAdmin = false;
 
   document.addEventListener("DOMContentLoaded", async () => {
     const token = await Auth.requireAuth();
     if (!token) return;
 
-    const isAdmin = localStorage.getItem("is_admin") === "1";
+    isAdmin = localStorage.getItem("is_admin") === "1";
+
     const createBtn = document.getElementById("create-user-btn");
     if (createBtn) {
-      createBtn.style.display = isAdmin ? "inline-block" : "none";
-      if (isAdmin) {
-        createBtn.addEventListener("click", () => {
-          window.location.href = "create-user.html";
-        });
-      }
+      createBtn.style.display = isAdmin ? "inline-flex" : "none";
+      createBtn.addEventListener("click", () => {
+        window.location.href = "create-user.html";
+      });
     }
+
+    wireFilters();
+    wireList();
+    wireModalForms();
 
     await loadUsers();
-
-    const searchInput = document.getElementById("user-search");
-    if (searchInput) {
-      const onSearch = Async.debounce((value) => filterUsers(value.toLowerCase()), 200);
-      searchInput.addEventListener("input", (e) => onSearch(e.target.value));
-    }
-
-    toggleView();
-    window.addEventListener("resize", Async.throttle(toggleView, 150));
-
-    wireModalForms();
-    wireDropdownDelegation();
   });
 
-  // Re-fetch when the page is restored from the back-forward cache (bfcache).
-  // Without this, hitting "back" shows a stale DOM and requires a manual refresh.
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
       Api.invalidate("/users");
@@ -46,192 +34,250 @@
   });
 
   async function loadUsers() {
+    const loading = document.getElementById("users-loading");
+    loading?.classList.remove("hidden");
     try {
       const data = await Api.get("/users");
       allUsers = data.users || [];
-      renderUsers(allUsers);
+      applyFilters();
     } catch (err) {
       console.error("Failed to load users:", err);
       alert(err.data?.message || "Could not load users.");
+    } finally {
+      loading?.classList.add("hidden");
     }
   }
 
-  function toggleView() {
-    const cardView = document.querySelector(".card-view");
-    const table = document.querySelector("table");
-    if (!cardView || !table) return;
-    if (window.innerWidth <= 768) {
-      cardView.style.display = "block";
-      table.style.display = "none";
-    } else {
-      cardView.style.display = "none";
-      table.style.display = "table";
+  function wireFilters() {
+    const search = document.getElementById("user-search");
+    if (search) {
+      const onSearch = Async.debounce(applyFilters, 200);
+      search.addEventListener("input", onSearch);
     }
+    ["filter-type", "filter-region", "filter-status"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("change", applyFilters);
+    });
+    document.getElementById("reset-filters-btn")?.addEventListener("click", () => {
+      ["user-search", "filter-type", "filter-region", "filter-status"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      applyFilters();
+    });
   }
 
-  function renderUsers(users) {
-    const isAdmin = localStorage.getItem("is_admin") === "1";
-    const tableBody = document.getElementById("users-table-body");
-    const cardContainer = document.getElementById("user-cards");
-    if (!tableBody || !cardContainer) return;
+  function userType(user) {
+    if (user.admin) return "admin";
+    if (Number(user.driver) === 2) return "driver_manager";
+    if (Number(user.driver) === 1) return "driver";
+    if (Number(user.storage) === 2) return "storage_manager";
+    if (Number(user.storage) === 1) return "storage";
+    return String(user.role || "").toLowerCase();
+  }
 
-    const tbodyFrag = document.createDocumentFragment();
-    const cardsFrag = document.createDocumentFragment();
+  const TYPE_LABEL = {
+    admin: "System Admin",
+    driver_manager: "Driver Manager",
+    driver: "Driver",
+    storage_manager: "Storage Admin",
+    storage: "Storage User",
+  };
 
-    const total = users.length;
-    users.forEach((user, idx) => {
-      const isUserAdmin = !!user.admin;
-      const isActive = String(user.status) === "1";
-      const dropPos = total - idx <= 2 ? "look_up" : "look_down";
+  function typeLabel(user) {
+    const type = userType(user);
+    return TYPE_LABEL[type] || user.role || "No role";
+  }
 
-      let userClass = "";
-      let badgeLabel = "";
-      if (!isActive) {
-        userClass = "inactive-badge";
-        badgeLabel = " (Inactive)";
-      } else if (isUserAdmin) {
-        userClass = "admin-badge";
-        badgeLabel = " (Admin)";
+  function isCapabilityUser(user) {
+    return Number(user.driver) > 0 || Number(user.storage) > 0;
+  }
+
+  function applyFilters() {
+    const term = (document.getElementById("user-search")?.value || "").trim().toLowerCase();
+    const type = document.getElementById("filter-type")?.value || "";
+    const region = document.getElementById("filter-region")?.value || "";
+    const status = document.getElementById("filter-status")?.value || "";
+
+    const filtered = allUsers.filter((u) => {
+      if (term) {
+        const haystack = [u.username, u.email, u.phone, u.user_id]
+          .map((v) => String(v || "").toLowerCase())
+          .join(" ");
+        if (!haystack.includes(term)) return false;
       }
-
-      const usernameDisplay = `<span class="${userClass}">${esc(user.username)} - ${esc(user.user_id)}${esc(badgeLabel)}</span>`;
-      const menuHtml = buildMenu(user.user_id, isActive, isAdmin, dropPos);
-
-      const regionVal = (user.region || "cairo").toLowerCase();
-      const regionPill = `<span class="region-pill region-pill--${regionVal}">${regionVal.toUpperCase()}</span>`;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${usernameDisplay}</td>
-        <td>${esc(user.role || "")}</td>
-        <td>${regionPill}</td>
-        <td>${esc(user.assigned_to_username || "—")} - ${esc(user.assigned_to_user_id || "—")}</td>
-        <td>${esc(user.phone || "—")}</td>
-        <td>
-          <div class="action-container">
-            <button class="action-btn" data-dropdown-id="user-dropdown-${user.user_id}">⋮</button>
-            ${menuHtml}
-          </div>
-        </td>`;
-      tbodyFrag.appendChild(tr);
-
-      const card = document.createElement("div");
-      card.className = "user-card";
-      card.innerHTML = `
-        <p><strong>Username:</strong> ${usernameDisplay}</p>
-        <p><strong>Role:</strong> ${esc(user.role || "")}</p>
-        <p><strong>Region:</strong> ${regionPill}</p>
-        <p><strong>Assigned To:</strong> ${esc(user.assigned_to_username || "—")} - ${esc(user.assigned_to_user_id || "—")}</p>
-        <p><strong>Phone:</strong> ${esc(user.phone || "—")}</p>
-        <div class="card-actions">
-          <div class="row-actions">
-            <button class="btn view-btn" data-action="edit" data-id="${user.user_id}">Edit</button>
-            ${isAdmin ? `<button class="btn delete-btn" data-action="delete" data-id="${user.user_id}">Delete</button>` : ""}
-          </div>
-          <div class="row-actions">
-            <button class="btn" data-action="password" data-id="${user.user_id}">Change Password</button>
-            <button class="btn toggle-btn" data-action="toggle" data-id="${user.user_id}" data-status="${isActive ? 0 : 1}">
-              ${isActive ? "Deactivate" : "Activate"}
-            </button>
-          </div>
-        </div>`;
-      cardsFrag.appendChild(card);
+      if (type && userType(u) !== type) return false;
+      if (region && (u.region || "cairo").toLowerCase() !== region) return false;
+      if (status && String(u.status) !== status) return false;
+      return true;
     });
 
-    tableBody.replaceChildren(tbodyFrag);
-    cardContainer.replaceChildren(cardsFrag);
+    render(filtered);
   }
 
-  function buildMenu(userId, isActive, isAdmin, posClass) {
+  function render(users) {
+    const list = document.getElementById("user-list");
+    const empty = document.getElementById("users-empty");
+    if (!list) return;
+
+    empty?.classList.toggle("hidden", users.length > 0);
+    renderSummary(allUsers);
+
+    const frag = document.createDocumentFragment();
+    users.forEach((u) => frag.appendChild(buildCard(u)));
+    list.replaceChildren(frag);
+  }
+
+  function renderSummary(users) {
+    const box = document.getElementById("summary-row");
+    if (!box) return;
+    if (!users.length) {
+      box.innerHTML = "";
+      return;
+    }
+    const count = (fn) => users.filter(fn).length;
+    const tiles = [
+      ["Total", users.length, ""],
+      ["Active", count((u) => String(u.status) === "1"), "ok"],
+      ["Inactive", count((u) => String(u.status) !== "1"), "off"],
+      ["Admins", count((u) => !!u.admin), ""],
+      ["Drivers", count((u) => Number(u.driver) > 0), ""],
+      ["Storage", count((u) => Number(u.storage) > 0), ""],
+    ];
+    box.innerHTML = tiles
+      .map(
+        ([label, value, mod]) =>
+          `<div class="stat-tile${mod ? ` stat-tile--${mod}` : ""}"><span>${value}</span><small>${label}</small></div>`
+      )
+      .join("");
+  }
+
+  function buildCard(user) {
+    const type = userType(user);
+    const active = String(user.status) === "1";
+    const region = (user.region || "cairo").toLowerCase();
+    const initial = (user.username || "?").trim().charAt(0).toUpperCase();
+
+    const card = document.createElement("article");
+    card.className = `u-card u-card--${type.replace(/\s+/g, "-")}${active ? "" : " u-card--off"}`;
+    card.dataset.userId = user.user_id;
+
+    card.innerHTML = `
+      <button type="button" class="u-head" aria-expanded="false">
+        <span class="chev" aria-hidden="true"></span>
+        <span class="avatar">${esc(initial)}</span>
+        <span class="u-head-main">
+          <span class="u-name">
+            ${esc(user.username || "—")}
+            <span class="u-id">#${esc(user.user_id)}</span>
+            ${active ? "" : `<span class="status-pill status-pill--off">Inactive</span>`}
+          </span>
+          <span class="u-meta">
+            <span class="type-badge type-badge--${esc(type.replace(/\s+/g, "-"))}">${esc(typeLabel(user))}</span>
+            <span class="region-pill region-pill--${esc(region)}">${esc(region.toUpperCase())}</span>
+            ${
+              user.assigned_to_username
+                ? `<span class="muted">reports to ${esc(user.assigned_to_username)}</span>`
+                : ""
+            }
+          </span>
+        </span>
+        <span class="u-phone">${esc(user.phone || "—")}</span>
+      </button>
+      <div class="u-body"><div class="u-body-inner"></div></div>`;
+
+    return card;
+  }
+
+  function detailHtml(user) {
+    const levelName = { 0: "—", 1: "User", 2: "Manager" };
+    const facts = [
+      ["Email", esc(user.email || "—")],
+      ["Phone", esc(user.phone || "—")],
+      ["Role", esc(user.role || "—")],
+      ["Region", esc((user.region || "cairo").toUpperCase())],
+      [
+        "Manager",
+        user.assigned_to_user_id
+          ? `${esc(user.assigned_to_username || "—")} <span class="muted">#${esc(user.assigned_to_user_id)}</span>`
+          : "—",
+      ],
+      ["System admin", user.admin ? "Yes" : "No"],
+      ["Driver", esc(levelName[Number(user.driver) || 0])],
+      ["Storage", esc(levelName[Number(user.storage) || 0])],
+      ["Cairo target", esc(user.cairo_target ?? 0)],
+      ["Region target", esc(user.region_target ?? 0)],
+      ["Location tracking", Number(user.track_locations) ? "On" : "Off"],
+      ["Status", String(user.status) === "1" ? "Active" : "Inactive"],
+    ];
+
+    const active = String(user.status) === "1";
+    const id = user.user_id;
+    const actions = [
+      `<button class="btn" data-action="edit" data-id="${id}">Edit</button>`,
+      `<button class="btn" data-action="password" data-id="${id}">Change Password</button>`,
+      `<button class="btn" data-action="assign-target" data-id="${id}">Assign Target</button>`,
+    ];
+    if (isAdmin) {
+      actions.push(`<button class="btn" data-action="permissions" data-id="${id}">Permissions</button>`);
+    }
+    actions.push(
+      `<button class="btn toggle-btn" data-action="toggle" data-id="${id}" data-status="${active ? 0 : 1}">${
+        active ? "Deactivate" : "Activate"
+      }</button>`
+    );
+    if (isAdmin) {
+      actions.push(`<button class="btn delete-btn" data-action="delete" data-id="${id}">Delete</button>`);
+    }
+
     return `
-      <div class="dropdown-menu ${posClass}" id="user-dropdown-${userId}">
-        <button data-action="edit" data-id="${userId}">Edit</button>
-        <button data-action="password" data-id="${userId}">Change Password</button>
-        <button data-action="assign-target" data-id="${userId}">Assign Target</button>
-        <button data-action="toggle" data-id="${userId}" data-status="${isActive ? 0 : 1}">
-          ${isActive ? "Deactivate" : "Activate"}
-        </button>
-        ${isAdmin ? `<button class="delete-btn" data-action="delete" data-id="${userId}">Delete</button>` : ""}
-      </div>`;
+      <div class="detail-grid">
+        ${facts.map(([k, v]) => `<div><small>${k}</small><span>${v}</span></div>`).join("")}
+      </div>
+      <div class="row-actions">${actions.join("")}</div>`;
   }
 
-  // ── Single body-level delegation for dropdown + menu actions ─────────────
-  function wireDropdownDelegation() {
-    document.body.addEventListener("click", (e) => {
+  function setOpen(card, open) {
+    const head = card.querySelector(".u-head");
+    const inner = card.querySelector(".u-body-inner");
+    if (open && !inner.dataset.filled) {
+      const user = allUsers.find((u) => String(u.user_id) === card.dataset.userId);
+      if (user) {
+        inner.innerHTML = detailHtml(user);
+        inner.dataset.filled = "1";
+      }
+    }
+    card.classList.toggle("open", open);
+    head.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function wireList() {
+    const list = document.getElementById("user-list");
+    list.addEventListener("click", (e) => {
       const actionBtn = e.target.closest("[data-action][data-id]");
-      const openTrigger = e.target.closest("[data-dropdown-id]");
-
-      // Close all open menus when clicking outside any action
-      if (!actionBtn && !openTrigger) {
-        document.querySelectorAll(".dropdown-menu").forEach((m) => (m.style.display = "none"));
-        return;
-      }
-
-      if (openTrigger) {
-        e.stopPropagation();
-        document.querySelectorAll(".dropdown-menu").forEach((m) => (m.style.display = "none"));
-        const menu = document.getElementById(openTrigger.dataset.dropdownId);
-        if (menu) menu.style.display = "block";
-        return;
-      }
-
       if (actionBtn) {
-        const action = actionBtn.dataset.action;
+        e.stopPropagation();
         const id = parseInt(actionBtn.dataset.id, 10);
-        document.querySelectorAll(".dropdown-menu").forEach((m) => (m.style.display = "none"));
+        const action = actionBtn.dataset.action;
         if (action === "edit") openEditModal(id);
         else if (action === "password") openPasswordModal(id);
         else if (action === "assign-target") openAssignNumberModal(id);
+        else if (action === "permissions") openPermissionsModal(id);
         else if (action === "toggle") toggleUserStatus(id, parseInt(actionBtn.dataset.status, 10));
         else if (action === "delete") deleteUser(id);
+        return;
       }
+      const head = e.target.closest(".u-head");
+      if (!head) return;
+      const card = head.closest(".u-card");
+      setOpen(card, !card.classList.contains("open"));
     });
   }
 
-  // ── Modal wiring ────────────────────────────────────────────────────────
-
   function wireModalForms() {
-    const editForm = document.getElementById("edit-user-form");
-    editForm?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const userId = document.getElementById("edit-user-id").value;
-      const newRegion = document.getElementById("edit-region").value;
-      const origUser = allUsers.find((u) => String(u.user_id) === String(userId));
-      const regionChanged = origUser && (origUser.region || "cairo").toLowerCase() !== newRegion;
-      try {
-        // Run info+role+manager in parallel — backend doesn't require ordering
-        await Promise.all([
-          Api.postForm(`/users/edit_info/${userId}`, {
-            username: document.getElementById("edit-username").value,
-            email: document.getElementById("edit-email").value,
-            phone: document.getElementById("edit-phone").value,
-            driver: document.getElementById("edit-driver").checked ? "1" : "0",
-            storage: document.getElementById("edit-storage").checked ? "1" : "0",
-          }),
-          Api.postForm(`/users/edit_role/${userId}`, {
-            role: document.getElementById("edit-role").value,
-            admin: document.getElementById("edit-admin").checked ? "1" : "0",
-          }),
-          Api.postForm(`/users/change_manager/${userId}`, {
-            assigned_to_user_id: document.getElementById("edit-assigned-to").value,
-          }),
-        ]);
-        // Region runs after the manager change — set_region validates the
-        // user's manager/subordinate region tree, which the calls above may alter.
-        if (regionChanged) {
-          await Api.postForm(`/users/set_region/${userId}`, { region: newRegion });
-        }
-        alert("User updated");
-        closeEditModal();
-        Api.invalidate("/users");
-        await loadUsers();
-      } catch (err) {
-        alert(err.data?.message || err.message || "Update failed.");
-      }
-    });
+    document.getElementById("edit-user-form")?.addEventListener("submit", submitEdit);
+    document.getElementById("permissions-save")?.addEventListener("click", submitPermissions);
 
-    const pwForm = document.getElementById("change-password-form");
-    pwForm?.addEventListener("submit", async (e) => {
+    document.getElementById("change-password-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const userId = document.getElementById("password-user-id").value;
       const newPassword = document.getElementById("new-password").value;
@@ -245,24 +291,95 @@
         alert(err.data?.message || err.message || "Password update failed.");
       }
     });
+
+    document.querySelectorAll(".modal").forEach((modal) => {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.classList.add("hidden");
+      });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal:not(.hidden)").forEach((m) => m.classList.add("hidden"));
+      }
+    });
   }
 
-  // ── Global helpers (referenced by inline onclick handlers) ──────────────
-
-  async function openEditModal(userId) {
+  function openEditModal(userId) {
     const user = allUsers.find((u) => u.user_id === userId);
     if (!user) return;
+
     document.getElementById("edit-user-id").value = user.user_id;
+    document.getElementById("edit-user-label").textContent = `${user.username} — #${user.user_id}`;
     document.getElementById("edit-username").value = user.username || "";
     document.getElementById("edit-email").value = user.email || "";
     document.getElementById("edit-phone").value = user.phone || "";
-    document.getElementById("edit-role").value = user.role || "";
     document.getElementById("edit-region").value = (user.region || "cairo").toLowerCase();
     document.getElementById("edit-assigned-to").value = user.assigned_to_user_id || "";
     document.getElementById("edit-admin").checked = !!user.admin;
-    document.getElementById("edit-driver").checked = user.driver == 1;
-    document.getElementById("edit-storage").checked = user.storage == 1;
+
+    const roleSelect = document.getElementById("edit-role");
+    const role = String(user.role || "").toLowerCase();
+    const match = Array.from(roleSelect.options).find((o) => o.value.toLowerCase() === role);
+    roleSelect.value = match ? match.value : "";
+
+    const locked = isCapabilityUser(user);
+    ["edit-role", "edit-assigned-to", "edit-admin"].forEach((id) => {
+      document.getElementById(id).disabled = locked;
+    });
+
     document.getElementById("edit-user-modal").classList.remove("hidden");
+  }
+
+  async function submitEdit(e) {
+    e.preventDefault();
+    const userId = document.getElementById("edit-user-id").value;
+    const user = allUsers.find((u) => String(u.user_id) === String(userId));
+    if (!user) return;
+
+    const locked = isCapabilityUser(user);
+    const newRegion = document.getElementById("edit-region").value;
+    const newRole = document.getElementById("edit-role").value;
+    const newAdmin = document.getElementById("edit-admin").checked;
+    const newManager = document.getElementById("edit-assigned-to").value.trim();
+
+    const calls = [
+      Api.postForm(`/users/edit_info/${userId}`, {
+        username: document.getElementById("edit-username").value,
+        email: document.getElementById("edit-email").value,
+        phone: document.getElementById("edit-phone").value,
+      }),
+    ];
+
+    if (!locked) {
+      const roleChanged = !!newRole && newRole.toLowerCase() !== String(user.role || "").toLowerCase();
+      const adminChanged = newAdmin !== !!user.admin;
+      if (roleChanged || adminChanged) {
+        const payload = { admin: newAdmin ? "1" : "0" };
+        if (roleChanged) payload.role = newRole;
+        calls.push(Api.postForm(`/users/edit_role/${userId}`, payload));
+      }
+      if (newManager && newManager !== String(user.assigned_to_user_id || "")) {
+        calls.push(
+          Api.postForm(`/users/change_manager/${userId}`, { assigned_to_user_id: newManager })
+        );
+      }
+    }
+
+    try {
+      await Promise.all(calls);
+      if ((user.region || "cairo").toLowerCase() !== newRegion) {
+        await Api.postForm(`/users/set_region/${userId}`, { region: newRegion });
+      }
+      alert("User updated");
+      closeEditModal();
+      Api.invalidate("/users");
+      await loadUsers();
+    } catch (err) {
+      alert(err.data?.message || err.message || "Update failed.");
+      Api.invalidate("/users");
+      await loadUsers();
+    }
   }
 
   function closeEditModal() {
@@ -270,7 +387,12 @@
   }
 
   function openPasswordModal(userId) {
+    const user = allUsers.find((u) => u.user_id === userId);
     document.getElementById("password-user-id").value = userId;
+    document.getElementById("password-user-label").textContent = user
+      ? `${user.username} — #${user.user_id}`
+      : "";
+    document.getElementById("new-password").value = "";
     document.getElementById("change-password-modal").classList.remove("hidden");
   }
 
@@ -278,10 +400,79 @@
     document.getElementById("change-password-modal")?.classList.add("hidden");
   }
 
-  function openAssignNumberModal(userId) {
-    document.getElementById("assign-user-id").value = userId;
+  function openPermissionsModal(userId) {
     const user = allUsers.find((u) => u.user_id === userId);
-    // Backend now returns both cairo_target / region_target and legacy aliases.
+    if (!user) return;
+    document.getElementById("permissions-user-id").value = userId;
+    document.getElementById("permissions-user-label").textContent =
+      `${user.username} — ${typeLabel(user)}`;
+    document.getElementById("permissions-driver").value = String(user.driver ?? 0);
+    document.getElementById("permissions-storage").value = String(user.storage ?? 0);
+    document.getElementById("permissions-modal").classList.remove("hidden");
+  }
+
+  function closePermissionsModal() {
+    document.getElementById("permissions-modal")?.classList.add("hidden");
+  }
+
+  async function submitPermissions() {
+    const userId = document.getElementById("permissions-user-id").value;
+    const user = allUsers.find((u) => String(u.user_id) === String(userId));
+    const driver = Number(document.getElementById("permissions-driver").value);
+    const storage = Number(document.getElementById("permissions-storage").value);
+
+    if (driver > 0 && storage > 0) {
+      alert("A user cannot be both a driver and a storage user. Set one of them back to 'Not'.");
+      return;
+    }
+
+    const currentDriver = Number(user?.driver ?? 0);
+    const currentStorage = Number(user?.storage ?? 0);
+    if (driver === currentDriver && storage === currentStorage) {
+      closePermissionsModal();
+      return;
+    }
+
+    if ((driver > 0 && currentDriver === 0) || (storage > 0 && currentStorage === 0)) {
+      if (!confirm(`Change permissions for ${user?.username || "this user"}?`)) return;
+    }
+
+    const btn = document.getElementById("permissions-save");
+    btn.disabled = true;
+    try {
+      const steps = [];
+      if (driver < currentDriver) steps.push(["driver", driver]);
+      if (storage < currentStorage) steps.push(["storage", storage]);
+      if (driver > currentDriver) steps.push(["driver", driver]);
+      if (storage > currentStorage) steps.push(["storage", storage]);
+
+      const messages = [];
+      for (const [column, level] of steps) {
+        const path =
+          column === "driver"
+            ? `/users/set_driver_role/${userId}`
+            : `/users/set_storage_role/${userId}`;
+        const data = await Api.post(path, { level });
+        if (data?.message) messages.push(data.message);
+      }
+
+      alert(messages.join("\n") || "Permissions updated");
+      closePermissionsModal();
+    } catch (err) {
+      alert(err.data?.message || err.message || "Failed to update permissions.");
+    } finally {
+      btn.disabled = false;
+      Api.invalidate("/users");
+      await loadUsers();
+    }
+  }
+
+  function openAssignNumberModal(userId) {
+    const user = allUsers.find((u) => u.user_id === userId);
+    document.getElementById("assign-user-id").value = userId;
+    document.getElementById("target-user-label").textContent = user
+      ? `${user.username} — #${user.user_id}`
+      : "";
     document.getElementById("local-number").value = user?.cairo_target ?? user?.local_number ?? "";
     document.getElementById("abroad-number").value = user?.region_target ?? user?.abroad_number ?? "";
     document.getElementById("assign-number-modal").classList.remove("hidden");
@@ -291,18 +482,12 @@
     document.getElementById("assign-number-modal")?.classList.add("hidden");
   }
 
-  /**
-   * Placeholder — backend currently has no endpoint for saving local/abroad number per user.
-   * Add this in users.py if you want this feature wired up. See backend recommendations.
-   */
   async function submitAssignNumber() {
     const userId = document.getElementById("assign-user-id").value;
-    const cairoTarget = document.getElementById("local-number").value;
-    const regionTarget = document.getElementById("abroad-number").value;
     try {
       await Api.postForm(`/users/assign_target/${userId}`, {
-        cairo_target: cairoTarget,
-        region_target: regionTarget,
+        cairo_target: document.getElementById("local-number").value,
+        region_target: document.getElementById("abroad-number").value,
       });
       alert("Targets saved");
       closeAssignNumberModal();
@@ -336,26 +521,14 @@
     }
   }
 
-  function filterUsers(searchTerm) {
-    const filtered = allUsers.filter((u) =>
-      (u.username || "").toLowerCase().includes(searchTerm)
-    );
-    renderUsers(filtered);
-  }
-
   function viewUser(userId) {
     window.location.href = `view-user.html?user_id=${userId}`;
   }
 
-  // Export globals for inline onclick compatibility
-  window.openEditModal = openEditModal;
   window.closeEditModal = closeEditModal;
-  window.openPasswordModal = openPasswordModal;
   window.closePasswordModal = closePasswordModal;
-  window.openAssignNumberModal = openAssignNumberModal;
+  window.closePermissionsModal = closePermissionsModal;
   window.closeAssignNumberModal = closeAssignNumberModal;
   window.submitAssignNumber = submitAssignNumber;
-  window.deleteUser = deleteUser;
-  window.toggleUserStatus = toggleUserStatus;
   window.viewUser = viewUser;
 })();

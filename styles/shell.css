@@ -43,16 +43,20 @@ body { display: flex; height: 100dvh; }
 }
 
 .drawer-brand {
-  padding: 24px 20px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 16px 20px 12px;
   text-align: center;
+  background: inherit;
   border-bottom: 1px solid #f0f1f4;
 }
 
 .drawer-logo {
-  width: 96px;
-  border-radius: 14px;
+  width: 64px;
+  border-radius: 12px;
   box-shadow: 0 4px 14px rgba(37, 99, 235, .12);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .drawer-welcome {
@@ -76,31 +80,83 @@ body { display: flex; height: 100dvh; }
 .drawer-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 12px 10px;
+  padding: 12px 10px 18px;
   flex: 1;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 18px;
+}
+
+.nav-group:first-of-type,
+.nav-group--first {
+  margin-top: 6px;
+}
+
+.nav-group-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: #2563eb;
+}
+
+.nav-group-label::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #2563eb, #6366f1);
+}
+
+.nav-group-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(37, 99, 235, .28), rgba(37, 99, 235, 0));
 }
 
 .drawer-nav a {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 14px;
+  padding: 0 14px;
   border-radius: 10px;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1.2;
   color: #334155;
   transition: background .15s, color .15s;
-  min-height: 42px;
+  min-height: 40px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* fa-fw gives every glyph the same advance width, so a single 12px flex gap
+   reads identically on every row and the labels line up. */
 .drawer-nav a i {
-  width: 20px;
+  flex: 0 0 auto;
   text-align: center;
   font-size: 15px;
-  color: #64748b;
+  color: #7b879b;
   transition: color .15s;
+}
+
+.drawer-nav a span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .drawer-nav a:hover { background: #f1f5fb; color: #1e3a5f; }
@@ -109,20 +165,24 @@ body { display: flex; height: 100dvh; }
 .drawer-nav a.active {
   background: linear-gradient(135deg, #1e3a5f, #2563eb);
   color: #fff;
+  font-weight: 600;
   box-shadow: 0 3px 12px rgba(37, 99, 235, .22);
 }
 
 .drawer-nav a.active i { color: #fff; }
 
 .drawer-nav a.nav-cta {
+  justify-content: center;
+  min-height: 44px;
+  font-weight: 600;
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: #fff;
   box-shadow: 0 3px 12px rgba(34, 197, 94, .22);
-  margin: 4px 0;
 }
 
+.drawer-nav a.nav-cta span { flex: 0 0 auto; }
 .drawer-nav a.nav-cta i { color: #fff; }
-.drawer-nav a.nav-cta:hover { filter: brightness(1.06); }
+.drawer-nav a.nav-cta:hover { filter: brightness(1.06); color: #fff; }
 
 /* ─── Stage (main area) ────────────────────── */
 .stage {
@@ -272,6 +332,15 @@ body.dark-mode .drawer-welcome { color: #94a3b8; }
 body.dark-mode .drawer-welcome strong { color: #93c5fd; }
 body.dark-mode .drawer-version { color: #475569; }
 
+body.dark-mode .nav-group-label { color: #93c5fd; }
+
+body.dark-mode .nav-group-label::before {
+  background: linear-gradient(180deg, #60a5fa, #818cf8);
+}
+
+body.dark-mode .nav-group-label::after {
+  background: linear-gradient(90deg, rgba(147, 197, 253, .3), rgba(147, 197, 253, 0));
+}
 body.dark-mode .drawer-nav a { color: #cbd5e1; }
 body.dark-mode .drawer-nav a i { color: #94a3b8; }
 body.dark-mode .drawer-nav a:hover { background: #1e293b; color: #fff; }
