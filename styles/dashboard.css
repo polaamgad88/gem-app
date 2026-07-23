@@ -558,3 +558,81 @@ body.dark-mode .map-note-bar{background:#1a2235;border-color:#2a3548;color:#94a3
   .section-heading{font-size:14px}
   th,td{padding:8px 10px;font-size:12px}
 }
+
+.summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat-tile {
+  flex: 1 1 120px;
+  padding: 11px 14px;
+  text-align: center;
+  background: linear-gradient(135deg, #f0f4ff, #f8f9fc);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  border-radius: 12px;
+}
+
+.stat-tile span {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e3a5f;
+  line-height: 1.25;
+}
+
+.stat-tile small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #667085;
+}
+
+.stat-tile--ok span { color: #16a34a; }
+.stat-tile--warn span { color: #d97706; }
+.stat-tile--bad span { color: #dc2626; }
+
+.visit-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.visit-status--on-site { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.visit-status--near { background: linear-gradient(135deg, #fbbf24, #d97706); }
+.visit-status--far { background: linear-gradient(135deg, #f87171, #dc2626); }
+
+.visits-table .col-status { width: 110px; }
+.visits-table .col-date,
+.visits-table .col-dist { white-space: nowrap; }
+.visits-table .col-address { max-width: 260px; }
+.visits-table .col-action { text-align: right; }
+
+body.dark-mode .stat-tile {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.5));
+  border-color: rgba(99, 102, 241, 0.12);
+}
+
+body.dark-mode .stat-tile span { color: #93c5fd; }
+body.dark-mode .stat-tile small { color: #94a3b8; }
+body.dark-mode .stat-tile--ok span { color: #4ade80; }
+body.dark-mode .stat-tile--warn span { color: #fcd34d; }
+body.dark-mode .stat-tile--bad span { color: #fca5a5; }
+
+@media (max-width: 768px) {
+  .stat-tile {
+    flex: 1 1 calc(33.333% - 7px);
+    padding: 10px 8px;
+  }
+}

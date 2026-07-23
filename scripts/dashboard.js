@@ -136,10 +136,22 @@ function applyTheme(mode) {
   if (mode === "dark") document.body.classList.add("dark-mode");
   else document.body.classList.remove("dark-mode");
 }
-function statusEmoji(distance, within200) {
-  if (within200 || distance < 200) return "🟢";
-  if (distance <= 300 && distance >= 200) return "🟡";
-  return "🔴";
+function escapeHtml(value) {
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (ch) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])
+  );
+}
+function statusTier(distance, within200) {
+  if (within200 || distance < 200) return "on-site";
+  if (distance <= 300) return "near";
+  return "far";
+}
+function statusBadge(distance, within200) {
+  const tier = statusTier(distance, within200);
+  const label = { "on-site": "On site", near: "Near", far: "Far" }[tier];
+  return `<span class="visit-status visit-status--${tier}">${label}</span>`;
 }
 function fmtDate(iso) {
   const d = new Date(iso);
@@ -426,9 +438,50 @@ async function fetchVisits() {
   return res.json();
 }
 
+function renderVisitStats(data) {
+  const box = document.getElementById("visitStats");
+  if (!box) return;
+
+  const visits = data.visits || [];
+  if (!visits.length) {
+    box.innerHTML = "";
+    return;
+  }
+
+  const tally = { "on-site": 0, near: 0, far: 0 };
+  let distanceSum = 0;
+  for (const v of visits) {
+    const dist = Number(v.distance_m ?? 0);
+    tally[statusTier(dist, !!v.within_200m)] += 1;
+    distanceSum += dist;
+  }
+
+  const onSiteRate = Math.round((tally["on-site"] / visits.length) * 100);
+  const avgDistance = Math.round(distanceSum / visits.length);
+
+  const tiles = [
+    ["Visits", data.total ?? visits.length, ""],
+    ["On site", tally["on-site"], "ok"],
+    ["Near", tally.near, "warn"],
+    ["Far", tally.far, "bad"],
+    ["On-site rate", `${onSiteRate}%`, onSiteRate >= 80 ? "ok" : "warn"],
+    ["Avg distance", `${avgDistance} m`, ""],
+  ];
+
+  box.innerHTML = tiles
+    .map(
+      ([label, value, mod]) =>
+        `<div class="stat-tile${mod ? ` stat-tile--${mod}` : ""}">
+           <span>${escapeHtml(value)}</span><small>${label}</small>
+         </div>`
+    )
+    .join("");
+}
+
 function renderVisits(data) {
   const tbody = document.getElementById("visitsTbody");
   tbody.innerHTML = "";
+  renderVisitStats(data);
   if (!data.visits || data.visits.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="8" style="text-align:center;color:#777">No visits found</td></tr>';
@@ -440,14 +493,14 @@ function renderVisits(data) {
     const dist = Number(v.distance_m ?? 0);
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${statusEmoji(dist, within)}</td>
-      <td>${v.username ?? `User #${v.user_id}`}</td>
-      <td>${fmtDate(v.arrived_at)}</td>
-      <td>${v.customer_name ?? `Customer #${v.customer_id}`}</td>
-      <td>${reasonLabel(v.reason)}</td>
-      <td>${v.address_text ?? "-"}</td>
-      <td>${dist}</td>
-      <td><button class="viewBtn">View</button></td>
+      <td class="col-status">${statusBadge(dist, within)}</td>
+      <td>${escapeHtml(v.username ?? `User #${v.user_id}`)}</td>
+      <td class="col-date">${escapeHtml(fmtDate(v.arrived_at))}</td>
+      <td>${escapeHtml(v.customer_name ?? `Customer #${v.customer_id}`)}</td>
+      <td>${escapeHtml(reasonLabel(v.reason))}</td>
+      <td class="col-address">${escapeHtml(v.address_text ?? "-")}</td>
+      <td class="col-dist">${escapeHtml(dist)}</td>
+      <td class="col-action"><button class="viewBtn">View</button></td>
     `;
     tr.querySelector(".viewBtn").addEventListener("click", () =>
       openMapPopup({

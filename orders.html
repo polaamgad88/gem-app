@@ -32,53 +32,72 @@
       window.location.replace("index.html?page=" + encodeURIComponent(page));
     }
   </script>
-
 </head>
 
 <body>
-  <div id="loader" style="display: none">
-    <div class="loader"></div>
-    <strong>Loading orders...</strong>
+  <div id="topProgress" class="top-progress" hidden></div>
+
+  <div class="page-head">
+    <h2 class="page-heading">Orders</h2>
+    <div class="head-actions">
+      <button id="confirmedToggle" type="button" class="ghost-btn">All Orders</button>
+      <button id="exportBtn" type="button" class="primary-btn" title="Export to Excel">
+        <span aria-hidden="true">⤓</span><span>Export</span>
+      </button>
+    </div>
   </div>
 
-  <h2 class="page-heading">Orders</h2>
+  <div id="summary-row" class="summary-row"></div>
 
-  <div class="filters">
+  <div class="filters-bar">
+    <div class="toolbar-field toolbar-field--grow">
+      <input type="search" id="orderSearch" placeholder="Search order no, customer or delegate..." />
+    </div>
+    <button id="filtersToggle" type="button" class="filters-toggle" aria-expanded="false">
+      <span class="chev" aria-hidden="true"></span>
+      <span>Filters</span>
+      <span id="filtersCount" class="filters-count hidden">0</span>
+    </button>
+    <button id="resetFilters" type="button" class="ghost-btn">Reset</button>
+  </div>
+
+  <div id="filtersPanel" class="filters hidden">
     <div class="filter-group">
-      <label for="userFilter">Filter by User:</label>
+      <label for="userFilter">Delegate</label>
       <select id="userFilter">
-        <option value="all">All Users</option>
+        <option value="all">All users</option>
       </select>
     </div>
 
     <div class="filter-group">
-      <label for="customerFilter">Filter by Customer:</label>
+      <label for="customerFilter">Customer</label>
       <select id="customerFilter">
-        <option value="all">All Customers</option>
+        <option value="all">All customers</option>
       </select>
     </div>
+
     <div class="filter-group">
-      <label for="dateStart">Order Date From:</label>
+      <label for="dateStart">Order date from</label>
       <input type="date" id="dateStart" />
     </div>
 
     <div class="filter-group">
-      <label for="dateEnd">Order Date To:</label>
+      <label for="dateEnd">Order date to</label>
       <input type="date" id="dateEnd" />
     </div>
 
     <div class="filter-group">
-      <label for="updateDateStart">Update Date From:</label>
+      <label for="updateDateStart">Update date from</label>
       <input type="date" id="updateDateStart" />
     </div>
 
     <div class="filter-group">
-      <label for="updateDateEnd">Update Date To:</label>
+      <label for="updateDateEnd">Update date to</label>
       <input type="date" id="updateDateEnd" />
     </div>
 
-    <div class="filter-group">
-      <label for="pageSize">Entries per page:</label>
+    <div class="filter-group filter-group--narrow">
+      <label for="pageSize">Per page</label>
       <select id="pageSize">
         <option value="10">10</option>
         <option value="25" selected>25</option>
@@ -86,63 +105,44 @@
         <option value="100">100</option>
       </select>
     </div>
-
-    <div class="filter-group">
-      <label for="confirmedToggle">Show:</label>
-      <button id="confirmedToggle" class="toggle-btn">
-        All Orders
-      </button>
-    </div>
   </div>
 
-  <div class="export-wrapper">
-    <button id="exportBtn" class="export-btn" title="Export to Excel">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" aria-hidden="true">
-        <path fill="#fff" d="M369.9 97.98L286 14.1C277.5 5.6 266.2 0 254.4 0H48C21.49 0 0 21.49 0 48v416c0 26.5 21.49 48 48 48h288c26.5 0 48-21.5 48-48V131.6c0-12.7-5.1-24.9-14.1-33.62zM256 51.9 332.1 128H256V51.9zM231.1 352l-30.5-45.6-30.3 45.6H132.2l47.3-72-45.2-68h38.3l28.7 42.4 28.5-42.4h38l-45.2 68 47.4 72H231.1z" />
-      </svg>
-      <p>DOWNLOAD</p>
-    </button>
+  <p id="resultMeta" class="result-meta"></p>
+
+  <div id="selectionBar" class="selection-bar hidden">
+    <span id="selectionCount">0 selected</span>
+    <button id="exportSelected" type="button" class="ghost-btn">Export selected</button>
+    <button id="clearSelection" type="button" class="link-btn">Clear</button>
   </div>
 
   <div class="table-responsive">
     <table class="table">
       <thead>
         <tr>
-          <th><input type="checkbox" id="checkAll" /></th>
-          <th>Order&nbsp;ID</th>
-          <th class="sortable" onclick="sortTable(2,'date')">
-            Date ⬍
-          </th>
+          <th class="col-check"><input type="checkbox" id="checkAll" aria-label="Select all" /></th>
+          <th class="col-id">Order</th>
+          <th class="col-date sortable" data-sort="date">Updated</th>
           <th>Customer</th>
-          <th>Delegate</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th class="sortable" onclick="sortTable(7,'price')">
-            Total ⬍
-          </th>
-          <th>Action</th>
+          <th class="col-user">Delegate</th>
+          <th class="col-status">Status</th>
+          <th class="col-total sortable" data-sort="price">Total</th>
+          <th class="col-action"></th>
         </tr>
       </thead>
       <tbody id="ordersTable"></tbody>
-      <tfoot>
-        <tr id="orderSummaryRow">
-          <td colspan="9"></td>
-        </tr>
-      </tfoot>
     </table>
   </div>
 
   <div class="card-view" style="display: none">
     <div id="ordersCards"></div>
-    <div id="cardSummary"></div>
   </div>
 
-  <div id="pagination" class="pagination-controls">
-  </div>
+  <p id="ordersEmpty" class="empty-state hidden">No orders match these filters.</p>
+
+  <div id="pagination" class="pagination-controls"></div>
 
   <div id="exportModal" class="modal hidden">
     <div class="modal-content">
-      <span class="close-modal">&times;</span>
       <h2>Export Orders</h2>
       <form id="exportForm">
         <div class="form-group">
@@ -156,33 +156,34 @@
           <datalist id="modalUserList"></datalist>
         </div>
         <div class="form-group">
-          <label>Amount&nbsp;(EGP)</label>
+          <label>Amount (EGP)</label>
           <div class="export-modal-row">
             <input type="number" id="amountStart" placeholder="From" />
             <input type="number" id="amountEnd" placeholder="To" />
           </div>
         </div>
         <div class="form-group">
-          <label>Create Date range</label>
+          <label>Order date range</label>
           <div class="export-modal-row">
-            <input type="date" id="dateStart" />
-            <input type="date" id="dateEnd" />
+            <input type="date" id="exportDateStart" />
+            <input type="date" id="exportDateEnd" />
           </div>
         </div>
         <div class="form-group">
-          <label>Update Date range</label>
+          <label>Update date range</label>
           <div class="export-modal-row">
-            <input type="date" id="dateStartUpdate" placeholder="From" />
-            <input type="date" id="dateEndUpdate" placeholder="To" />
+            <input type="date" id="exportUpdateStart" />
+            <input type="date" id="exportUpdateEnd" />
           </div>
         </div>
-        <div class="form-group checkbox-inline">
-          <input type="checkbox" id="fullyconfirmed" />
-          <label for="fullyconfirmed">Only Fully Confirmed Orders</label>
+        <label class="check-row">
+          <input type="checkbox" id="fullyconfirmed" /> Only fully confirmed orders
+        </label>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary-btn">Export</button>
+          <button type="button" class="btn cancel-btn" data-close="exportModal">Cancel</button>
         </div>
-        <button type="submit" class="export-btn">
-          Export
-        </button>
       </form>
     </div>
   </div>
