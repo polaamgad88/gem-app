@@ -36,7 +36,6 @@ h1 {
   color: var(--primary-color);
 }
 
-/* Back link */
 .back-link {
   display: inline-block;
   margin-bottom: var(--spacing-md);
@@ -54,7 +53,6 @@ h1 {
 
 .back-link:before { content: none; }
 
-/* Sections */
 .customer-info,
 .Delegate-management,
 .order-section,
@@ -75,7 +73,6 @@ h1 {
   margin: 0;
 }
 
-/* Address section */
 .address-section h2 {
   font-size: var(--font-size-lg);
   color: var(--primary-color);
@@ -143,7 +140,6 @@ h1 {
   background-color: var(--danger-dark);
 }
 
-/* Buttons */
 button,
 .btn {
   font-size: var(--font-size-sm);
@@ -221,7 +217,6 @@ button,
   color: white;
 }
 
-/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -321,7 +316,6 @@ th {
   text-align: right;
 }
 
-/* Card view */
 .card-view {
   display: none;
   margin-top: var(--spacing-md);
@@ -361,7 +355,6 @@ th {
   margin-top: var(--spacing-sm);
 }
 
-/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -416,7 +409,6 @@ th {
   margin: 6px 0;
 }
 
-/* Address modal (with map) */
 #address-modal {
   display: none;
   position: fixed;
@@ -453,7 +445,6 @@ body.dark-mode #map {
   border: 1px solid #2a2e36;
 }
 
-/* Delegate list */
 #Delegate-list {
   list-style: none;
   padding-left: 0;
@@ -491,7 +482,6 @@ body.dark-mode #map {
   background-color: var(--danger-dark);
 }
 
-/* Dark mode */
 body.dark-mode {
   background-color: #0f1115;
   color: #e2e8f0;
@@ -594,7 +584,6 @@ body.dark-mode .back-link {
   border-color: #2a2e36;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   body {
     padding: 10px;

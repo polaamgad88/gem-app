@@ -1,4 +1,3 @@
-/* Orders Page Styles */
 @import url("./base.css");
 
 body {
@@ -48,7 +47,6 @@ h1 {
   font-size: var(--font-size-xl);
 }
 
-/* Filters */
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -167,7 +165,6 @@ th[onclick] { cursor: pointer; }
 .table th.sortable { cursor: pointer; user-select: none; }
 .table th.sortable:hover { background-color: #f1f4f9 !important; }
 
-/* Override navy header → white identity */
 table th,
 .table thead th {
   background-color: #ffffff !important;
@@ -211,7 +208,6 @@ table th,
   font-weight: 600;
 }
 
-/* Back link button style */
 .back-link {
   display: inline-block;
   margin-bottom: 8px;
@@ -231,7 +227,6 @@ table th,
 .back-link:active { transform: translateY(1px); }
 .back-link:before { content: none; }
 
-/* Modal */
 .modal.hidden { display: none; }
 
 .modal {
@@ -280,7 +275,6 @@ table th,
 
 .form-group input { margin-top: 0.4rem; }
 
-/* Export button */
 .export-btn {
   background: linear-gradient(135deg, #28a745, #1e7e34);
   color: #fff;
@@ -319,7 +313,6 @@ table th,
   margin: 12px 0;
 }
 
-/* checkbox column */
 table td:first-child,
 table th:first-child {
   width: 40px;
@@ -383,7 +376,6 @@ tfoot td {
   cursor: not-allowed;
 }
 
-/* Summary stats */
 .orders-summary-grid {
   display: flex;
   gap: 16px;
@@ -429,7 +421,6 @@ tfoot td {
   font-weight: 700;
 }
 
-/* Card view */
 .card-view { display: none; }
 
 .card-view .order-card {
@@ -485,7 +476,6 @@ tfoot td {
   color: var(--gray-700);
 }
 
-/* Export modal */
 .export-modal-row {
   display: flex;
   gap: 0.5rem;
@@ -509,7 +499,6 @@ tfoot td {
   padding: 12px;
 }
 
-/* Dark mode */
 body.dark-mode {
   background-color: #0f1115;
   color: #e2e8f0;
@@ -584,9 +573,6 @@ body.dark-mode .card-view .order-card-footer .view-btn {
   color: #fff !important;
 }
 
-/* ──────────────────────────────────────────
-   Responsive
-   ────────────────────────────────────────── */
 @media (max-width: 992px) {
   .container {
     padding: var(--spacing-md);

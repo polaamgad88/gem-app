@@ -1,19 +1,8 @@
-/**
- * Shared utilities for GEM dashboard.
- *
- * Exposes window.Utils with namespaces:
- *   Auth, UI, Format, URL, Api, Cache, Async, DOM
- */
 (function () {
   "use strict";
 
   const API_BASE = "https://order-app.gemegypt.net/api";
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Async helpers
-  // ────────────────────────────────────────────────────────────────────────────
-
-  /** Debounce: delays fn until `wait` ms passed since last call. */
   function debounce(fn, wait = 250) {
     let t;
     const debounced = function (...args) {
@@ -24,7 +13,6 @@
     return debounced;
   }
 
-  /** Throttle: at most one call per `wait` ms (leading + trailing). */
   function throttle(fn, wait = 200) {
     let last = 0;
     let timer;
@@ -48,14 +36,9 @@
     };
   }
 
-  /** Sleep helper. */
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   const Async = { debounce, throttle, sleep };
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // Cache (in-memory + localStorage with TTL)
-  // ────────────────────────────────────────────────────────────────────────────
 
   const memCache = new Map();
   const inflight = new Map(); // url → Promise (dedupes concurrent GETs)
@@ -65,7 +48,6 @@
   }
 
   const Cache = {
-    /** Get + parse from localStorage, returns null if expired or missing. */
     getLS(key) {
       try {
         const raw = localStorage.getItem(`cache:${key}`);
@@ -87,14 +69,12 @@
           JSON.stringify({ v: value, exp: Date.now() + ttlMs })
         );
       } catch {
-        /* quota / serialization — silent */
       }
     },
     delLS(key) {
       try {
         localStorage.removeItem(`cache:${key}`);
       } catch {
-        /* noop */
       }
     },
     getMem(key) {
@@ -117,18 +97,62 @@
     },
   };
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Api: fetch wrapper with auth + retry + timeout + abort
-  // ────────────────────────────────────────────────────────────────────────────
-
   class ApiError extends Error {
-    constructor(message, { status, data, url } = {}) {
+    constructor(message, { status, data, url, cause } = {}) {
       super(message);
       this.name = "ApiError";
       this.status = status;
       this.data = data;
       this.url = url;
+      this.cause = cause;
     }
+  }
+
+  const STATUS_TEXT = {
+    400: "The server rejected the request",
+    401: "Your session has expired",
+    403: "You do not have permission to do this",
+    404: "Not found",
+    409: "Conflict with the current state",
+    413: "The upload is too large",
+    422: "The server could not process the request",
+    429: "Too many requests — slow down",
+    500: "The server hit an internal error",
+    502: "A service the server depends on is unreachable",
+    503: "The server is temporarily unavailable",
+    504: "A service the server depends on timed out",
+  };
+
+  function originOf(url) {
+    try {
+      return new URL(url, window.location.href).origin;
+    } catch {
+      return url;
+    }
+  }
+
+  function describeNetworkError(err, url) {
+    const where = originOf(url);
+    if (err && err.name === "TypeError") {
+      return (
+        `Cannot reach the server at ${where}. ` +
+        `It may be down, or the address/CORS settings may be wrong.`
+      );
+    }
+    return err && err.message ? err.message : `Network error contacting ${where}`;
+  }
+
+  function describeHttpError(status, data, url) {
+    if (data && typeof data === "object") {
+      const msg = data.message || data.error;
+      if (msg) return String(msg);
+    }
+    if (typeof data === "string") {
+      const text = data.trim();
+      if (text && !text.startsWith("<")) return text.slice(0, 300);
+    }
+    const label = STATUS_TEXT[status] || "Request failed";
+    return `${label} (HTTP ${status}) — ${originOf(url)}`;
   }
 
   function resolveUrl(path) {
@@ -146,7 +170,6 @@
     }
     if (opts.body && !headers.has("Content-Type")) {
       if (opts.body instanceof FormData) {
-        // browser sets multipart boundary
       } else if (opts.body instanceof URLSearchParams) {
         headers.set("Content-Type", "application/x-www-form-urlencoded");
       } else {
@@ -157,21 +180,6 @@
     return headers;
   }
 
-  /**
-   * Smart fetch: auto auth header, JSON encode body, retry transient errors,
-   * timeout via AbortController, parse JSON response.
-   *
-   * @param {string} path Endpoint path or full URL.
-   * @param {object} [opts]
-   * @param {string} [opts.method] HTTP method (default GET).
-   * @param {any}    [opts.body]   Auto-stringified unless FormData.
-   * @param {object} [opts.query]  Query params object.
-   * @param {number} [opts.timeout] Ms, default 30000.
-   * @param {number} [opts.retries] On 5xx/network, default 2.
-   * @param {AbortSignal} [opts.signal] External signal.
-   * @param {boolean} [opts.raw]  If true, return Response instead of parsed JSON.
-   * @returns {Promise<any>}
-   */
   async function request(path, opts = {}) {
     const method = (opts.method || "GET").toUpperCase();
     let url = resolveUrl(path);
@@ -187,7 +195,6 @@
     }
 
     let bodyData = opts.body;
-    // Form-encoded mode: serialize plain object to URLSearchParams.
     if (opts.form && bodyData && !(bodyData instanceof FormData) && !(bodyData instanceof URLSearchParams) && typeof bodyData !== "string") {
       const usp = new URLSearchParams();
       for (const [k, v] of Object.entries(bodyData)) {
@@ -224,9 +231,6 @@
           body,
           signal: ctrl.signal,
           credentials: opts.credentials,
-          // Never serve API responses from the browser HTTP cache — app-level
-          // memCache (getCached) handles intentional caching. Prevents stale
-          // data after create/edit/delete + on bfcache restore.
           cache: opts.cache ?? "no-store",
         });
         clearTimeout(timer);
@@ -236,7 +240,10 @@
           if (!window.location.pathname.endsWith("login.html")) {
             window.location.href = "login.html";
           }
-          throw new ApiError("Unauthorized", { status: 401, url });
+          throw new ApiError("Your session has expired. Please log in again.", {
+            status: 401,
+            url,
+          });
         }
 
         if (opts.raw) return res;
@@ -257,8 +264,11 @@
             await sleep(300 * Math.pow(2, attempt));
             continue;
           }
-          const msg = (data && (data.error || data.message)) || `HTTP ${res.status}`;
-          throw new ApiError(msg, { status: res.status, data, url });
+          throw new ApiError(describeHttpError(res.status, data, url), {
+            status: res.status,
+            data,
+            url,
+          });
         }
 
         return data;
@@ -266,28 +276,29 @@
         clearTimeout(timer);
         lastErr = err;
         if (err.name === "AbortError" && !opts.signal?.aborted) {
-          // local timeout — retry
           if (attempt < retries) {
             attempt++;
             await sleep(300 * Math.pow(2, attempt));
             continue;
           }
-          throw new ApiError("Request timed out", { url });
+          throw new ApiError(
+            `The server did not answer within ${Math.round(timeoutMs / 1000)}s ` +
+              `(${originOf(url)}). It may be busy or waiting on SAP.`,
+            { url, cause: err }
+          );
         }
         if (err instanceof ApiError) throw err;
-        // network error — retry once
         if (attempt < retries) {
           attempt++;
           await sleep(300 * Math.pow(2, attempt));
           continue;
         }
-        throw new ApiError(err.message || "Network error", { url });
+        throw new ApiError(describeNetworkError(err, url), { url, cause: err });
       }
     }
     throw lastErr;
   }
 
-  /** GET with response cached in-memory by URL (ttl default 60s, set to 0 to bypass). */
   async function getCached(path, opts = {}) {
     const url = resolveUrl(path);
     const queryStr = opts.query
@@ -301,7 +312,6 @@
       if (hit !== null) return hit;
     }
 
-    // dedupe concurrent identical requests
     if (inflight.has(key)) return inflight.get(key);
 
     const p = request(path, { ...opts, method: "GET" })
@@ -315,7 +325,6 @@
     return p;
   }
 
-  /** Invalidate cached GETs whose key includes any of the given path fragments. */
   function invalidate(...fragments) {
     for (const key of memCache.keys()) {
       if (fragments.some((f) => key.includes(f))) memCache.delete(key);
@@ -328,7 +337,6 @@
     get: (path, opts) => request(path, { ...opts, method: "GET" }),
     getCached,
     post: (path, body, opts) => request(path, { ...opts, method: "POST", body }),
-    /** POST with application/x-www-form-urlencoded body (matches backend `request.form` endpoints). */
     postForm: (path, body, opts) =>
       request(path, { ...opts, method: "POST", body, form: true }),
     patch: (path, body, opts) => request(path, { ...opts, method: "PATCH", body }),
@@ -338,18 +346,12 @@
     ApiError,
   };
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // DOM helpers
-  // ────────────────────────────────────────────────────────────────────────────
-
-  /** Build a DocumentFragment from an HTML string. Faster than innerHTML in loops. */
   function fragmentFromHtml(html) {
     const tpl = document.createElement("template");
     tpl.innerHTML = html;
     return tpl.content;
   }
 
-  /** Replace child contents of `el` with array items mapped through `renderFn`. */
   function replaceChildren(el, items, renderFn) {
     if (!el) return;
     const frag = document.createDocumentFragment();
@@ -365,7 +367,6 @@
     el.replaceChildren(frag);
   }
 
-  /** Event delegation: bind ONE listener on container, fire when target matches selector. */
   function delegate(container, eventType, selector, handler) {
     if (!container) return () => {};
     const wrapped = (e) => {
@@ -378,7 +379,6 @@
     return () => container.removeEventListener(eventType, wrapped);
   }
 
-  /** Escape HTML for safe insertion. */
   function escapeHtml(s) {
     if (s == null) return "";
     return String(s)
@@ -390,10 +390,6 @@
   }
 
   const DOM = { fragmentFromHtml, replaceChildren, delegate, escapeHtml };
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // Auth (re-uses Api wrapper)
-  // ────────────────────────────────────────────────────────────────────────────
 
   const Auth = {
     async checkLogin() {
@@ -442,10 +438,6 @@
     },
   };
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // UI helpers
-  // ────────────────────────────────────────────────────────────────────────────
-
   const UI = {
     showLoader(id = "loader") {
       const el = document.getElementById(id);
@@ -482,10 +474,6 @@
     },
   };
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Format helpers
-  // ────────────────────────────────────────────────────────────────────────────
-
   const Format = {
     date(dateStr) {
       const d = new Date(dateStr);
@@ -511,10 +499,6 @@
     },
   };
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // URL params
-  // ────────────────────────────────────────────────────────────────────────────
-
   const URLh = {
     getParam(name) {
       return new URLSearchParams(window.location.search).get(name);
@@ -524,7 +508,6 @@
     },
   };
 
-  // Export
   window.Utils = {
     Auth,
     UI,

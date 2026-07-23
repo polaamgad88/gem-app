@@ -1,8 +1,3 @@
-/* ═══════════════════════════════════════════════════════
-   Shell — drawer + top bar + iframe stage
-   Brand: #1e3a5f → #2563eb (blue gradient)
-   ═══════════════════════════════════════════════════════ */
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -16,7 +11,6 @@ html, body {
 
 body { display: flex; height: 100dvh; }
 
-/* ─── Overlay (mobile) ─────────────────────── */
 .overlay {
   display: none;
   position: fixed;
@@ -29,7 +23,6 @@ body { display: flex; height: 100dvh; }
 
 .overlay.open { display: block; }
 
-/* ─── Drawer ───────────────────────────────── */
 .drawer {
   width: 256px;
   flex-shrink: 0;
@@ -76,7 +69,6 @@ body { display: flex; height: 100dvh; }
   margin-top: 2px;
 }
 
-/* ─── Nav links ────────────────────────────── */
 .drawer-nav {
   display: flex;
   flex-direction: column;
@@ -142,8 +134,6 @@ body { display: flex; height: 100dvh; }
   text-overflow: ellipsis;
 }
 
-/* fa-fw gives every glyph the same advance width, so a single 12px flex gap
-   reads identically on every row and the labels line up. */
 .drawer-nav a i {
   flex: 0 0 auto;
   text-align: center;
@@ -184,7 +174,6 @@ body { display: flex; height: 100dvh; }
 .drawer-nav a.nav-cta i { color: #fff; }
 .drawer-nav a.nav-cta:hover { filter: brightness(1.06); color: #fff; }
 
-/* ─── Stage (main area) ────────────────────── */
 .stage {
   flex: 1;
   display: flex;
@@ -195,7 +184,6 @@ body { display: flex; height: 100dvh; }
   overflow: hidden;
 }
 
-/* ─── Top bar ──────────────────────────────── */
 .bar {
   display: flex;
   align-items: center;
@@ -243,7 +231,6 @@ body { display: flex; height: 100dvh; }
   margin-left: auto;
 }
 
-/* ─── Region badge ─────────────────────────── */
 .region-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -264,7 +251,6 @@ body { display: flex; height: 100dvh; }
   background: linear-gradient(135deg, #0ea5e9, #2563eb);
 }
 
-/* Subtle region tint on the stage so Alex pages feel distinct */
 body.region-alex .stage-frame {
   box-shadow: inset 0 0 0 3px rgba(124, 58, 237, 0.35);
 }
@@ -307,7 +293,6 @@ body.region-alex .bar {
   color: #fff;
 }
 
-/* ─── Iframe ───────────────────────────────── */
 .stage-frame {
   flex: 1;
   width: 100%;
@@ -317,9 +302,6 @@ body.region-alex .bar {
   background: transparent;
 }
 
-/* ═══════════════════════════════════════════════════════
-   Dark mode
-   ═══════════════════════════════════════════════════════ */
 body.dark-mode { background: #0c1120; color: #e2e8f0; }
 
 body.dark-mode .drawer {
@@ -375,17 +357,11 @@ body.dark-mode .bar-btn-logout:hover {
   border-color: #b91c1c;
 }
 
-/* ═══════════════════════════════════════════════════════
-   Desktop (>768)
-   ═══════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
   .drawer { position: relative; }
   .drawer.collapsed { width: 0; padding: 0; overflow: hidden; border: none; }
 }
 
-/* ═══════════════════════════════════════════════════════
-   Mobile (<=768)
-   ═══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .drawer {
     position: fixed;

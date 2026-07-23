@@ -27,7 +27,6 @@ async function fetchWithAuth(url, opts = {}) {
   });
 }
 
-/** Probe which endpoint we can use (admin first, else view). Cached after first run. */
 async function ensureRankingEndpoint(mode = "amount") {
   if (rankingEndpointType !== "unknown") return rankingEndpointType;
 
@@ -94,7 +93,6 @@ async function loadPersonalSeries(mode = "amount") {
     chartSubtitle.textContent =
       mode === "amount" ? "Monthly total amount" : "Monthly total orders";
 
-    // hide Top-15 table in personal mode
     topCard.classList.add("hidden");
 
     const labels = series.map((s) => s.month);
@@ -131,7 +129,6 @@ async function loadPersonalSeries(mode = "amount") {
   }
 }
 
-/* -------------------- helpers -------------------- */
 function authHeaders() {
   return JWT ? { Authorization: `Bearer ${JWT}` } : {};
 }
@@ -387,15 +384,6 @@ function wireAutocompleteFields() {
   });
 }
 
-/**
- * Build query string for /visits (list endpoint).
- * Uses:
- *   - userFilter (user_id)
- *   - customerFilter (customer_id)
- *   - statusFilter (status)
- *   - reasonFilter (reason)
- *   - dateStart/dateEnd (start_date / end_date)
- */
 function buildQuery() {
   const userEl = document.getElementById("userFilter");
   const custEl = document.getElementById("customerFilter");
@@ -411,21 +399,17 @@ function buildQuery() {
   if (userId) params.set("user_id", userId);
   if (customerId) params.set("customer_id", customerId);
 
-  // status (green / yellow / red)
   const statusVal = statusEl?.value || "";
   if (statusVal) params.set("status", statusVal);
 
-  // reason (single allowed)
   const reasonVal = reasonEl?.value || "";
   if (reasonVal) params.set("reason", reasonVal);
 
-  // date range (YYYY-MM-DD)
   const startVal = dateStartEl?.value || "";
   const endVal = dateEndEl?.value || "";
   if (startVal) params.set("start_date", startVal);
   if (endVal) params.set("end_date", endVal);
 
-  // paging
   params.set("page", currentPage);
   params.set("limit", currentLimit);
   return params.toString();
@@ -526,7 +510,6 @@ function openMapPopup(payload) {
     return;
   }
 
-  // Show modal first so Leaflet can size correctly
   modal.classList.add("show");
 
   const {
@@ -562,7 +545,6 @@ function openMapPopup(payload) {
       ? [aLatN, aLonN]
       : [30.0444, 31.2357]; // Cairo fallback
 
-  // Create or reuse the map
   if (!_visitMap) {
     _visitMap = L.map(mapEl).setView(center, 15);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -573,12 +555,10 @@ function openMapPopup(payload) {
     _visitMap.setView(center, 15);
   }
 
-  // Clear old layers
   if (_plannedMarker) _visitMap.removeLayer(_plannedMarker);
   if (_actualMarker) _visitMap.removeLayer(_actualMarker);
   if (_lineLayer) _visitMap.removeLayer(_lineLayer);
 
-  // Add markers if available
   if (!Number.isNaN(pLatN) && !Number.isNaN(pLonN)) {
     _plannedMarker = L.marker([pLatN, pLonN], {
       icon: L.icon({
@@ -666,7 +646,6 @@ async function loadRankingData(mode = "amount") {
     topCard.classList.remove("hidden");
     thThisMonth.classList.remove("hidden");
 
-    // table
     const tbody = document.getElementById("delegatesTable");
     tbody.innerHTML = "";
     users.forEach((u) => {
@@ -684,7 +663,6 @@ async function loadRankingData(mode = "amount") {
       tbody.appendChild(tr);
     });
 
-    // chart (bar only)
     const labels = users.map((u) => u.name);
     const dataset =
       mode === "amount"
@@ -735,15 +713,6 @@ window.showChart = changeChartType;
 window.changeDataset = (val) =>
   loadRankingData(val === "sales" ? "amount" : "orders");
 
-/**
- * Download Excel report using same filters:
- *  - userFilter -> user_id (REQUIRED)
- *  - statusFilter -> status
- *  - reasonFilter -> reason
- *  - dateStart/dateEnd -> start_date/end_date
- *
- *  Note: customerFilter is NOT used by backend report (report is per user).
- */
 async function downloadVisitsReport() {
   const userEl = document.getElementById("userFilter");
   const statusEl = document.getElementById("statusFilter");
@@ -751,14 +720,12 @@ async function downloadVisitsReport() {
   const dateStartEl = document.getElementById("dateStart");
   const dateEndEl = document.getElementById("dateEnd");
 
-  // user_id is required for the report endpoint
   const userId = valueLooksLikeIdNumOrStoredId(userEl);
   if (!userId) {
     alert("Please select a user to generate the visits report.");
     return;
   }
 
-  // Build query params (same filters as list)
   const params = new URLSearchParams();
   params.set("user_id", userId);
 
@@ -783,17 +750,12 @@ async function downloadVisitsReport() {
         const errJson = await res.json();
         if (errJson?.message) msg = errJson.message;
       } catch {
-        // ignore JSON parse error, keep generic message
       }
       throw new Error(msg);
     }
 
     const blob = await res.blob();
 
-    // --- Try to use filename from backend (Content-Disposition) ---
-    // NOTE: For this to work, backend must set:
-    //   Access-Control-Expose-Headers: Content-Disposition
-    // or serve frontend from same origin as API.
     let filename = "visits_report.xlsx"; // default fallback
 
     const cd =
@@ -803,7 +765,6 @@ async function downloadVisitsReport() {
     console.log("Content-Disposition header:", cd); // will be null if not exposed
 
     if (cd) {
-      // 1) RFC 5987 style: filename*=UTF-8''...
       let match = cd.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
       if (match && match[1]) {
         try {
@@ -812,21 +773,18 @@ async function downloadVisitsReport() {
           filename = match[1];
         }
       } else {
-        // 2) Simple: filename="name.xlsx" or filename=name.xlsx
         match = cd.match(/filename[^;=\n]*=\s*(?:\"([^\"]*)\"|([^;\n]*))/i);
         if (match) {
           filename = (match[1] || match[2] || filename).replace(/['"]/g, "");
         }
       }
     } else {
-      // If header is not visible, build a useful fallback name on the frontend
       const parts = [`user_${userId}`];
       if (startVal) parts.push(`from_${startVal}`);
       if (endVal) parts.push(`to_${endVal}`);
       filename = `visits_report_${parts.join("_")}.xlsx`;
     }
 
-    // Trigger download
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = filename;
@@ -914,7 +872,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const personalToggle = document.getElementById("personalToggle"); // checkbox
   const dataTypeSelect = document.getElementById("dataType"); // Sales/Orders
 
-  // Show Personal toggle only for non-admins
   if (!isAdmin) personalWrap?.classList.remove("hidden");
   else personalWrap?.classList.add("hidden");
 

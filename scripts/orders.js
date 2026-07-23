@@ -1,10 +1,3 @@
-/* Orders page — perf-refactored.
- * - Uses Utils.Api with TTL cache for users/customers.
- * - DocumentFragment batching for table + cards.
- * - Event delegation for view buttons.
- * - Debounced filter changes.
- */
-
 document.addEventListener("DOMContentLoaded", async () => {
   const { Api, Auth, UI, Format, Async, DOM } = window.Utils;
   const esc = DOM.escapeHtml;
@@ -36,8 +29,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   UI.checkScreenSize();
   window.addEventListener("resize", Async.throttle(UI.checkScreenSize, 150));
-
-  // ── Data fetch ─────────────────────────────────────────────────────────
 
   async function fetchUsers() {
     const data = await Api.getCached("/users", { cacheTtl: 5 * 60 * 1000 });
@@ -105,7 +96,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (userId !== "all") query.user_id = userId;
 
     if (customerName && customerName !== "all") {
-      // Prefer global customers list (more reliable than current page of orders)
       const match =
         state.allCustomers.find(
           (c) => `${c.first_name} ${c.last_name}` === customerName
@@ -153,8 +143,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       .getElementById("confirmedToggle")
       ?.classList.contains("active");
   }
-
-  // ── Render ─────────────────────────────────────────────────────────────
 
   function renderPagination() {
     const container = document.getElementById("pagination");
@@ -293,8 +281,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       `<div style="text-align:center;padding:20px;">No orders</div>`;
   }
 
-  // ── Events ─────────────────────────────────────────────────────────────
-
   function setupEventListeners() {
     const debouncedRefresh = Async.debounce(() => fetchAndRenderOrders(), 250);
 
@@ -330,7 +316,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         .forEach((cb) => (cb.checked = e.target.checked));
     });
 
-    // Event delegation: view buttons + pagination
     document.body.addEventListener("click", (e) => {
       const viewBtn = e.target.closest(".view-btn");
       if (viewBtn?.dataset.orderId) {
@@ -439,7 +424,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Legacy sort handlers (called via inline onclick in HTML)
   function parseCustomDate(dateStr) {
     const [datePart, timePart] = dateStr.split(" ");
     const [day, month, year] = datePart.split("/").map(Number);

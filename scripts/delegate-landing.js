@@ -40,8 +40,6 @@ function setupAdminButtons(admin, role) {
   setupFleetNav(isAdmin);
 }
 
-// Nav links are flex rows. Showing one with display:block would drop the icon
-// gap and break the alignment of the whole list.
 function showNavLink(el) {
   if (el) el.style.display = "flex";
 }
@@ -80,7 +78,6 @@ function setupFleetNav(isAdmin) {
   syncNavGroups();
 }
 
-// Hide a section header once every link under it is hidden.
 function syncNavGroups() {
   let first = true;
   document.querySelectorAll("#nav .nav-group").forEach((group) => {

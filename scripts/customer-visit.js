@@ -1,4 +1,3 @@
-// Get DOM elements
 const customerSearchInput = document.getElementById("customer-search");
 const customerSuggestions = document.getElementById("customer-suggestions");
 const checkInButton = document.getElementById("checkInBtn");
@@ -9,9 +8,6 @@ const statusDropdown = document.getElementById("status-dropdown");
 const billDiv = document.getElementById("billDiv");
 const locationStatusEl = document.getElementById("locationStatus");
 
-// ------------------------------
-// Map setup
-// ------------------------------
 const map = L.map("map").setView([30.044015, 31.331689], 13);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
@@ -20,9 +16,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 let marker;
 
-// ------------------------------
-// Bill amount toggle
-// ------------------------------
 function toggleBillAmountVisibility(status) {
   if (!billDiv) return;
   billDiv.style.display = status === "bill_collection" ? "block" : "none";
@@ -32,9 +25,6 @@ statusDropdown.addEventListener("change", function () {
   toggleBillAmountVisibility(this.value);
 });
 
-// ------------------------------
-// Location auto-refresh (every 10 seconds)
-// ------------------------------
 let lastKnownLocation = null; // { latitude, longitude, timestamp }
 let locationIntervalId = null;
 
@@ -94,7 +84,6 @@ async function refreshLocation() {
 }
 
 function startLocationAutoRefresh() {
-  // first refresh triggers permission prompt
   refreshLocation();
 
   if (locationIntervalId) clearInterval(locationIntervalId);
@@ -108,9 +97,6 @@ function isLocationFresh(maxAgeMs = 15000) {
   return Date.now() - lastKnownLocation.timestamp <= maxAgeMs;
 }
 
-// ------------------------------
-// Customers
-// ------------------------------
 async function fetchCustomers(query = "") {
   const token = localStorage.getItem("access_token");
   const response = await fetch(
@@ -233,7 +219,6 @@ checkInButton.addEventListener("click", async () => {
   const validated = validateInputs();
   if (!validated) return;
 
-  // ensure we have a fresh location right before sending
   if (!isLocationFresh(15000)) {
     await refreshLocation();
   }

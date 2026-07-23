@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const manualBarcodeInput = document.getElementById("manualBarcodeInput");
   const scanQtyInput = document.getElementById("scanQtyInput");
 
-  // ── Item-scanner camera (used after order is loaded) ──────────────────────
   let cameraStream = null;
   let loadedOrder = null;
 
@@ -43,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastDetectedAt = 0;
   let cameraInfoShown = false;
 
-  // ── Order-ID camera (used in the search section before order is loaded) ───
   const orderScanToggleBtn = document.getElementById("orderScanToggleBtn");
   const orderScanPanel = document.getElementById("orderScanPanel");
   const orderScanVideo = document.getElementById("orderScanVideo");
@@ -58,8 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initScannerModeToggle();
   updateActionButtons();
   initOrderScanToggle();
-
-  // ─── Search ───────────────────────────────────────────────────────────────
 
   searchOrderBtn.addEventListener("click", async () => {
     const sapOrderId = orderIdInput.value.trim();
@@ -147,8 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ─── Table interactions ───────────────────────────────────────────────────
-
   orderedItemsTableBody.addEventListener("click", (event) => {
     const minusBtn = event.target.closest(".minus-btn");
     if (!minusBtn) return;
@@ -187,8 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
     handleFinalCheckedInput(target, true);
   });
 
-  // ─── Start Checking ───────────────────────────────────────────────────────
-
   if (startCheckingBtn) {
     startCheckingBtn.addEventListener("click", async () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
@@ -219,7 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // "prepared" and "reviewed" both get reopened when the user wants to re-check
         if (["prepared", "reviewed"].includes(currentStatus)) {
           responsePayload = await reopenSapOrder(sapOrderId, token);
         } else {
@@ -239,8 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  // ─── Scan / Check ─────────────────────────────────────────────────────────
 
   if (submitScanBtn) {
     submitScanBtn.addEventListener("click", () => {
@@ -308,8 +297,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ─── Finish (Prepare) ─────────────────────────────────────────────────────
-
   if (finishOrderBtn) {
     finishOrderBtn.addEventListener("click", async () => {
       if (!loadedOrder?.sap_order?.sap_order_id) {
@@ -348,7 +335,6 @@ document.addEventListener("DOMContentLoaded", () => {
         populateOrderDetails(loadedOrder);
         updateActionButtons();
 
-        // Compute missing items from the actual returned data
         const missingCount = (loadedOrder.items || []).filter(
           (item) => Number(item.qty_remaining || 0) > 0,
         ).length;
@@ -375,13 +361,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ─── Review (NEW) ─────────────────────────────────────────────────────────
-
   if (reviewOrderBtn) {
     let reviewPendingConfirm = false;
 
     reviewOrderBtn.addEventListener("click", async () => {
-      // ── Permission check (client-side guard) ──────────────────────────────
       const me = getCurrentUserInfo();
       if (!me.is_admin && !me.is_storage_admin) {
         showMessage(
@@ -419,7 +402,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // ── Two-click confirmation (replaces browser confirm()) ───────────────
       if (!reviewPendingConfirm) {
         reviewPendingConfirm = true;
         reviewOrderBtn.textContent = "Tap again to confirm review";
@@ -427,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
           "A confirmation email will be sent to the team. Click 'Tap again to confirm review' to proceed.",
           false,
         );
-        // Auto-cancel after 5 s if user doesn't click again
         setTimeout(() => {
           if (reviewPendingConfirm) {
             reviewPendingConfirm = false;
@@ -438,7 +419,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Second click — proceed
       reviewPendingConfirm = false;
 
       try {
@@ -463,7 +443,6 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         console.error("Review failed:", error);
 
-        // Translate backend error messages into plain language
         const raw = error.message || "";
         let friendlyMsg;
         if (
@@ -492,12 +471,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ─── Auth ─────────────────────────────────────────────────────────────────
-
-  /**
-   * Decode the JWT sub payload to get current user id + username.
-   * Returns { user_id, username } or nulls if not available.
-   */
   function getCurrentUserInfo() {
     const possibleKeys = [
       "token",
@@ -562,10 +535,24 @@ document.addEventListener("DOMContentLoaded", () => {
     return null;
   }
 
-  // ─── HTTP helpers ─────────────────────────────────────────────────────────
+  function originOf(url) {
+    try {
+      return new URL(url, window.location.href).origin;
+    } catch (error) {
+      return url;
+    }
+  }
 
   async function requestJson(url, options = {}) {
-    const response = await fetch(url, options);
+    let response;
+    try {
+      response = await fetch(url, options);
+    } catch (error) {
+      throw new Error(
+        `Cannot reach the server at ${originOf(url)}. ` +
+          `It may be down, or the address/CORS settings may be wrong.`,
+      );
+    }
 
     let data = null;
     const rawText = await response.text();
@@ -574,12 +561,13 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         data = JSON.parse(rawText);
       } catch (error) {
-        data = { message: rawText };
+        data = rawText.trim().startsWith("<") ? null : { message: rawText };
       }
     }
 
     if (!response.ok) {
-      throw new Error(data?.message || `Request failed (${response.status}).`);
+      const detail = [data?.message, data?.error].filter(Boolean).join(" — ");
+      throw new Error(detail || `Request failed (HTTP ${response.status}).`);
     }
 
     return data;
@@ -644,7 +632,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // NEW — calls POST /sap-orders/<id>/review
   async function reviewSapOrder(sapOrderId, token) {
     return requestJson(
       `${API_BASE}/sap-orders/${encodeURIComponent(sapOrderId)}/review`,
@@ -654,8 +641,6 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     );
   }
-
-  // ─── Data normalisation ───────────────────────────────────────────────────
 
   function normalizeLoadedOrderPayload(payload) {
     const sapOrder = payload?.sap_order || payload || {};
@@ -670,7 +655,6 @@ document.addEventListener("DOMContentLoaded", () => {
         original_qty_checked: checked,
         draft_qty_checked: checked,
         draft_qty_remaining: Math.max(quantity - checked, 0),
-        // Preserve checker info returned by the backend
         checked_by_user_id: item.checked_by_user_id || null,
         checked_by_username: item.checked_by_username || null,
         checked_at: item.checked_at || null,
@@ -696,8 +680,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return { sap_order: sapOrder, items, summary };
   }
 
-  // ─── Render ───────────────────────────────────────────────────────────────
-
   function populateOrderDetails(payload) {
     const sapOrder = payload?.sap_order || {};
     const items = payload?.items || [];
@@ -706,7 +688,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadedOrderStatus.textContent = sapOrder.status || "-";
     loadedCustomerName.textContent = sapOrder.prepared_by_username || "-";
 
-    // NEW — reviewer fields (elements may be absent in older HTML, guard with ?.
     if (loadedReviewedBy) {
       loadedReviewedBy.textContent = sapOrder.reviewed_by_username || "-";
     }
@@ -714,7 +695,6 @@ document.addEventListener("DOMContentLoaded", () => {
       loadedReviewedAt.textContent = sapOrder.reviewed_at || "-";
     }
 
-    // Highlight status badge
     loadedOrderStatus.className =
       "status-badge status-" + (sapOrder.status || "unknown").toLowerCase();
 
@@ -764,8 +744,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ─── Draft logic ──────────────────────────────────────────────────────────
-
   function handleFinalCheckedInput(input, normalize = false) {
     const row = input.closest("tr");
     if (!row || !loadedOrder?.items?.length) return;
@@ -803,7 +781,6 @@ document.addEventListener("DOMContentLoaded", () => {
       0,
     );
 
-    // Record who made this change (from scan button or manual edit)
     if (checkerUserId !== undefined) {
       item.checked_by_user_id = checkerUserId;
       item.checked_by_username = checkerUsername || null;
@@ -839,8 +816,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return null;
   }
 
-  // ─── State helpers ────────────────────────────────────────────────────────
-
   function resetLoadedOrderUI(options = {}) {
     const { keepInputValue = false, preserveMessage = false } = options;
 
@@ -874,21 +849,12 @@ document.addEventListener("DOMContentLoaded", () => {
     updateActionButtons();
   }
 
-  /**
-   * The order is editable (scanning/checking allowed) only when status is
-   * one of the active working statuses.  "prepared" and "reviewed" are
-   * locked — the preparer must reopen, or a reviewer must act.
-   */
   function canEditDraft() {
     if (!loadedOrder?.sap_order?.sap_order_id) return false;
     const status = String(loadedOrder.sap_order.status || "").toLowerCase();
     return ["checked", "opened", "reopened"].includes(status);
   }
 
-  /**
-   * Returns true only when the order is in "prepared" status,
-   * meaning it's waiting for a reviewer to confirm it.
-   */
   function canReview() {
     if (!loadedOrder?.sap_order?.sap_order_id) return false;
     const status = String(loadedOrder.sap_order.status || "").toLowerCase();
@@ -908,8 +874,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ─── UI feedback ──────────────────────────────────────────────────────────
-
   function showLoader(show) {
     orderSearchLoader.classList.toggle("hidden", !show);
   }
@@ -927,31 +891,20 @@ document.addEventListener("DOMContentLoaded", () => {
     orderSearchMessage.style.color = isError ? "#dc2626" : "#16a34a";
   }
 
-  /**
-   * Central place that drives ALL button states based on current order status.
-   *
-   * Status flow:
-   *   checked → opened → (scanning) → prepared → reviewed
-   *                ↑_______reopen____________________|
-   */
   function updateActionButtons() {
     const hasLoadedOrder = Boolean(loadedOrder?.sap_order?.sap_order_id);
     const canEdit = canEditDraft();
     const canRev = canReview();
     const status = String(loadedOrder?.sap_order?.status || "").toLowerCase();
 
-    // Scan / Check button
     if (submitScanBtn) submitScanBtn.disabled = !canEdit;
 
-    // Finish (Prepare) button
     if (finishOrderBtn) finishOrderBtn.disabled = !canEdit;
 
-    // Qty field usable once an order is loaded
     if (scanQtyInput) scanQtyInput.disabled = !hasLoadedOrder;
 
     setDraftInputsDisabled(!canEdit);
 
-    // ── Start / Reopen button ──────────────────────────────────────────────
     if (startCheckingBtn) {
       startCheckingBtn.disabled = !hasLoadedOrder;
 
@@ -966,10 +919,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // ── Review button ──────────────────────────────────────────────────────
     if (reviewOrderBtn) {
-      // Always show the button once an order is loaded — hide it only
-      // when there is no order at all.
       reviewOrderBtn.classList.toggle("hidden", !hasLoadedOrder);
 
       if (status === "reviewed") {
@@ -979,13 +929,10 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         reviewOrderBtn.textContent = "Confirm Review";
         reviewOrderBtn.classList.remove("reviewed");
-        // Enabled only when status is "prepared"
         reviewOrderBtn.disabled = !canRev;
       }
     }
   }
-
-  // ─── Order-ID camera (search camera) ─────────────────────────────────────
 
   function initOrderScanToggle() {
     if (!orderScanToggleBtn) return;
@@ -1110,12 +1057,10 @@ document.addEventListener("DOMContentLoaded", () => {
           orderLastBarcode = raw;
           orderLastAt = now;
 
-          // Fill the order ID input and fire the search
           if (orderIdInput) orderIdInput.value = raw;
           clearInterval(orderDetectorInterval);
           orderDetectorInterval = null;
 
-          // Small delay so the user can see the value appear before search starts
           setTimeout(() => {
             searchOrderBtn.click();
           }, 300);
@@ -1123,8 +1068,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 400);
     })();
   }
-
-  // ─── Camera / Scanner ─────────────────────────────────────────────────────
 
   function initScannerModeToggle() {
     if (
@@ -1279,8 +1222,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (video) video.srcObject = null;
   }
 
-  // ─── Utilities ────────────────────────────────────────────────────────────
-
   function normalizeBarcode(value) {
     return String(value || "")
       .trim()
@@ -1296,17 +1237,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 900);
   }
 
-  // ─── Checker cell renderer ────────────────────────────────────────────────
-
-  /**
-   * Returns an HTML string for the "Checked By" cell.
-   *
-   * States:
-   *   • Not checked yet  — grey badge "Not checked yet"
-   *   • Fully checked    — green badge with username + "X min ago"
-   *   • Partially / missing — amber badge with username + remaining note
-   *   • Draft (in-session change, no server timestamp yet) — blue badge
-   */
   function renderCheckerCell(item) {
     const qty = Number(item.quantity || 0);
     const checked = Number(item.draft_qty_checked ?? item.qty_checked ?? 0);
@@ -1316,17 +1246,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = item.checked_by_username || null;
     const checkedAt = item.checked_at || null;
 
-    // Nothing touched at all
     if (!username && checked === 0) {
       return `<span class="checker-badge checker-none">Not checked yet</span>`;
     }
 
-    // Has a username (from server or just set in this session)
     const nameLabel = escapeHtml(username || "You");
     const timeLabel = checkedAt ? `· ${timeAgo(checkedAt)}` : `· just now`;
 
     if (remaining === 0 && checked >= qty && qty > 0) {
-      // Fully done ✓
       return `
         <span class="checker-badge checker-done" title="Checked at ${escapeHtml(checkedAt || "this session")}">
           ✓ ${nameLabel} <small>${timeLabel}</small>
@@ -1334,28 +1261,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (checked > 0 && remaining > 0) {
-      // Partially checked — missing items
       return `
         <span class="checker-badge checker-partial" title="Checked at ${escapeHtml(checkedAt || "this session")}">
           ⚠ ${nameLabel} <small>· ${remaining} missing ${timeLabel}</small>
         </span>`;
     }
 
-    // checked = 0 but username exists (was reset / reopened after being checked)
     return `
       <span class="checker-badge checker-reset" title="Previously checked by ${nameLabel}">
         — ${nameLabel} <small>(reset)</small>
       </span>`;
   }
 
-  /**
-   * Returns a human-readable relative time string for a datetime string.
-   * e.g. "just now", "2 min ago", "1 hr ago", "3 days ago"
-   */
   function timeAgo(datetimeStr) {
     if (!datetimeStr) return "";
     try {
-      // Backend returns "YYYY-MM-DD HH:MM:SS" (no timezone suffix) — treat as local
       const normalized = datetimeStr.replace(" ", "T");
       const date = new Date(normalized);
       if (isNaN(date.getTime())) return datetimeStr;

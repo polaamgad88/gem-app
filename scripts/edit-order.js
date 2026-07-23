@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", async function () {
-  // Get order ID from URL
   const orderId = Utils.URL.getParam("order_id");
   if (!orderId) {
     alert("No order ID specified in the URL.");
@@ -7,25 +6,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  // Check authentication
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
 
-  // Load order data
   try {
     Utils.UI.showLoader("loader");
     const order = await fetchOrderDetails(orderId, token);
 
-    // Populate order information
     populateOrderInfo(order, token);
 
-    // Populate editable items
     populateEditableItems(order, token);
 
-    // Set up event listeners
     setupEventListeners(orderId, token);
 
-    // Check screen size and toggle view if needed
     Utils.UI.checkScreenSize();
     window.addEventListener("resize", Utils.UI.checkScreenSize);
 
@@ -37,7 +30,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-// Helper function to fetch order details
 async function fetchOrderDetails(orderId, token) {
   const res = await fetch(`https://order-app.gemegypt.net/api/orders/find/${orderId}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -52,9 +44,7 @@ async function fetchOrderDetails(orderId, token) {
   return await res.json();
 }
 
-// Helper function to fetch customer addresses
 async function fetchCustomerAddresses(customerId, token) {
-  // Using the endpoint specified by the user
   const res = await fetch(
     `https://order-app.gemegypt.net/api/customers/${customerId}/addresses`,
     {
@@ -74,7 +64,6 @@ async function fetchCustomerAddresses(customerId, token) {
   return await res.json();
 }
 
-// Helper function to populate order information
 async function populateOrderInfo(order, token) {
   document.getElementById("orderId").textContent = `#${order.order_id}`;
   document.getElementById("order-id").textContent = `#${order.order_id}`;
@@ -93,31 +82,26 @@ async function populateOrderInfo(order, token) {
     "customer-id"
   ).textContent = `CUST-${order.customer_id}`;
 
-  // Fetch customer addresses and populate dropdown
   try {
     const addressSelect = document.getElementById("customer-address-select");
     addressSelect.innerHTML = '<option value="">Loading addresses...</option>';
 
     const addressData = await fetchCustomerAddresses(order.customer_id, token);
-    // Handle both possible response formats (addresses array or direct array)
     const addresses = addressData.addresses || addressData || [];
 
     if (addresses.length === 0) {
-      // If no addresses found, show the current address as text
       addressSelect.innerHTML = `<option value="">${
         order.address || "No address available"
       }</option>`;
       return;
     }
 
-    // Populate dropdown with addresses
     addressSelect.innerHTML = "";
     addresses.forEach((addr) => {
       const option = document.createElement("option");
       option.value = addr.address_id;
       option.textContent = addr.address;
 
-      // Select the current address if it matches
       if (addr.address === order.address) {
         option.selected = true;
       }
@@ -125,11 +109,9 @@ async function populateOrderInfo(order, token) {
       addressSelect.appendChild(option);
     });
 
-    // Store the customer ID in a data attribute for later use
     addressSelect.dataset.customerId = order.customer_id;
   } catch (err) {
     console.error("Error fetching customer addresses:", err);
-    // Fallback to displaying the current address as text
     const addressSelect = document.getElementById("customer-address-select");
     addressSelect.innerHTML = `<option value="">${
       order.address || "No address available"
@@ -157,7 +139,6 @@ function populateEditableItems(order, token) {
       ? `https://order-app.gemegypt.net/api/images/${item.image_path}`
       : "";
 
-    // === Table Row ===
     const row = document.createElement("tr");
     row.dataset.productId = productId;
     row.dataset.price = price;
@@ -181,7 +162,6 @@ function populateEditableItems(order, token) {
     `;
     tableBody.appendChild(row);
 
-    // === Card View ===
     const card = document.createElement("div");
     card.className = "item-card";
     card.dataset.productId = productId;
@@ -207,11 +187,9 @@ function populateEditableItems(order, token) {
     `;
     cardsContainer.appendChild(card);
 
-    // === Sync logic ===
     const rowQty = row.querySelector(".qty");
     const cardQty = card.querySelector(".qty");
 
-    // Sync quantity between row and card
     const syncQty = (sourceInput, targetInput) => {
       targetInput.value = sourceInput.value;
       updateTotals();
@@ -220,7 +198,6 @@ function populateEditableItems(order, token) {
     rowQty.addEventListener("input", () => syncQty(rowQty, cardQty));
     cardQty.addEventListener("input", () => syncQty(cardQty, rowQty));
 
-    // Sync removal from either view
     const removeBoth = () => {
       row.remove();
       card.remove();
@@ -231,41 +208,33 @@ function populateEditableItems(order, token) {
     card.querySelector(".remove-btn").addEventListener("click", removeBoth);
   });
 
-  // Set initial total
   document.getElementById(
     "total-price"
   ).textContent = `EGP ${total.toLocaleString()}`;
 }
 
-// Helper function to update totals
 function updateTotals() {
   let total = 0;
 
-  // Calculate from table rows
   document.querySelectorAll("#editable-items-body tr").forEach((row) => {
-    // Skip temporary rows
     if (row.classList.contains("temp-product-row")) return;
 
     const price = parseFloat(row.dataset.price);
     const qty = parseInt(row.querySelector(".qty").value);
     const itemTotal = price * qty;
 
-    // Update item total cell
     row.cells[4].textContent = `EGP ${itemTotal.toLocaleString()}`;
 
     total += itemTotal;
   });
 
-  // Update card totals
   document.querySelectorAll(".item-card").forEach((card) => {
-    // Skip temporary cards
     if (card.classList.contains("temp-product-card")) return;
 
     const price = parseFloat(card.dataset.price);
     const qty = parseInt(card.querySelector(".qty").value);
     const itemTotal = price * qty;
 
-    // Update item total in card
     const totalElement = card.querySelector(".item-card-body p:last-child");
     if (totalElement) {
       totalElement.innerHTML = `<span class="item-card-label">Total:</span> EGP ${itemTotal.toFixed(
@@ -274,20 +243,16 @@ function updateTotals() {
     }
   });
 
-  // Update total price
   document.getElementById(
     "total-price"
   ).textContent = `EGP ${total.toLocaleString()}`;
 }
 
-// Helper function to set up event listeners
 function setupEventListeners(orderId, token) {
-  // Add product button
   document
     .getElementById("add-product-btn")
     .addEventListener("click", async () => {
       try {
-        // Fetch brands first for the dropdown
         const brandsResponse = await fetch(
           "https://order-app.gemegypt.net/api/products/brands/orders",
           {
@@ -311,7 +276,6 @@ function setupEventListeners(orderId, token) {
       }
     });
 
-  // Save order button
   document.getElementById("save-order").addEventListener("click", async () => {
     await saveOrder(orderId, token);
   });
@@ -571,12 +535,10 @@ async function addProductToOrder(productId, price, quantity, token) {
       ? `https://order-app.gemegypt.net/api/images/${productData.image_path}`
       : "";
 
-    // Remove any temp UI
     document
       .querySelectorAll(".temp-product-row, .temp-product-card")
       .forEach((el) => el.remove());
 
-    // === Table Row ===
     const tableBody = document.getElementById("editable-items-body");
     const row = document.createElement("tr");
     row.dataset.productId = productId;
@@ -601,7 +563,6 @@ async function addProductToOrder(productId, price, quantity, token) {
     `;
     tableBody.appendChild(row);
 
-    // === Card View ===
     const cardsContainer = document.getElementById("editable-items-cards");
     const card = document.createElement("div");
     card.className = "item-card";
@@ -634,7 +595,6 @@ async function addProductToOrder(productId, price, quantity, token) {
     `;
     cardsContainer.appendChild(card);
 
-    // === Quantity Sync ===
     const rowQty = row.querySelector(".qty");
     const cardQty = card.querySelector(".qty");
 
@@ -646,7 +606,6 @@ async function addProductToOrder(productId, price, quantity, token) {
     rowQty.addEventListener("input", () => syncQty(rowQty, cardQty));
     cardQty.addEventListener("input", () => syncQty(cardQty, rowQty));
 
-    // === Remove Sync ===
     const removeBoth = () => {
       row.remove();
       card.remove();
@@ -663,12 +622,10 @@ async function addProductToOrder(productId, price, quantity, token) {
   }
 }
 
-// Helper function to save the order
 async function saveOrder(orderId, token) {
   try {
     Utils.UI.showLoader("loader");
 
-    // Get the selected address ID
     const addressSelect = document.getElementById("customer-address-select");
     const addressId = addressSelect.value;
     const customerId = addressSelect.dataset.customerId;
@@ -709,7 +666,6 @@ async function saveOrder(orderId, token) {
       return;
     }
 
-    // Prepare the request data in the format specified by the user
     const requestData = {
       customer_id: parseInt(customerId),
       address_id: parseInt(addressId),
@@ -719,7 +675,6 @@ async function saveOrder(orderId, token) {
 
     console.log("Sending order update with data:", requestData);
 
-    // Send request as JSON directly
     const res = await fetch(`https://order-app.gemegypt.net/api/orders/edit/${orderId}`, {
       method: "POST", // Using proper PUT method with JSON
       headers: {

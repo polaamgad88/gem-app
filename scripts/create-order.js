@@ -1,15 +1,11 @@
 document.addEventListener("DOMContentLoaded", async function () {
-  // Check authentication
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
 
-  // Set up event listeners
   setupEventListeners(token);
 
-  // Initialize form elements
   document.getElementById("order-date").valueAsDate = new Date();
 
-  // Load initial data
   try {
     Utils.UI.showLoader("loader");
 
@@ -36,7 +32,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       ),
     ]);
 
-    // ✅ Make products globally accessible
     window.allProducts = products;
 
     populateCustomerDropdown(customers);
@@ -94,62 +89,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   fileInput.addEventListener("change", () => {
     fileNameSpan.textContent = fileInput.files[0]?.name || "No file chosen";
   });
-  // The oldest uploaded file functionality is commented out
-  // document
-  //   .getElementById("upload-sheet-btn")
-  //   .addEventListener("click", async () => {
-  //     const file = fileInput.files[0];
-  //     const customerId = document.getElementById("customer-select").value;
-  //     const addressId = document.getElementById("address-select").value;
 
-  //     if (!file) {
-  //       alert("❌ Please choose an Excel file first.");
-  //       return;
-  //     }
-
-  //     if (!customerId || !addressId) {
-  //       alert("❌ Please select both a customer and an address.");
-  //       return;
-  //     }
-
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("customer_id", customerId);
-  //     formData.append("address_id", addressId);
-
-  //     try {
-  //       Utils.UI.showLoader("loader");
-
-  //       const res = await fetch(
   //         "https://order-app.gemegypt.net/api/orders/upload-sheet",
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-  //           },
-  //           body: formData,
-  //         }
-  //       );
 
-  //       Utils.UI.hideLoader("loader");
-  //       const data = await res.json();
-
-  //       if (res.ok) {
-  //         alert("✅ Order created successfully from sheet.");
-  //         sessionStorage.removeItem("orderDraft");
-  //         window.location.href = `view-order.html?order_id=${data.order_id}`;
-  //       } else {
-  //         alert(`❌ Failed to upload: ${data.message || "Unknown error"}`);
-  //         if (data.note) {
-  //           console.warn("Note:", data.note);
-  //         }
-  //       }
-  //     } catch (err) {
-  //       Utils.UI.hideLoader("loader");
-  //       console.error("Upload error:", err);
-  //       alert("❌ An error occurred while uploading the sheet.");
-  //     }
-  //   });
 });
 function saveOrderToSession() {
   const customerId = document.getElementById("customer-select").value;
@@ -375,7 +317,6 @@ function loadOrderFromSession() {
   }
 }
 
-// Helper function to fetch lists from API
 async function fetchList(url, key, token) {
   try {
     const res = await fetch(url, {
@@ -435,7 +376,6 @@ function populateCustomerDropdown(customers) {
     renderSuggestions(matches);
   });
 
-  // Show all on focus
   searchInput.addEventListener("focus", () => {
     renderSuggestions(allCustomers);
   });
@@ -458,9 +398,7 @@ function populateCustomerDropdown(customers) {
   });
 }
 
-// Helper function to set up event listeners
 function setupEventListeners(token) {
-  // Customer select change event
   document
     .getElementById("customer-select")
     .addEventListener("change", async (e) => {
@@ -496,7 +434,6 @@ function setupEventListeners(token) {
       }
     });
 
-  // Submit order button
   document
     .getElementById("submit-order")
     .addEventListener("click", async () => {
@@ -504,7 +441,6 @@ function setupEventListeners(token) {
     });
 }
 
-// Helper function to set up add row buttons
 function setupAddRowButtons(brands, categoryOptions, productOptions) {
   document.querySelectorAll(".add-row-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -679,7 +615,6 @@ function addOrderRow(container, brands, products) {
     lockedRow.dataset.productPrice = selectedProduct.price;
 
     container.insertBefore(lockedRow, row);
-    // row.remove();
     barcodeInput.value = "";
     nameInput.value = "";
     quantityInput.value = "";
@@ -701,11 +636,9 @@ function addOrderRow(container, brands, products) {
       row.dataset.selectedProductId = productId;
       barcodeSuggestions.style.display = "none";
 
-      // Show name in input to indicate selection
       nameInput.value = `${product.product_name}`;
       quantityInput.style.border = "2px solid red";
 
-      // Wait for user to enter qty
     }
   });
 
@@ -721,7 +654,6 @@ function addOrderRow(container, brands, products) {
       nameInput.value = `${product.product_name}`;
       quantityInput.style.border = "2px solid red";
 
-      // Wait for quantity to be filled
     }
   });
 
@@ -798,7 +730,6 @@ function addOrderRow(container, brands, products) {
   });
 
   nameInput.addEventListener("focus", () => {
-    // Always show all suggestions when field is focused
     nameSuggestions.innerHTML = "";
     const brand = brandSelect.value;
     const category = categorySelect.value;
@@ -1264,13 +1195,11 @@ async function submitOrder(token) {
 
 if (typeof window.toggleTab !== "function") {
   window.toggleTab = function (id, it) {
-    // Automatically close the other tab when one is opened
     const allTabs = {
       "detailed-order-content": "combined-order",
       "combined-order": "detailed-order-content",
     };
 
-    // Close the opposite tab if we're opening one
     const oppositeId = allTabs[id];
     if (it === 1 && oppositeId) {
       const oppositeContent = document.getElementById(oppositeId);
@@ -1282,7 +1211,6 @@ if (typeof window.toggleTab !== "function") {
       }
     }
 
-    // Toggle current tab
     const content = document.getElementById(id);
     const arrow = content.previousElementSibling.querySelector(".arrow");
     const isVisible = content.style.display === "block";
@@ -1315,7 +1243,6 @@ function saveNote() {
   }
 }
 
-// The newest uploaded file functionality
 document
   .getElementById("order-sheet")
   .addEventListener("change", function (event) {

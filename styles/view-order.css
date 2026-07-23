@@ -216,7 +216,6 @@ table {
   border: 1px solid #eef0f4;
 }
 
-/* Order info grid */
 .order-info-grid {
   display: flex;
   gap: 16px;
@@ -281,7 +280,6 @@ table {
   white-space: pre-wrap;
 }
 
-/* Action buttons */
 .order-actions {
   display: flex;
   justify-content: flex-end;
@@ -342,7 +340,6 @@ table {
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
 }
 
-/* Back link */
 .back-link {
   display: inline-block;
   margin-bottom: var(--spacing-md);
@@ -360,7 +357,6 @@ table {
 
 .back-link:before { content: none; }
 
-/* Card view */
 .card-view {
   display: none;
 }
@@ -422,7 +418,6 @@ table {
   margin-right: 4px;
 }
 
-/* Dark mode */
 body.dark-mode {
   background-color: #0f1115;
   color: #e2e8f0;
@@ -497,7 +492,6 @@ body.dark-mode .back-link {
   border-color: #2a2e36;
 }
 
-/* Responsive */
 @media (max-width: 992px) {
   .container {
     padding: var(--spacing-md);

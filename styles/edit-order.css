@@ -244,7 +244,6 @@ h2 {
   margin-top: 16px;
 }
 
-/* Customer note */
 #customer-note {
   width: 100%;
   padding: 12px 14px;
@@ -263,7 +262,6 @@ h2 {
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
 }
 
-/* Search container */
 .search-container {
   display: flex;
   flex-direction: column;
@@ -393,7 +391,6 @@ h2 {
   background-color: #f8fafc;
 }
 
-/* Order info grid */
 .order-info-grid {
   display: flex;
   gap: 16px;
@@ -427,7 +424,6 @@ h2 {
   align-items: center;
 }
 
-/* Card view for mobile */
 .card-view {
   display: none;
 }
@@ -476,7 +472,6 @@ h2 {
   color: var(--gray-700);
 }
 
-/* Back link */
 .back-link {
   display: inline-block;
   margin-bottom: var(--spacing-md);
@@ -494,7 +489,6 @@ h2 {
 
 .back-link:before { content: none; }
 
-/* Dark mode */
 body.dark-mode {
   background-color: #0f1115;
   color: #e2e8f0;
@@ -599,7 +593,6 @@ body.dark-mode .search-container {
   border-color: #2a2e36;
 }
 
-/* Responsive */
 @media (max-width: 992px) {
   .container {
     padding: var(--spacing-md);

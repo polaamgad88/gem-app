@@ -145,7 +145,6 @@ select {
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
 }
 
-/* Checkbox group */
 .checkbox-group {
   display: flex;
   align-items: center;
@@ -175,7 +174,6 @@ select {
   accent-color: var(--danger-color);
 }
 
-/* Flags section */
 .flags-section {
   border: 1px solid #eef0f4;
   border-radius: 10px;
@@ -215,7 +213,6 @@ select {
 #create-user-form button[type="submit"]:hover { filter: brightness(1.06); }
 #create-user-form button[type="submit"]:active { transform: translateY(1px); }
 
-/* Dark mode */
 body.dark-mode {
   background-color: #0f1115 !important;
   color: #e2e8f0 !important;
@@ -261,7 +258,6 @@ body.dark-mode .mutex-note {
   color: #64748b;
 }
 
-/* Responsive */
 @media (max-width: 576px) {
   body {
     padding: 10px;

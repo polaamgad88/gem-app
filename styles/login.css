@@ -1,5 +1,3 @@
-/* Login page — standalone (no base.css needed) */
-
 *,
 *::before,
 *::after {
@@ -23,7 +21,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* decorative circles */
 body::before {
   content: "";
   position: absolute;
@@ -243,7 +240,6 @@ input:focus {
   z-index: 1;
 }
 
-/* Smaller decorative circles on small screens */
 @media (max-width: 768px) {
   body::before {
     width: 220px;

@@ -62,7 +62,6 @@ h3 {
   letter-spacing: -0.2px;
 }
 
-/* Order header */
 .order-header {
   display: flex;
   flex-wrap: wrap;
@@ -77,7 +76,6 @@ h3 {
   min-width: 200px;
 }
 
-/* Tabs (collapsibles) */
 .tabs {
   margin-bottom: 28px;
 }
@@ -209,7 +207,6 @@ h3 {
 .add-row-btn.primary:hover { filter: brightness(1.08); }
 .add-row-btn.primary:active { transform: translateY(1px); }
 
-/* Order summary */
 .order-summary {
   display: flex;
   justify-content: space-between;
@@ -253,7 +250,6 @@ h3 {
   text-align: center;
 }
 
-/* Order preview */
 .order-preview {
   margin-top: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
@@ -310,7 +306,6 @@ h3 {
 #submit-order:hover { filter: brightness(1.06); }
 #submit-order:active { transform: translateY(1px); }
 
-/* Product selection */
 .product-select,
 .brand-select,
 .category-select {
@@ -318,7 +313,6 @@ h3 {
   min-width: 150px;
 }
 
-/* Quantity controls */
 .quantity-wrapper {
   display: flex;
   align-items: center;
@@ -365,7 +359,6 @@ h3 {
 
 .delete-btn:hover { background-color: var(--danger-dark); }
 
-/* Loader */
 #preview-loader {
   text-align: center;
   padding: var(--spacing-md);
@@ -373,7 +366,6 @@ h3 {
   font-weight: 600;
 }
 
-/* Back link */
 .back-link {
   display: inline-block;
   margin-bottom: var(--spacing-md);
@@ -391,7 +383,6 @@ h3 {
 
 .back-link:before { content: none; }
 
-/* Barcode */
 .barcode-input {
   flex: 2;
   min-width: 150px;
@@ -426,7 +417,6 @@ h3 {
   justify-content: center;
 }
 
-/* Preview cards */
 .order-preview-cards {
   display: flex;
   flex-direction: column;
@@ -479,7 +469,6 @@ h3 {
   border: 2px solid #0b2a59;
 }
 
-/* Customer select */
 .custom-customer-select {
   position: relative;
   flex: 1;
@@ -553,7 +542,6 @@ h3 {
   background-color: var(--gray-100);
 }
 
-/* Note */
 .note-section {
   margin-bottom: 16px;
   font-size: 14px;
@@ -577,14 +565,12 @@ h3 {
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
 }
 
-/* Section divider */
 .section-divider {
   border: none;
   border-top: 1px solid #eef0f4;
   margin: 36px 0;
 }
 
-/* Upload section */
 .upload-heading {
   text-align: center;
   margin-bottom: 12px;
@@ -636,7 +622,6 @@ h3 {
   color: #495057;
 }
 
-/* Responsive input helper */
 .responsive-input {
   flex: 1 1 30%;
   padding: 12px 14px;
@@ -663,7 +648,6 @@ h3 {
   width: 100%;
 }
 
-/* Dark mode */
 body.dark-mode {
   background-color: #0f1115 !important;
   color: #e2e8f0 !important;
@@ -747,9 +731,6 @@ body.dark-mode .custom-customer-select ul {
   border-color: #2a2e36 !important;
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   Responsive
-   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (min-width: 992px) {
   .order-preview-cards {
     display: flex;
@@ -856,7 +837,6 @@ body.dark-mode .custom-customer-select ul {
     margin-top: var(--spacing-xs);
   }
 
-  /* Simplified preview table */
   .order-preview-table th:nth-child(1),
   .order-preview-table td:nth-child(1) {
     display: none;
@@ -868,7 +848,6 @@ body.dark-mode .custom-customer-select ul {
     font-size: var(--font-size-sm);
   }
 
-  /* Preview cards */
   .preview-card {
     padding: 10px;
     gap: 10px;

@@ -1,5 +1,3 @@
-// reports.js (full updated file)
-
 document.addEventListener("DOMContentLoaded", async () => {
   const token = await Utils.Auth.requireAuth();
   if (!token) return;
@@ -64,10 +62,6 @@ function todayDate() {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
-/**
- * ✅ Initialize the date inputs to "this month → today" if empty
- * (You can change it to full month end if you prefer.)
- */
 function initDateInputs() {
   const startEl = document.getElementById("dateStart");
   const endEl = document.getElementById("dateEnd");
@@ -77,9 +71,6 @@ function initDateInputs() {
   if (!endEl.value) endEl.value = formatYYYYMMDD(todayDate());
 }
 
-/**
- * ✅ Read selected range from inputs, with safe fallback to "this month → today"
- */
 function getSelectedRange() {
   const startEl = document.getElementById("dateStart");
   const endEl = document.getElementById("dateEnd");
@@ -100,7 +91,6 @@ function getSelectedRange() {
     if (endEl) endEl.value = endStr;
   }
 
-  // if user picks reversed, swap
   if (start.getTime() > end.getTime()) {
     const tmp = start;
     start = end;
@@ -119,10 +109,6 @@ function getSelectedRange() {
   };
 }
 
-/**
- * ✅ Previous range with SAME length as selected range:
- * prevEnd = day before start, prevStart = prevEnd - (len-1 days)
- */
 function getPreviousSameLengthRange(start, end) {
   const msDay = 24 * 60 * 60 * 1000;
   const lenDays = Math.round((end.getTime() - start.getTime()) / msDay) + 1;
@@ -203,11 +189,6 @@ async function apiGet(path, token, params = {}) {
   return { res, data: await safeJson(res) };
 }
 
-/**
- * Get visits count + sum(amount). Backend now returns `total_amount` as a
- * server-side aggregate, so a single request is enough. Falls back to client-side
- * pagination for older backends that don't return total_amount.
- */
 async function getVisitStats(token, startDate, endDate, userId = null) {
   const params = {
     start_date: startDate,
@@ -222,12 +203,10 @@ async function getVisitStats(token, startDate, endDate, userId = null) {
 
   const total = Number(data.total || 0);
 
-  // Fast path: server-aggregated total_amount.
   if (typeof data.total_amount === "number") {
     return { total, amountSum: Number(data.total_amount) };
   }
 
-  // Slow path: paginate client-side (legacy backends).
   const limit = 200;
   let page = 1;
   let amountSum = 0;
@@ -258,7 +237,6 @@ async function getCustomersTotal(token) {
     limit: 1,
   });
   if (!res.ok) return 0;
-  // Backend returns: {customers, total, page, pages}
   if (data && typeof data.total === "number") return data.total;
   if (data && Array.isArray(data.customers)) return data.customers.length;
   if (data && Array.isArray(data.data)) return data.data.length;
@@ -285,23 +263,19 @@ function escapeHtml(str) {
 async function loadDashboard(token) {
   Utils.UI.hideError?.("error-message");
 
-  // ✅ Use dashboard-like date inputs
   const { start, end, startStr, endStr } = getSelectedRange();
   setRangeLabel(startStr, endStr);
 
-  // previous same-length range
   const { prevStart, prevEnd } = getPreviousSameLengthRange(start, end);
   const prevStartStr = formatYYYYMMDD(prevStart);
   const prevEndStr = formatYYYYMMDD(prevEnd);
 
-  // ---- Target (mock) ----
   const targetPct = 0;
   const targetEl = document.getElementById("target-achieved");
   if (targetEl) {
     targetEl.innerHTML = `${targetPct.toFixed(1)}<span class="unit">%</span>`;
   }
 
-  // ---- Main stats: visits + collected (sum amount) ----
   const [thisStats, prevStats] = await Promise.all([
     getVisitStats(token, startStr, endStr),
     getVisitStats(token, prevStartStr, prevEndStr),
@@ -319,26 +293,21 @@ async function loadDashboard(token) {
   const collectedEl = document.getElementById("collected-amounts");
   if (collectedEl) collectedEl.textContent = Utils.Format.currency(amountThis);
 
-  // trends
   setTrend("trend-visits", pctChange(visitsThis, visitsPrev));
   setTrend("trend-collected", pctChange(amountThis, amountPrev));
 
-  // Badge trend (keep using visits trend for now)
   setBadgeTrend(pctChange(visitsThis, visitsPrev));
 
-  // ---- customers linked ----
   const customersTotal = await getCustomersTotal(token);
   const customersEl = document.getElementById("customers-linked");
   if (customersEl) customersEl.textContent = String(customersTotal);
 
-  // linked trend placeholder
   const linkedTrendEl = document.getElementById("trend-linked");
   if (linkedTrendEl) {
     linkedTrendEl.classList.add("trend-up");
     linkedTrendEl.innerHTML = `<i class="fa-solid fa-minus"></i> <span id="trend-linked-text">0</span>`;
   }
 
-  // ---- team breakdown ----
   await loadTeamBreakdown(token, startStr, endStr);
 }
 

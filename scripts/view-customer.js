@@ -1,5 +1,3 @@
-/* View Customer page — refactored to use Utils.Api + capture map lat/lon. */
-
 const { Api, Auth, DOM, Format } = window.Utils;
 const esc = DOM.escapeHtml;
 
@@ -35,8 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   wireOrderViewDelegation();
 });
 
-// ── Map ─────────────────────────────────────────────────────────────────────
-
 function initAddressMap() {
   if (typeof L === "undefined") return;
   const mapEl = document.getElementById("map");
@@ -67,8 +63,6 @@ function resetMarker() {
   selectedLat = null;
   selectedLng = null;
 }
-
-// ── Edit Customer modal ─────────────────────────────────────────────────────
 
 function wireEditCustomerModal(customerId) {
   const openBtn = document.getElementById("edit-customer-btn");
@@ -117,8 +111,6 @@ function wireEditCustomerModal(customerId) {
   });
 }
 
-// ── Delegate modal ──────────────────────────────────────────────────────────
-
 function wireDelegateModal(customerId) {
   const openBtn = document.getElementById("add-Delegate-btn");
   const modal = document.getElementById("Delegate-modal");
@@ -150,8 +142,6 @@ function wireDelegateModal(customerId) {
     }
   });
 }
-
-// ── Address modal ───────────────────────────────────────────────────────────
 
 function wireAddressModal(customerId) {
   const openBtn = document.getElementById("add-address-btn");
@@ -209,8 +199,6 @@ function wireAddressModal(customerId) {
     }
   });
 }
-
-// ── Data loads ──────────────────────────────────────────────────────────────
 
 async function loadCustomerAddresses(customerId) {
   try {
@@ -414,7 +402,6 @@ function viewOrder(orderId) {
   window.location.href = `view-order.html?order_id=${orderId}`;
 }
 
-// Event delegation for dynamic table/card buttons
 function wireOrderViewDelegation() {
   document.body.addEventListener("click", (e) => {
     const t = e.target.closest("[data-action]");
@@ -428,7 +415,6 @@ function wireOrderViewDelegation() {
   });
 }
 
-// Legacy inline handlers (in case onclick still references them)
 window.viewOrder = viewOrder;
 window.removeDelegate = removeDelegate;
 window.editAddress = editAddress;

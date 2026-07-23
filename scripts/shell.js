@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const regionBadge = document.getElementById("region-badge");
   const links     = document.querySelectorAll("#nav a");
 
-  // ── Region badge ───────────────────────────────────
   const region = (localStorage.getItem("region") || "cairo").toLowerCase();
   if (regionBadge) {
     regionBadge.textContent = region === "alex" ? "ALEX" : "CAIRO";
@@ -22,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.add("region-cairo");
   }
 
-  // ── Theme ──────────────────────────────────────────
   function setTheme(mode) {
     document.body.classList.toggle("dark-mode", mode === "dark");
     themeBtn.textContent = mode === "dark" ? "☀️ Light" : "🌙 Dark";
@@ -45,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {}
   });
 
-  // ── Navigation ─────────────────────────────────────
   function highlight(page) {
     const target = page.split("/").pop().split("?")[0];
     links.forEach((a) => {
@@ -79,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (req) go(req);
   else highlight("dashboard.html");
 
-  // ── Drawer toggle ──────────────────────────────────
   function openDrawer() {
     drawer.classList.add("open");
     overlay.classList.add("open");
@@ -110,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.innerWidth > 768) closeDrawer();
   }, 150));
 
-  // ── Logout ─────────────────────────────────────────
   logoutBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     try { await Utils.Auth.logout(); } catch {}
