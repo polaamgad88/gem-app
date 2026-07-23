@@ -53,6 +53,10 @@
     <div class="toolbar-field toolbar-field--grow">
       <input type="search" id="orderSearch" placeholder="Search order no, customer or delegate..." />
     </div>
+    <div class="segmented" id="dateFieldSwitch" role="group" aria-label="Date column shows">
+      <button type="button" data-field="update_date" class="active">Updated</button>
+      <button type="button" data-field="order_date">Created</button>
+    </div>
     <button id="filtersToggle" type="button" class="filters-toggle" aria-expanded="false">
       <span class="chev" aria-hidden="true"></span>
       <span>Filters</span>
@@ -121,7 +125,7 @@
         <tr>
           <th class="col-check"><input type="checkbox" id="checkAll" aria-label="Select all" /></th>
           <th class="col-id">Order</th>
-          <th class="col-date sortable" data-sort="date">Updated</th>
+          <th class="col-date sortable" data-sort="date" id="dateColumnHeader">Updated</th>
           <th>Customer</th>
           <th class="col-user">Delegate</th>
           <th class="col-status">Status</th>

@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     allCustomers: [],
     selected: new Set(),
     searchTerm: "",
+    dateField: "update_date",
     currentPage: 1,
     totalPages: 1,
     total: 0,
@@ -29,13 +30,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupEventListeners();
 
-  try {
-    await Promise.all([fetchUsers(), fetchCustomers()]);
-    await fetchAndRenderOrders();
-  } catch (err) {
-    console.error(err);
-    UI.showError("Failed to load orders.");
-  }
+  // Orders first. The delegate/customer lists only populate filter dropdowns
+  // and the export datalists, and /customers?all=true pulls every customer —
+  // waiting on those before asking for orders was most of the startup delay.
+  const ordersReady = fetchAndRenderOrders();
+  Promise.all([fetchUsers(), fetchCustomers()]).catch((err) =>
+    console.error("Failed to load filter lists:", err)
+  );
+  await ordersReady;
 
   UI.checkScreenSize();
   window.addEventListener("resize", Async.throttle(UI.checkScreenSize, 150));
@@ -77,17 +79,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function fetchAndRenderOrders(page = 1) {
-    state.limit = parseInt(document.getElementById("pageSize").value || "25", 10);
+    state.limit = parseInt(fieldValue("pageSize", "25") || "25", 10);
     setBusy(true);
     renderSkeleton();
 
     const confirmedOnly = isConfirmedOnly();
-    const userId = document.getElementById("userFilter").value;
-    const customerName = document.getElementById("customerFilter").value;
-    const dateStart = document.getElementById("dateStart").value;
-    const dateEnd = document.getElementById("dateEnd").value;
-    const updateStart = document.getElementById("updateDateStart").value;
-    const updateEnd = document.getElementById("updateDateEnd").value;
+    const userId = fieldValue("userFilter", "all");
+    const customerName = fieldValue("customerFilter", "all");
+    const dateStart = fieldValue("dateStart");
+    const dateEnd = fieldValue("dateEnd");
+    const updateStart = fieldValue("updateDateStart");
+    const updateEnd = fieldValue("updateDateEnd");
 
     const query = { page, limit: state.limit };
     if (userId !== "all") query.user_id = userId;
@@ -121,8 +123,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       paintFilterCount();
     } catch (err) {
       console.error(err);
-      document.getElementById("ordersTable").replaceChildren();
-      document.getElementById("ordersCards").replaceChildren();
+      document.getElementById("ordersTable")?.replaceChildren();
+      document.getElementById("ordersCards")?.replaceChildren();
       renderLoadError(err.message || "Failed to load orders.");
     } finally {
       setBusy(false);
@@ -183,6 +185,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const to = from + shown - 1;
     const filtered = state.searchTerm ? " (filtered)" : "";
     meta.innerHTML = `Showing <strong>${from}–${to}</strong> of <strong>${state.total}</strong> orders${filtered}`;
+  }
+
+  function fieldValue(id, fallback = "") {
+    const el = document.getElementById(id);
+    return el ? el.value : fallback;
   }
 
   function setBusy(busy) {
@@ -280,7 +287,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (const o of orders) {
       const id = o.order_id;
       const checked = state.selected.has(String(id)) ? "checked" : "";
-      const when = Format.dateSlash(o.update_date);
+      const when = Format.dateSlash(o[state.dateField]) || "—";
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -432,8 +439,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   function syncSelectionUI() {
     const bar = document.getElementById("selectionBar");
     const count = state.selected.size;
-    document.getElementById("selectionCount").textContent = `${count} selected`;
-    bar.classList.toggle("hidden", count === 0);
+    const label = document.getElementById("selectionCount");
+    if (label) label.textContent = `${count} selected`;
+    bar?.classList.toggle("hidden", count === 0);
 
     const boxes = Array.from(document.querySelectorAll("#ordersTable .order-checkbox"));
     const checkAll = document.getElementById("checkAll");
@@ -467,8 +475,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById(id)?.addEventListener("change", debouncedRefresh);
     }
 
+    document.getElementById("dateFieldSwitch")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-field]");
+      if (!btn || btn.dataset.field === state.dateField) return;
+
+      state.dateField = btn.dataset.field;
+      document
+        .querySelectorAll("#dateFieldSwitch button")
+        .forEach((b) => b.classList.toggle("active", b === btn));
+
+      const header = document.getElementById("dateColumnHeader");
+      if (header) header.textContent = btn.textContent;
+
+      // Only the rendered column changes; no refetch, both dates are already
+      // in the payload.
+      applySearch();
+    });
+
     document.getElementById("filtersToggle")?.addEventListener("click", () => {
-      openFilters(document.getElementById("filtersPanel").classList.contains("hidden"));
+      openFilters(!!document.getElementById("filtersPanel")?.classList.contains("hidden"));
     });
 
     document.getElementById("resetFilters")?.addEventListener("click", () => {
@@ -568,8 +593,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function handleModalExport(e) {
     e.preventDefault();
-    const custName = document.getElementById("modalCustomer").value.trim();
-    const userName = document.getElementById("modalUser").value.trim();
+    const custName = fieldValue("modalCustomer").trim();
+    const userName = fieldValue("modalUser").trim();
 
     const custId = state.allCustomers.find(
       (c) => `${c.first_name} ${c.last_name}` === custName
@@ -580,22 +605,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (custId) query.customer_id = custId;
     if (userId) query.user_id = userId;
 
-    const aStart = document.getElementById("amountStart").value;
-    const aEnd = document.getElementById("amountEnd").value;
+    const aStart = fieldValue("amountStart");
+    const aEnd = fieldValue("amountEnd");
     if (aStart) query.amount_start = aStart;
     if (aEnd) query.amount_end = aEnd;
 
-    const dStart = document.getElementById("exportDateStart").value;
-    const dEnd = document.getElementById("exportDateEnd").value;
+    const dStart = fieldValue("exportDateStart");
+    const dEnd = fieldValue("exportDateEnd");
     if (dStart) query.date_start = dStart;
     if (dEnd) query.date_end = dEnd;
 
-    const dStartUpd = document.getElementById("exportUpdateStart").value;
-    const dEndUpd = document.getElementById("exportUpdateEnd").value;
+    const dStartUpd = fieldValue("exportUpdateStart");
+    const dEndUpd = fieldValue("exportUpdateEnd");
     if (dStartUpd) query.update_date_start = dStartUpd;
     if (dEndUpd) query.update_date_end = dEndUpd;
 
-    if (document.getElementById("fullyconfirmed").checked) {
+    if (document.getElementById("fullyconfirmed")?.checked) {
       query.confirmed_cycle_only = "true";
     }
 
@@ -633,8 +658,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ascending = state.sortOrder[type];
     const sorted = [...state.allOrders].sort((a, b) => {
       if (type === "date") {
-        const da = new Date(a.update_date).getTime() || 0;
-        const db = new Date(b.update_date).getTime() || 0;
+        const da = new Date(a[state.dateField]).getTime() || 0;
+        const db = new Date(b[state.dateField]).getTime() || 0;
         return ascending ? da - db : db - da;
       }
       const na = Number(a.total_amount || 0);
