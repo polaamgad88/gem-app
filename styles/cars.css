@@ -97,7 +97,8 @@ body {
 }
 
 #add-car-btn,
-#add-driver-btn {
+#add-driver-btn,
+#add-distributor-btn {
   padding: 10px 20px;
   background: linear-gradient(135deg, #022048, #0b2a59);
   color: #fff;
@@ -111,12 +112,14 @@ body {
 }
 
 #add-car-btn:hover,
-#add-driver-btn:hover {
+#add-driver-btn:hover,
+#add-distributor-btn:hover {
   filter: brightness(1.1);
 }
 
 #add-car-btn:active,
-#add-driver-btn:active {
+#add-driver-btn:active,
+#add-distributor-btn:active {
   transform: translateY(1px);
 }
 
@@ -466,7 +469,8 @@ body.dark-mode .empty-state {
   }
 
   #add-car-btn,
-  #add-driver-btn {
+  #add-driver-btn,
+  #add-distributor-btn {
     width: 100%;
   }
 
@@ -477,6 +481,8 @@ body.dark-mode .empty-state {
 
   .tab-btn {
     flex: 1;
+    padding: 9px 8px;
+    font-size: 13px;
   }
 
   .form-row {

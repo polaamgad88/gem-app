@@ -15,15 +15,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isAdminChk        = document.getElementById("is-admin");
   const isDriverChk       = document.getElementById("is-driver");
   const isDriverAdminChk  = document.getElementById("is-driver-admin");
+  const isDistributorChk     = document.getElementById("is-distributor");
   const isStorageChk      = document.getElementById("is-storage");
   const isStorageAdminChk = document.getElementById("is-storage-admin");
   const assignedToSelect  = document.getElementById("assigned-to");
   const roleSelect        = document.getElementById("role");
 
-  const capabilityBoxes = [isDriverChk, isDriverAdminChk, isStorageChk, isStorageAdminChk];
+  const capabilityBoxes = [isDriverChk, isDriverAdminChk, isDistributorChk, isStorageChk, isStorageAdminChk];
 
   function activeCapability() {
     if (isDriverChk.checked || isDriverAdminChk.checked) return "driver";
+    if (isDistributorChk.checked) return "distributor";
     if (isStorageChk.checked || isStorageAdminChk.checked) return "storage";
     return null;
   }
@@ -38,9 +40,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const locked = capability !== null;
 
     if (locked) {
-      roleSelect.value = capability === "driver" ? "car" : "storage";
+      roleSelect.value = capability === "driver" ? "car" : capability;
       assignedToSelect.value = "";
-    } else if (roleSelect.value === "car" || roleSelect.value === "storage") {
+    } else if (roleSelect.value === "car" || roleSelect.value === "storage" || roleSelect.value === "distributor") {
       roleSelect.value = "";
     }
 
@@ -61,27 +63,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   roleSelect.addEventListener("change", () => {
+    capabilityBoxes.forEach((box) => (box.checked = false));
     if (roleSelect.value === "car") isDriverChk.checked = true;
+    else if (roleSelect.value === "distributor") isDistributorChk.checked = true;
     else if (roleSelect.value === "storage") isStorageChk.checked = true;
     else capabilityBoxes.forEach((box) => (box.checked = false));
     syncCapability();
   });
 
   if (!isAdmin && isDriverManager) {
-    document.querySelector(".page-heading").textContent = "Add Driver";
-    isDriverChk.checked = true;
+    document.querySelector(".page-heading").textContent = "Add Driver or Distributor";
     [isAdminChk, isDriverAdminChk, isStorageChk, isStorageAdminChk].forEach((chk) => {
       chk.checked = false;
       chk.disabled = true;
       chk.closest(".checkbox-group").style.display = "none";
     });
-    isDriverChk.disabled = true;
     assignedToSelect.closest(".form-field").style.display = "none";
+    const regionSelect = document.getElementById("region");
+    regionSelect.value = localStorage.getItem("region") || "cairo";
+    regionSelect.disabled = true;
   }
 
-  if (new URLSearchParams(location.search).get("driver") === "1") {
-    isDriverChk.checked = true;
-  }
+  const fromFleet = new URLSearchParams(location.search);
+  if (fromFleet.get("distributor") === "1") isDistributorChk.checked = true;
+  else if (fromFleet.get("driver") === "1") isDriverChk.checked = true;
 
   syncCapability();
 
@@ -140,6 +145,7 @@ async function handleCreateUser(token) {
   const isAdmin         = document.getElementById("is-admin").checked;
   const isDriver        = document.getElementById("is-driver").checked;
   const isDriverAdmin   = document.getElementById("is-driver-admin").checked;
+  const isDistributor      = document.getElementById("is-distributor").checked;
   const isStorage       = document.getElementById("is-storage").checked;
   const isStorageAdmin  = document.getElementById("is-storage-admin").checked;
   const trackLocations  = document.getElementById("is-track-locations")?.checked;
@@ -149,12 +155,17 @@ async function handleCreateUser(token) {
     return;
   }
 
-  if ((isDriver || isDriverAdmin) && (isStorage || isStorageAdmin)) {
+  if ((isDriver || isDriverAdmin || isDistributor) && (isStorage || isStorageAdmin)) {
     alert("A user cannot be both a Driver and a Storage user.");
     return;
   }
 
-  if (isAdmin && (isDriver || isDriverAdmin || isStorage || isStorageAdmin)) {
+  if (isDistributor && (isDriver || isDriverAdmin)) {
+    alert("A user cannot be both a distributor and a driver.");
+    return;
+  }
+
+  if (isAdmin && (isDriver || isDriverAdmin || isDistributor || isStorage || isStorageAdmin)) {
     alert("A system admin cannot also be a driver or a storage user.");
     return;
   }
@@ -179,6 +190,7 @@ async function handleCreateUser(token) {
   } else if (isDriver) {
     formData.append("driver", "on");
   }
+  if (isDistributor) formData.append("distributor", "on");
   if (isStorageAdmin) {
     formData.append("storage_admin", "on");
   } else if (isStorage) {
@@ -193,7 +205,7 @@ async function handleCreateUser(token) {
     const data = await Utils.Api.postForm("/register", payload);
     alert(data?.message || "User created successfully!");
     Utils.Api.invalidate("/users");
-    window.location.href = "users.html";
+    window.location.href = new URLSearchParams(location.search).has("driver") || new URLSearchParams(location.search).has("distributor") ? "cars.html" : "users.html";
   } catch (err) {
     console.error("Error creating user:", err);
     alert(err.data?.message || err.message || "Failed to create user.");

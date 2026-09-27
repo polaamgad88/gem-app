@@ -46,6 +46,7 @@ function showNavLink(el) {
 
 function setupFleetNav(isAdmin) {
   const isDriver = localStorage.getItem("driver") === "1";
+  const isDistributor = localStorage.getItem("distributor") === "1";
   const isDriverManager = localStorage.getItem("driver_manager") === "1";
   const isStorageManager = localStorage.getItem("storage_manager") === "1";
 
@@ -53,13 +54,13 @@ function setupFleetNav(isAdmin) {
   const carsLink = document.getElementById("cars_page");
   const deliveriesLink = document.getElementById("deliveries_page");
 
-  if (isDriver || isAdmin) showNavLink(deliverLink);
+  if (isDriver || isDistributor) showNavLink(deliverLink);
   if (isDriverManager || isAdmin) showNavLink(carsLink);
-  if (isDriver || isDriverManager || isStorageManager || isAdmin) {
+  if (isDriver || isDistributor || isDriverManager || isStorageManager || isAdmin) {
     showNavLink(deliveriesLink);
   }
 
-  if (isDriver && !isDriverManager && !isAdmin) {
+  if ((isDriver || isDistributor) && !isDriverManager && !isAdmin) {
     const allowed = new Set(["deliver.html", "deliveries.html"]);
     document.querySelectorAll("#nav a").forEach((link) => {
       if (allowed.has(link.dataset.page)) showNavLink(link);
@@ -96,6 +97,7 @@ async function verifyToken(token) {
   localStorage.setItem("is_admin", data.admin ? "1" : "0");
   localStorage.setItem("user_role", data.role ?? "");
   localStorage.setItem("driver", data.driver ? "1" : "0");
+  localStorage.setItem("distributor", data.distributor ? "1" : "0");
   localStorage.setItem("driver_manager", data.driver_manager ? "1" : "0");
   localStorage.setItem("storage", data.storage ? "1" : "0");
   localStorage.setItem("storage_manager", data.storage_manager ? "1" : "0");

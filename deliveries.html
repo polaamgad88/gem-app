@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Deliveries</title>
+  <title>التوصيلات</title>
   <link rel="stylesheet" href="./styles/base.css" />
   <link rel="stylesheet" href="./styles/deliveries.css" />
   <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
@@ -35,8 +35,8 @@
 
 <body>
   <div class="page-head">
-    <h1 class="page-heading" id="page-heading">Deliveries</h1>
-    <a href="cars.html" id="back-to-fleet" class="back-link hidden">Back to Fleet</a>
+    <h1 class="page-heading" id="page-heading">التوصيلات</h1>
+    <a href="cars.html" id="back-to-fleet" class="back-link hidden">الرجوع للعربيات</a>
   </div>
 
   <div id="summary-row" class="summary-row"></div>
@@ -44,61 +44,147 @@
   <div class="filters-bar">
     <button id="filters-toggle" type="button" class="filters-toggle" aria-expanded="false">
       <span class="chev" aria-hidden="true"></span>
-      <span>Filters</span>
+      <span>الفلاتر</span>
       <span id="filters-count" class="filters-count hidden">0</span>
     </button>
     <div class="filters-actions">
-      <button id="expand-all-btn" type="button" class="ghost-btn">Expand all</button>
-      <button id="refresh-btn" type="button" class="ghost-btn">Refresh</button>
+      <button id="expand-all-btn" type="button" class="ghost-btn">فتح الكل</button>
+      <button id="refresh-btn" type="button" class="ghost-btn">تحديث</button>
     </div>
   </div>
 
   <div id="filters-panel" class="deliveries-toolbar hidden">
     <div class="toolbar-field">
-      <label for="filter-status">Result</label>
+      <label for="filter-status">النتيجة</label>
       <select id="filter-status">
-        <option value="">All</option>
-        <option value="delivered">Delivered</option>
-        <option value="partial delivered">Partial Delivered</option>
-        <option value="partial refund">Partial Refund</option>
-        <option value="refund">Refund</option>
-        <option value="delay">Delay</option>
+        <option value="">الكل</option>
+        <option value="delivered">تم التسليم</option>
+        <option value="partial delivered">تم تسليم جزء</option>
+        <option value="partial refund">تسليم جزئي مع مرتجع</option>
+        <option value="refund">مرتجع بالكامل</option>
+        <option value="delay">مؤجل</option>
       </select>
+    </div>
+
+    <div class="toolbar-field hidden" id="distributor-field">
+      <label for="filter-distributor">الموزع</label>
+      <select id="filter-distributor"><option value="">كل الموزعين</option></select>
     </div>
 
     <div class="toolbar-field" id="driver-field">
-      <label for="filter-driver">Driver</label>
+      <label for="filter-driver">السواق</label>
       <select id="filter-driver">
-        <option value="">All drivers</option>
+        <option value="">كل السواقين</option>
       </select>
     </div>
 
     <div class="toolbar-field">
-      <label for="filter-sap-order">Order No</label>
-      <input type="number" id="filter-sap-order" placeholder="SAP order" />
+      <label for="filter-sap-order">رقم الطلب</label>
+      <input type="number" id="filter-sap-order" placeholder="طلب SAP" />
     </div>
 
     <div class="toolbar-field">
-      <label for="filter-date-start">From</label>
+      <label for="filter-date-start">من</label>
       <input type="date" id="filter-date-start" />
     </div>
 
     <div class="toolbar-field">
-      <label for="filter-date-end">To</label>
+      <label for="filter-date-end">إلى</label>
       <input type="date" id="filter-date-end" />
     </div>
 
     <div class="toolbar-field toolbar-field--btn">
-      <button id="reset-filters-btn" type="button">Reset</button>
+      <button id="reset-filters-btn" type="button">مسح الفلاتر</button>
     </div>
   </div>
 
   <div id="delivery-list" class="delivery-list"></div>
 
-  <p id="deliveries-empty" class="empty-state hidden">No deliveries found.</p>
+  <p id="deliveries-empty" class="empty-state hidden">مفيش توصيلات</p>
   <div id="deliveries-loading" class="loading-state">
-    <div class="spinner"></div><span>Loading deliveries...</span>
+    <div class="spinner"></div><span>جاري تحميل التوصيلات...</span>
   </div>
+
+  <div id="delivery-edit-modal" class="delivery-modal hidden" role="dialog" aria-modal="true" aria-labelledby="delivery-edit-title">
+    <div class="delivery-modal-card">
+      <div class="delivery-modal-head">
+        <div>
+          <h2 id="delivery-edit-title">تعديل التوصيل</h2>
+          <p>عدّل بيانات التوصيل المسجلة. رقم طلب SAP ووقت التوصيل مينفعش يتغيروا.</p>
+        </div>
+        <button type="button" class="modal-close" id="delivery-edit-close" aria-label="قفل">×</button>
+      </div>
+
+      <form id="delivery-edit-form">
+        <input type="hidden" id="edit-delivery-id" />
+
+        <div class="edit-fixed-grid">
+          <div><small>طلب SAP</small><strong id="edit-sap-order">—</strong></div>
+          <div><small>وقت التوصيل</small><strong id="edit-delivered-at">—</strong></div>
+          <div><small>الحالة</small><strong id="edit-status-preview">—</strong></div>
+        </div>
+
+        <div class="edit-form-grid">
+          <div class="edit-field">
+            <label for="edit-driver">السواق</label>
+            <select id="edit-driver" required></select>
+          </div>
+          <div class="edit-field">
+            <label for="edit-distributor">الموزع</label>
+            <select id="edit-distributor"></select>
+          </div>
+          <div class="edit-field">
+            <label for="edit-car">العربية</label>
+            <select id="edit-car"></select>
+          </div>
+        </div>
+
+        <div class="edit-items-wrap">
+          <table class="edit-items-table">
+            <thead>
+              <tr>
+                <th>الصنف</th>
+                <th>الكمية المطلوبة</th>
+                <th>مستخدم في توصيلات تانية</th>
+                <th>أقصى كمية للتوصيل ده</th>
+                <th>اتسلم</th>
+                <th>مرتجع</th>
+              </tr>
+            </thead>
+            <tbody id="edit-items-body"></tbody>
+          </table>
+        </div>
+
+        <div class="edit-payment">
+          <div>
+            <strong>استلمت فلوس؟</strong>
+            <small>المبلغ مطلوب بس لو اخترت نعم.</small>
+          </div>
+          <div class="edit-payment-choice">
+            <button type="button" id="edit-money-no" class="edit-choice">لا</button>
+            <button type="button" id="edit-money-yes" class="edit-choice">نعم</button>
+          </div>
+          <div class="edit-field hidden" id="edit-amount-field">
+            <label for="edit-collected-amount">المبلغ المستلم</label>
+            <input id="edit-collected-amount" type="number" min="0.01" max="99999999.99" step="0.01" />
+          </div>
+        </div>
+
+        <div class="edit-field">
+          <label for="edit-note">ملاحظة</label>
+          <textarea id="edit-note" rows="3"></textarea>
+        </div>
+
+        <p id="delivery-edit-message" class="edit-message hidden"></p>
+
+        <div class="delivery-modal-actions">
+          <button type="button" class="ghost-btn" id="delivery-edit-cancel">إلغاء</button>
+          <button type="submit" class="save-delivery-btn" id="delivery-edit-save">حفظ التعديل</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 
 </html>
