@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Fleet</title>
+  <title>إدارة العربيات</title>
   <link rel="stylesheet" href="./styles/base.css" />
   <link rel="stylesheet" href="./styles/cars.css" />
   <link rel="icon" href="./assets/GEM-Group-2024.ico" type="image/x-icon" />
@@ -34,40 +34,41 @@
 </head>
 
 <body>
-  <h1 class="page-heading">Fleet</h1>
+  <h1 class="page-heading">إدارة العربيات</h1>
 
   <div class="tab-switch" role="tablist">
-    <button type="button" class="tab-btn active" data-tab="cars">Cars</button>
-    <button type="button" class="tab-btn" data-tab="drivers">Drivers</button>
+    <button type="button" class="tab-btn active" data-tab="cars">العربيات</button>
+    <button type="button" class="tab-btn" data-tab="drivers">السواقين</button>
+    <button type="button" class="tab-btn" data-tab="distributors">الموزعين</button>
   </div>
 
   <section id="tab-cars" class="tab-panel">
     <div class="fleet-toolbar">
       <div class="toolbar-field">
-        <label for="car-search">Search by Plate / Brand:</label>
-        <input type="search" id="car-search" placeholder="Type plate or brand..." />
+        <label for="car-search">البحث بنمر العربية / الماركة:</label>
+        <input type="search" id="car-search" placeholder="اكتب نمر العربية أو الماركة..." />
       </div>
 
       <div class="toolbar-field toolbar-field--narrow">
-        <label for="car-filter-assigned">Assignment:</label>
+        <label for="car-filter-assigned">الربط:</label>
         <select id="car-filter-assigned">
-          <option value="">All</option>
-          <option value="1">Assigned</option>
-          <option value="0">Unassigned</option>
+          <option value="">الكل</option>
+          <option value="1">مربوط</option>
+          <option value="0">مش مربوط</option>
         </select>
       </div>
 
       <div class="toolbar-field toolbar-field--narrow">
-        <label for="car-filter-active">Status:</label>
+        <label for="car-filter-active">الحالة:</label>
         <select id="car-filter-active">
-          <option value="1">Active</option>
-          <option value="0">Inactive</option>
-          <option value="">All</option>
+          <option value="1">شغالة</option>
+          <option value="0">متوقفة</option>
+          <option value="">الكل</option>
         </select>
       </div>
 
       <div class="toolbar-field toolbar-field--btn">
-        <button id="add-car-btn" type="button">Add Car</button>
+        <button id="add-car-btn" type="button">ضيف عربية</button>
       </div>
     </div>
 
@@ -75,12 +76,13 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Plate</th>
-            <th>Brand / Model</th>
-            <th>Details</th>
-            <th>Region</th>
-            <th>Assigned Driver</th>
-            <th>Actions</th>
+            <th>نمر العربية</th>
+            <th>الماركة / الموديل</th>
+            <th>التفاصيل</th>
+            <th>المنطقة</th>
+            <th>السواق</th>
+            <th>الموزع</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody id="cars-table-body"></tbody>
@@ -91,27 +93,27 @@
       <div id="car-cards"></div>
     </div>
 
-    <p id="cars-empty" class="empty-state hidden">No cars found.</p>
+    <p id="cars-empty" class="empty-state hidden">مفيش عربيات</p>
   </section>
 
   <section id="tab-drivers" class="tab-panel hidden">
     <div class="fleet-toolbar">
       <div class="toolbar-field">
-        <label for="driver-search">Search by Username / Phone:</label>
-        <input type="search" id="driver-search" placeholder="Type username or phone..." />
+        <label for="driver-search">البحث بالاسم / رقم التليفون:</label>
+        <input type="search" id="driver-search" placeholder="اكتب الاسم أو رقم التليفون..." />
       </div>
 
       <div class="toolbar-field toolbar-field--narrow">
-        <label for="driver-filter-active">Status:</label>
+        <label for="driver-filter-active">الحالة:</label>
         <select id="driver-filter-active">
-          <option value="">All</option>
-          <option value="1">Active</option>
-          <option value="0">Stopped</option>
+          <option value="">الكل</option>
+          <option value="1">شغالة</option>
+          <option value="0">متوقف</option>
         </select>
       </div>
 
       <div class="toolbar-field toolbar-field--btn">
-        <button id="add-driver-btn" type="button">Add Driver</button>
+        <button id="add-driver-btn" type="button">ضيف سواق</button>
       </div>
     </div>
 
@@ -119,13 +121,13 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Username</th>
-            <th>Phone</th>
-            <th>Region</th>
-            <th>Car</th>
-            <th>Deliveries</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th>اسم المستخدم</th>
+            <th>رقم التليفون</th>
+            <th>المنطقة</th>
+            <th>العربية</th>
+            <th>التوصيلات</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody id="drivers-table-body"></tbody>
@@ -136,53 +138,84 @@
       <div id="driver-cards"></div>
     </div>
 
-    <p id="drivers-empty" class="empty-state hidden">No drivers found.</p>
+    <p id="drivers-empty" class="empty-state hidden">مفيش سواقين</p>
+  </section>
+
+  <section id="tab-distributors" class="tab-panel hidden">
+    <div class="fleet-toolbar">
+      <div class="toolbar-field">
+        <label for="distributor-search">البحث بالاسم / رقم التليفون:</label>
+        <input type="search" id="distributor-search" placeholder="اكتب الاسم أو رقم التليفون..." />
+      </div>
+      <div class="toolbar-field toolbar-field--narrow">
+        <label for="distributor-filter-active">الحالة:</label>
+        <select id="distributor-filter-active">
+          <option value="">الكل</option>
+          <option value="1">شغال</option>
+          <option value="0">متوقف</option>
+        </select>
+      </div>
+      <div class="toolbar-field toolbar-field--btn">
+        <button id="add-distributor-btn" type="button">ضيف موزع</button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead><tr>
+          <th>اسم المستخدم</th><th>رقم التليفون</th><th>المنطقة</th>
+          <th>العربية</th><th>الحالة</th><th>الإجراءات</th>
+        </tr></thead>
+        <tbody id="distributors-table-body"></tbody>
+      </table>
+    </div>
+    <div class="card-view" style="display: none"><div id="distributor-cards"></div></div>
+    <p id="distributors-empty" class="empty-state hidden">مفيش موزعين</p>
   </section>
 
   <div id="car-modal" class="modal hidden">
     <div class="modal-content">
-      <h2 id="car-modal-title">Add Car</h2>
+      <h2 id="car-modal-title">ضيف عربية</h2>
       <form id="car-form">
         <input type="hidden" id="car-id" />
 
         <div class="form-group">
-          <label for="car-plate">Plate <span class="req">*</span></label>
-          <input type="text" id="car-plate" required placeholder="e.g. ABC 1234" />
+          <label for="car-plate">نمر العربية <span class="req">*</span></label>
+          <input type="text" id="car-plate" required placeholder="مثال: ABC 1234" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="car-brand">Brand</label>
-            <input type="text" id="car-brand" placeholder="e.g. Toyota" />
+            <label for="car-brand">الماركة</label>
+            <input type="text" id="car-brand" placeholder="مثال: Toyota" />
           </div>
           <div class="form-group">
-            <label for="car-model">Model</label>
-            <input type="text" id="car-model" placeholder="e.g. Hiace" />
+            <label for="car-model">الموديل</label>
+            <input type="text" id="car-model" placeholder="مثال: Hiace" />
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="car-year">Year</label>
-            <input type="number" id="car-year" min="1950" max="2100" placeholder="e.g. 2022" />
+            <label for="car-year">سنة الصنع</label>
+            <input type="number" id="car-year" min="1950" max="2100" placeholder="مثال: 2022" />
           </div>
           <div class="form-group">
-            <label for="car-region">Region</label>
+            <label for="car-region">المنطقة</label>
             <select id="car-region">
-              <option value="cairo">Cairo</option>
-              <option value="alex">Alex</option>
+              <option value="cairo">القاهرة</option>
+              <option value="alex">اسكندرية</option>
             </select>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="car-notes">Notes</label>
-          <textarea id="car-notes" rows="2" placeholder="Anything worth remembering about this car"></textarea>
+          <label for="car-notes">ملاحظات</label>
+          <textarea id="car-notes" rows="2" placeholder="أي ملاحظات مهمة عن العربية"></textarea>
         </div>
 
         <div class="modal-actions">
-          <button type="submit" class="btn btn-primary">Save</button>
-          <button type="button" class="btn cancel-btn" data-close="car-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">حفظ</button>
+          <button type="button" class="btn cancel-btn" data-close="car-modal">إلغاء</button>
         </div>
       </form>
     </div>
@@ -190,19 +223,19 @@
 
   <div id="assign-modal" class="modal hidden">
     <div class="modal-content">
-      <h2>Assign Car</h2>
+      <h2 id="assign-modal-title">ربط العربية</h2>
       <p class="modal-sub" id="assign-car-label"></p>
       <form id="assign-form">
         <input type="hidden" id="assign-car-id" />
         <div class="form-group">
-          <label for="assign-driver">Driver</label>
+          <label for="assign-driver" id="assign-person-label">السواق</label>
           <select id="assign-driver" required>
-            <option value="">Select a driver...</option>
+            <option value="">اختار السواق...</option>
           </select>
         </div>
         <div class="modal-actions">
-          <button type="submit" class="btn btn-primary">Assign</button>
-          <button type="button" class="btn cancel-btn" data-close="assign-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">ربط</button>
+          <button type="button" class="btn cancel-btn" data-close="assign-modal">إلغاء</button>
         </div>
       </form>
     </div>

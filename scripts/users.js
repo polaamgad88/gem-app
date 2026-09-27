@@ -70,6 +70,7 @@
     if (user.admin) return "admin";
     if (Number(user.driver) === 2) return "driver_manager";
     if (Number(user.driver) === 1) return "driver";
+    if (Number(user.distributor) === 1) return "distributor";
     if (Number(user.storage) === 2) return "storage_manager";
     if (Number(user.storage) === 1) return "storage";
     return String(user.role || "").toLowerCase();
@@ -79,6 +80,7 @@
     admin: "System Admin",
     driver_manager: "Driver Manager",
     driver: "Driver",
+    distributor: "Distributor",
     storage_manager: "Storage Admin",
     storage: "Storage User",
   };
@@ -89,7 +91,7 @@
   }
 
   function isCapabilityUser(user) {
-    return Number(user.driver) > 0 || Number(user.storage) > 0;
+    return Number(user.driver) > 0 || Number(user.storage) > 0 || Number(user.distributor) > 0;
   }
 
   function applyFilters() {
@@ -141,6 +143,7 @@
       ["Inactive", count((u) => String(u.status) !== "1"), "off"],
       ["Admins", count((u) => !!u.admin), ""],
       ["Drivers", count((u) => Number(u.driver) > 0), ""],
+      ["Distributors", count((u) => Number(u.distributor) > 0), ""],
       ["Storage", count((u) => Number(u.storage) > 0), ""],
     ];
     box.innerHTML = tiles
@@ -203,6 +206,7 @@
       ],
       ["System admin", user.admin ? "Yes" : "No"],
       ["Driver", esc(levelName[Number(user.driver) || 0])],
+      ["Distributor", Number(user.distributor) ? "Yes" : "No"],
       ["Storage", esc(levelName[Number(user.storage) || 0])],
       ["Cairo target", esc(user.cairo_target ?? 0)],
       ["Region target", esc(user.region_target ?? 0)],
@@ -407,6 +411,7 @@
     document.getElementById("permissions-user-label").textContent =
       `${user.username} — ${typeLabel(user)}`;
     document.getElementById("permissions-driver").value = String(user.driver ?? 0);
+    document.getElementById("permissions-distributor").value = String(user.distributor ?? 0);
     document.getElementById("permissions-storage").value = String(user.storage ?? 0);
     document.getElementById("permissions-modal").classList.remove("hidden");
   }
@@ -420,20 +425,22 @@
     const user = allUsers.find((u) => String(u.user_id) === String(userId));
     const driver = Number(document.getElementById("permissions-driver").value);
     const storage = Number(document.getElementById("permissions-storage").value);
+    const distributor = Number(document.getElementById("permissions-distributor").value);
 
-    if (driver > 0 && storage > 0) {
-      alert("A user cannot be both a driver and a storage user. Set one of them back to 'Not'.");
+    if ([driver > 0, storage > 0, distributor > 0].filter(Boolean).length > 1) {
+      alert("A user can have only one logistics capability.");
       return;
     }
 
     const currentDriver = Number(user?.driver ?? 0);
     const currentStorage = Number(user?.storage ?? 0);
-    if (driver === currentDriver && storage === currentStorage) {
+    const currentDistributor = Number(user?.distributor ?? 0);
+    if (driver === currentDriver && storage === currentStorage && distributor === currentDistributor) {
       closePermissionsModal();
       return;
     }
 
-    if ((driver > 0 && currentDriver === 0) || (storage > 0 && currentStorage === 0)) {
+    if ((driver > 0 && currentDriver === 0) || (storage > 0 && currentStorage === 0) || (distributor > 0 && currentDistributor === 0)) {
       if (!confirm(`Change permissions for ${user?.username || "this user"}?`)) return;
     }
 
@@ -443,15 +450,15 @@
       const steps = [];
       if (driver < currentDriver) steps.push(["driver", driver]);
       if (storage < currentStorage) steps.push(["storage", storage]);
+      if (distributor < currentDistributor) steps.push(["distributor", distributor]);
       if (driver > currentDriver) steps.push(["driver", driver]);
       if (storage > currentStorage) steps.push(["storage", storage]);
+      if (distributor > currentDistributor) steps.push(["distributor", distributor]);
 
       const messages = [];
       for (const [column, level] of steps) {
         const path =
-          column === "driver"
-            ? `/users/set_driver_role/${userId}`
-            : `/users/set_storage_role/${userId}`;
+          `/users/set_${column}_role/${userId}`;
         const data = await Api.post(path, { level });
         if (data?.message) messages.push(data.message);
       }

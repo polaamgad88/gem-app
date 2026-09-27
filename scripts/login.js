@@ -108,6 +108,7 @@ async function performLogin(username, password) {
   localStorage.setItem("is_admin", data.admin ?? "");
   localStorage.setItem("region", (data.region ?? "cairo").toLowerCase());
   localStorage.setItem("driver", data.driver ? "1" : "0");
+  localStorage.setItem("distributor", data.distributor ? "1" : "0");
   localStorage.setItem("driver_manager", data.driver_manager ? "1" : "0");
   localStorage.setItem("storage", data.storage ? "1" : "0");
   localStorage.setItem("storage_manager", data.storage_manager ? "1" : "0");
