@@ -17,6 +17,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     allUsers: [],
     allCustomers: [],
     selected: new Set(),
+    locations: new Set(),
+    areas: new Set(),
+    locationOptions: [],
+    areaOptions: [],
     searchTerm: "",
     dateField: "update_date",
     currentPage: 1,
@@ -24,6 +28,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     total: 0,
     limit: 25,
   };
+
+  let territoryRequest = 0;
+  let ordersRequest = 0;
 
   const token = await Auth.requireAuth();
   if (!token) return;
@@ -34,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // and the export datalists, and /customers?all=true pulls every customer —
   // waiting on those before asking for orders was most of the startup delay.
   const ordersReady = fetchAndRenderOrders();
-  Promise.all([fetchUsers(), fetchCustomers()]).catch((err) =>
+  Promise.all([fetchUsers(), fetchCustomers(), fetchTerritories()]).catch((err) =>
     console.error("Failed to load filter lists:", err)
   );
   await ordersReady;
@@ -78,7 +85,58 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  function territoryQueryString(includeAreas = true) {
+    const params = new URLSearchParams();
+    state.locations.forEach((value) => params.append("location", value));
+    if (includeAreas) state.areas.forEach((value) => params.append("area", value));
+    return params.size ? `?${params}` : "";
+  }
+
+  function renderTerritoryOptions(kind) {
+    const selected = kind === "location" ? state.locations : state.areas;
+    const options = kind === "location" ? state.locationOptions : state.areaOptions;
+    const details = document.getElementById(`${kind}Filter`);
+    const disabled = !options.length || (kind === "area" && !state.locations.size);
+    details.dataset.disabled = String(disabled);
+    details.querySelector("summary").setAttribute("aria-disabled", String(disabled));
+    if (disabled) details.open = false;
+    document.getElementById(`${kind}Summary`).textContent = selected.size === 1
+      ? [...selected][0]
+      : selected.size ? `${selected.size} ${kind === "location" ? "locations" : "areas"} selected`
+      : kind === "location" ? "All locations"
+      : state.locations.size ? "All matching areas" : "Select locations first";
+    document.getElementById(`${kind}Options`).innerHTML = options.length
+      ? options.map((value) => `<label class="territory-option"><input type="checkbox" value="${esc(value)}" ${selected.has(value) ? "checked" : ""}><span dir="auto">${esc(value)}</span></label>`).join("")
+      : `<p class="territory-empty">No ${kind === "location" ? "locations" : "areas"} available.</p>`;
+  }
+
+  async function fetchTerritories() {
+    const requestId = ++territoryRequest;
+    const areaDetails = document.getElementById("areaFilter");
+    areaDetails.open = false;
+    areaDetails.dataset.disabled = "true";
+    areaDetails.querySelector("summary").setAttribute("aria-disabled", "true");
+    document.getElementById("areaSummary").textContent = state.locations.size ? "Loading areas..." : "Select locations first";
+    try {
+      const data = await Api.get(`/customers/territories${territoryQueryString(false)}`);
+      if (requestId !== territoryRequest) return false;
+      state.locationOptions = data.locations || [];
+      state.areaOptions = state.locations.size ? data.areas || [] : [];
+      state.areas = new Set([...state.areas].filter((value) => state.areaOptions.includes(value)));
+    } catch (err) {
+      if (requestId !== territoryRequest) return false;
+      state.areaOptions = [];
+      state.areas.clear();
+      UI.showError(err.message || "Could not load locations and areas. Reload the page to retry.");
+    }
+    renderTerritoryOptions("location");
+    renderTerritoryOptions("area");
+    paintFilterCount();
+    return true;
+  }
+
   async function fetchAndRenderOrders(page = 1) {
+    const requestId = ++ordersRequest;
     state.limit = parseInt(fieldValue("pageSize", "25") || "25", 10);
     setBusy(true);
     renderSkeleton();
@@ -110,7 +168,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const path = confirmedOnly ? "/orders/confirmed-chain" : "/orders";
 
     try {
-      const data = await Api.get(path, { query });
+      const data = await Api.get(`${path}${territoryQueryString()}`, { query });
+      if (requestId !== ordersRequest) return;
       state.allOrders = data.orders || [];
       state.currentPage = data.page || 1;
       state.totalPages = data.pages || 1;
@@ -122,12 +181,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderPagination();
       paintFilterCount();
     } catch (err) {
+      if (requestId !== ordersRequest) return;
       console.error(err);
       document.getElementById("ordersTable")?.replaceChildren();
       document.getElementById("ordersCards")?.replaceChildren();
       renderLoadError(err.message || "Failed to load orders.");
     } finally {
-      setBusy(false);
+      if (requestId === ordersRequest) setBusy(false);
     }
   }
 
@@ -288,13 +348,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       const id = o.order_id;
       const checked = state.selected.has(String(id)) ? "checked" : "";
       const when = Format.dateSlash(o[state.dateField]) || "—";
+      const territory = [o.location, o.area]
+        .filter((value) => typeof value === "string" && value.trim())
+        .map((value) => value.trim())
+        .join(" · ");
+      const territoryLine = territory
+        ? `<div class="cell-sub" dir="auto">${esc(territory)}</div>`
+        : "";
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="col-check"><input type="checkbox" class="order-checkbox" value="${esc(id)}" ${checked}></td>
         <td class="col-id"><strong>#${esc(id)}</strong></td>
         <td class="col-date">${esc(when)}</td>
-        <td class="col-customer">${esc(o.customer_name || "-")}</td>
+        <td class="col-customer"><div>${esc(o.customer_name || "-")}</div>${territoryLine}</td>
         <td class="col-user">
           <div>${esc(o.username || "-")}</div>
           <div class="cell-sub">${esc(o.role || "")}</div>
@@ -316,6 +383,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
         <div class="order-card-body">
           <div><small>Customer</small><span>${esc(o.customer_name || "-")}</span></div>
+          <div><small>Location</small><span dir="auto">${esc(o.location || "-")}</span></div>
+          <div><small>Area</small><span dir="auto">${esc(o.area || "-")}</span></div>
           <div><small>Delegate</small><span>${esc(o.username || "-")}</span></div>
           <div><small>Status</small><span>${statusBadge(o.status)}</span></div>
           <div><small>Total</small><span>${esc(money(o.total_amount))}</span></div>
@@ -423,7 +492,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!el) return count;
       const value = el.value;
       return value && value !== "all" ? count + 1 : count;
-    }, 0);
+    }, 0) + Number(state.locations.size > 0) + Number(state.areas.size > 0);
     badge.textContent = n;
     badge.classList.toggle("hidden", n === 0);
   }
@@ -453,6 +522,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function setupEventListeners() {
     const debouncedRefresh = Async.debounce(() => fetchAndRenderOrders(), 250);
+
+    for (const kind of ["location", "area"]) {
+      const details = document.getElementById(`${kind}Filter`);
+      details.querySelector("summary").addEventListener("click", (event) => {
+        if (details.dataset.disabled === "true") event.preventDefault();
+      });
+      document.getElementById(`${kind}Options`).addEventListener("change", async (event) => {
+        if (!event.target.matches('input[type="checkbox"]')) return;
+        const selected = kind === "location" ? state.locations : state.areas;
+        if (event.target.checked) selected.add(event.target.value);
+        else selected.delete(event.target.value);
+        // Update the summary without replacing the focused checkbox.
+        document.getElementById(`${kind}Summary`).textContent = selected.size === 1
+          ? [...selected][0] : selected.size ? `${selected.size} ${kind === "location" ? "locations" : "areas"} selected`
+          : kind === "location" ? "All locations" : "All matching areas";
+        paintFilterCount();
+        if (kind === "location" && !await fetchTerritories()) return;
+        debouncedRefresh();
+      });
+    }
+    document.addEventListener("click", (event) => {
+      document.querySelectorAll(".territory-filter[open]").forEach((details) => {
+        if (!details.contains(event.target)) details.open = false;
+      });
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      document.querySelectorAll(".territory-filter[open]").forEach((details) => {
+        details.open = false;
+        details.querySelector("summary").focus();
+      });
+    });
 
     const toggleButton = document.getElementById("confirmedToggle");
     toggleButton?.addEventListener("click", () => {
@@ -505,6 +606,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const search = document.getElementById("orderSearch");
       if (search) search.value = "";
       state.searchTerm = "";
+      state.locations.clear();
+      state.areas.clear();
+      fetchTerritories();
       fetchAndRenderOrders();
     });
 
@@ -631,7 +735,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function downloadExport(query) {
     try {
       setBusy(true);
-      const res = await Api.get("/orders/export", { query, raw: true });
+      const path = query.order_ids ? "/orders/export" : `/orders/export${territoryQueryString()}`;
+      const res = await Api.get(path, { query, raw: true });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
         throw new Error(j.message || "Export failed");

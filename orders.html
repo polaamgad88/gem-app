@@ -53,6 +53,15 @@
     <div class="toolbar-field toolbar-field--grow">
       <input type="search" id="orderSearch" placeholder="Search order no, customer or delegate..." />
     </div>
+    <div class="page-size-control">
+      <label for="pageSize">Per page</label>
+      <select id="pageSize">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
     <div class="segmented" id="dateFieldSwitch" role="group" aria-label="Date column shows">
       <button type="button" data-field="update_date" class="active">Updated</button>
       <button type="button" data-field="order_date">Created</button>
@@ -81,6 +90,22 @@
     </div>
 
     <div class="filter-group">
+      <label id="locationFilterLabel">Locations</label>
+      <details id="locationFilter" class="territory-filter" data-disabled="true">
+        <summary aria-labelledby="locationFilterLabel locationSummary" aria-disabled="true"><span id="locationSummary">Loading locations...</span></summary>
+        <div id="locationOptions" class="territory-options" role="group" aria-label="Locations"></div>
+      </details>
+    </div>
+
+    <div class="filter-group">
+      <label id="areaFilterLabel">Areas</label>
+      <details id="areaFilter" class="territory-filter" data-disabled="true">
+        <summary aria-labelledby="areaFilterLabel areaSummary" aria-disabled="true"><span id="areaSummary">Select locations first</span></summary>
+        <div id="areaOptions" class="territory-options" role="group" aria-label="Areas"></div>
+      </details>
+    </div>
+
+    <div class="filter-group">
       <label for="dateStart">Order date from</label>
       <input type="date" id="dateStart" />
     </div>
@@ -100,15 +125,6 @@
       <input type="date" id="updateDateEnd" />
     </div>
 
-    <div class="filter-group filter-group--narrow">
-      <label for="pageSize">Per page</label>
-      <select id="pageSize">
-        <option value="10">10</option>
-        <option value="25" selected>25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-      </select>
-    </div>
   </div>
 
   <p id="resultMeta" class="result-meta"></p>
