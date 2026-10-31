@@ -443,11 +443,6 @@ function renderVisitStats(data) {
   if (!box) return;
 
   const visits = data.visits || [];
-  if (!visits.length) {
-    box.innerHTML = "";
-    return;
-  }
-
   const tally = { "on-site": 0, near: 0, far: 0 };
   let distanceSum = 0;
   for (const v of visits) {
@@ -456,11 +451,17 @@ function renderVisitStats(data) {
     distanceSum += dist;
   }
 
-  const onSiteRate = Math.round((tally["on-site"] / visits.length) * 100);
-  const avgDistance = Math.round(distanceSum / visits.length);
+  const total = Number(data.total ?? visits.length);
+  if (data.summary) {
+    tally["on-site"] = Number(data.summary.on_site || 0);
+    tally.near = Number(data.summary.near || 0);
+    tally.far = Number(data.summary.far || 0);
+  }
+  const onSiteRate = total ? Math.round((tally["on-site"] / total) * 100) : 0;
+  const avgDistance = Math.round(data.summary?.average_distance ?? (visits.length ? distanceSum / visits.length : 0));
 
   const tiles = [
-    ["Visits", data.total ?? visits.length, ""],
+    ["Visits", total, ""],
     ["On site", tally["on-site"], "ok"],
     ["Near", tally.near, "warn"],
     ["Far", tally.far, "bad"],
@@ -526,7 +527,7 @@ function renderPager({ page, limit, total, count }) {
     1,
     Math.ceil((total || 0) / (limit || currentLimit))
   );
-  pi.textContent = `Page ${page} of ${totalPages} • ${count}/${total} shown`;
+  pi.textContent = `Total ${total} visits · Showing ${count} · Page ${page} of ${totalPages}`;
   document.getElementById("prevPageBtn").disabled = page <= 1;
   document.getElementById("nextPageBtn").disabled = page >= totalPages;
 }

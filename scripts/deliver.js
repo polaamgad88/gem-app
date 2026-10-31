@@ -1,5 +1,5 @@
 (function () {
-  const { Api, Auth, DOM } = window.Utils;
+  const { Api, Auth, DOM, Format } = window.Utils;
   const esc = DOM.escapeHtml;
 
   const STATUS_LABELS = {
@@ -166,9 +166,11 @@
     statusEl.className =
       "status-badge status-" + String(order.status || "unknown").toLowerCase();
 
+    document.getElementById("sumCustomerCode").textContent = order.customer_code || "-";
+    document.getElementById("sumCustomerName").textContent = order.customer_name || "-";
     document.getElementById("sumPreparedBy").textContent = order.prepared_by || "-";
     document.getElementById("sumReviewedBy").textContent = order.reviewed_by || "-";
-    document.getElementById("sumReviewedAt").textContent = order.reviewed_at || "-";
+    document.getElementById("sumReviewedAt").textContent = order.reviewed_at ? Format.dateSlash(order.reviewed_at) : "-";
     document.getElementById("sumItems").textContent =
       `${summary.items_count ?? 0} أصناف · ${summary.total_quantity ?? 0} مطلوب · ` +
       `${summary.total_open ?? totalCurrentOpen()} متبقي`;
@@ -203,7 +205,7 @@
       previous
         .map(
           (entry) =>
-            `${esc(statusLabel(entry.status))} - السواق: ${esc(entry.driver || "?")} - الموزع: ${esc(entry.distributor || "—")} - سجله: ${esc(entry.recorded_by || "—")} - ${esc(entry.delivered_at || "?")}`
+            `${esc(statusLabel(entry.status))} - السواق: ${esc(entry.driver || "?")} - الموزع: ${esc(entry.distributor || "—")} - سجله: ${esc(entry.recorded_by || "—")} - ${esc(entry.delivered_at ? Format.dateSlash(entry.delivered_at) : "?")}`
         )
         .join(" · ");
     box.classList.remove("hidden");

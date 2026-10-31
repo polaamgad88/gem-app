@@ -25,6 +25,11 @@
   ];
 
   let allDeliveries = [];
+  let deliveryOffset = 0;
+  let deliveryTotal = 0;
+  let deliverySummary = null;
+  let deliveryRequest = 0;
+  const DELIVERY_LIMIT = 200;
   let endpoint = "/deliveries";
   let canSeeAllDrivers = false;
   let canManageDeliveries = false;
@@ -95,6 +100,15 @@
   });
 
   function wireFilters() {
+    document.getElementById("deliveries-prev").addEventListener("click", () => {
+      deliveryOffset = Math.max(0, deliveryOffset - DELIVERY_LIMIT);
+      loadDeliveries({ keepPage: true });
+    });
+    document.getElementById("deliveries-next").addEventListener("click", () => {
+      if (deliveryOffset + allDeliveries.length >= deliveryTotal) return;
+      deliveryOffset += DELIVERY_LIMIT;
+      loadDeliveries({ keepPage: true });
+    });
     const reload = Async.debounce(loadDeliveries, 250);
     FILTER_IDS.filter((id) => id !== "filter-sap-order").forEach((id) => {
       document.getElementById(id)?.addEventListener("change", loadDeliveries);
@@ -183,7 +197,11 @@
     select.innerHTML = `<option value="">كل الموزعين</option>${managerDistributors.map((person) => `<option value="${person.user_id}">${esc(person.username)}</option>`).join("")}`;
   }
 
-  async function loadDeliveries() {
+  async function loadDeliveries(options = {}) {
+    if (options.keepPage !== true) deliveryOffset = 0;
+    const requestId = ++deliveryRequest;
+    document.getElementById("deliveries-prev").disabled = true;
+    document.getElementById("deliveries-next").disabled = true;
     const loading = document.getElementById("deliveries-loading");
     loading?.classList.remove("hidden");
     paintFilterCount();
@@ -192,6 +210,8 @@
       const dateStart = document.getElementById("filter-date-start")?.value;
       const dateEnd = document.getElementById("filter-date-end")?.value;
       const query = {
+        limit: DELIVERY_LIMIT,
+        offset: deliveryOffset,
         status: document.getElementById("filter-status")?.value || "",
         sap_order_id: document.getElementById("filter-sap-order")?.value || "",
         date_start: dateStart ? `${dateStart} 00:00:00` : "",
@@ -203,13 +223,26 @@
       }
 
       const data = await Api.get(endpoint, { query });
+      if (requestId !== deliveryRequest) return;
       allDeliveries = data.deliveries || [];
+      deliveryTotal = Number(data.total ?? data.count ?? allDeliveries.length);
+      deliverySummary = data.summary || null;
+      deliveryOffset = Number(data.offset ?? deliveryOffset);
+      if (!allDeliveries.length && deliveryTotal && deliveryOffset) {
+        deliveryOffset = Math.floor((deliveryTotal - 1) / DELIVERY_LIMIT) * DELIVERY_LIMIT;
+        return loadDeliveries({ keepPage: true });
+      }
       render(allDeliveries);
+      const first = allDeliveries.length ? deliveryOffset + 1 : 0;
+      document.getElementById("deliveries-page-info").textContent = `عرض ${first}–${deliveryOffset + allDeliveries.length} من ${deliveryTotal} توصيل`;
+      document.getElementById("deliveries-prev").disabled = deliveryOffset === 0;
+      document.getElementById("deliveries-next").disabled = deliveryOffset + allDeliveries.length >= deliveryTotal;
     } catch (err) {
+      if (requestId !== deliveryRequest) return;
       console.error("Failed to load deliveries:", err);
       alert("مقدرناش نحمل التوصيلات.");
     } finally {
-      loading?.classList.add("hidden");
+      if (requestId === deliveryRequest) loading?.classList.add("hidden");
     }
   }
 
@@ -260,6 +293,9 @@
     meta.push(`الموزع: ${esc(delivery.distributor?.username || "—")}`);
     meta.push(`سجله: ${esc(delivery.recorded_by?.username || "—")}`);
     if (delivery.car?.plate) meta.push(`<span class="plate">${esc(delivery.car.plate)}</span>`);
+    if (delivery.customer_name || delivery.customer_code) {
+      meta.push(esc([delivery.customer_code, delivery.customer_name].filter(Boolean).join(" — ")));
+    }
     meta.push(`تم تسليم ${esc(totals.delivered)}/${esc(totals.ordered)}`);
     meta.push(
       delivery.money_collected
@@ -334,11 +370,6 @@
   function renderSummary(deliveries) {
     const box = document.getElementById("summary-row");
     if (!box) return;
-    if (!deliveries.length) {
-      box.innerHTML = "";
-      return;
-    }
-
     const counts = {};
     let unreviewed = 0;
     deliveries.forEach((delivery) => {
@@ -346,8 +377,13 @@
       if (!delivery.sap_reviewed_at_delivery) unreviewed += 1;
     });
 
+    if (deliverySummary) {
+      Object.keys(counts).forEach((key) => delete counts[key]);
+      Object.assign(counts, deliverySummary.statuses || {});
+      unreviewed = Number(deliverySummary.unreviewed || 0);
+    }
     const tiles = [
-      `<div class="stat-tile"><span>${deliveries.length}</span><small>الإجمالي</small></div>`,
+      `<div class="stat-tile"><span>${deliveryTotal}</span><small>الإجمالي</small></div>`,
     ];
     Object.entries(counts).forEach(([status, count]) => {
       const slug = String(status || "").replace(/\s+/g, "-");

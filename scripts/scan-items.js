@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadedOrderId = document.getElementById("loadedOrderId");
   const loadedOrderStatus = document.getElementById("loadedOrderStatus");
   const loadedCustomerName = document.getElementById("loadedCustomerName");
+  const loadedCustomerCode = document.getElementById("loadedCustomerCode");
+  const loadedSapCustomerName = document.getElementById("loadedSapCustomerName");
   const loadedReviewedBy = document.getElementById("loadedReviewedBy"); // NEW
   const loadedReviewedAt = document.getElementById("loadedReviewedAt"); // NEW
   const orderedItemsTableBody = document.getElementById(
@@ -687,12 +689,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loadedOrderId.textContent = sapOrder.sap_order_id ?? "-";
     loadedOrderStatus.textContent = sapOrder.status || "-";
     loadedCustomerName.textContent = sapOrder.prepared_by_username || "-";
+    loadedCustomerCode.textContent = sapOrder.customer_code || "-";
+    loadedSapCustomerName.textContent = sapOrder.customer_name || "-";
 
     if (loadedReviewedBy) {
       loadedReviewedBy.textContent = sapOrder.reviewed_by_username || "-";
     }
     if (loadedReviewedAt) {
-      loadedReviewedAt.textContent = sapOrder.reviewed_at || "-";
+      loadedReviewedAt.textContent = sapOrder.reviewed_at ? new Date(sapOrder.reviewed_at).toLocaleString("en-GB") : "-";
     }
 
     loadedOrderStatus.className =
@@ -827,6 +831,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadedOrderId.textContent = "-";
     loadedOrderStatus.textContent = "-";
     loadedCustomerName.textContent = "-";
+    loadedCustomerCode.textContent = "-";
+    loadedSapCustomerName.textContent = "-";
 
     if (loadedReviewedBy) loadedReviewedBy.textContent = "-";
     if (loadedReviewedAt) loadedReviewedAt.textContent = "-";
