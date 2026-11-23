@@ -9,6 +9,8 @@
   <link rel="icon" type="image/x-icon" href="./assets/GEM-Group-2024.ico" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="./styles/shell.css" />
+  <link rel="stylesheet" href="./styles/workspace-switcher.css" />
+  <link rel="stylesheet" href="./styles/gem-hr-shell.css" />
 
   <script>
     var _paq = window._paq = window._paq || [];
@@ -40,7 +42,20 @@
       <span class="drawer-version">v3.9.0 Beta</span>
     </div>
 
+    <!-- HR workspace switcher: isolated addition -->
+    <div class="ws-selector" id="ws-selector">
+      <button class="ws-trigger" id="ws-trigger" type="button" aria-expanded="false" aria-controls="ws-menu">
+        <span class="ws-symbol"><i class="fa-solid fa-building"></i></span>
+        <span class="ws-trigger-copy"><small>WORKSPACE</small><strong id="ws-current">GEM Operations</strong></span>
+        <i class="fa-solid fa-chevron-down ws-chevron"></i>
+      </button>
+      <div class="ws-menu" id="ws-menu" hidden>
+        <button type="button" class="ws-choice" data-workspace="operations"><i class="fa-solid fa-chart-line"></i><span><strong>GEM Operations</strong><small>Orders, visits & logistics</small></span></button>
+        <button type="button" class="ws-choice" data-workspace="hr"><i class="fa-solid fa-people-group"></i><span><strong>GEM Human Resources</strong><small>People, time & leave</small></span></button>
+      </div>
+    </div>
     <nav id="nav" class="drawer-nav">
+      <div id="ws-operations-nav" class="ws-nav-block">
       <a href="./create-order.html" data-page="create-order.html" class="nav-cta">
         <i class="fa-solid fa-plus fa-fw"></i><span>Add New Order</span>
       </a>
@@ -93,6 +108,20 @@
           <i class="fa-solid fa-clipboard-check fa-fw"></i><span>Deliveries</span>
         </a>
       </div>
+      </div><!-- end operations nav -->
+      <div id="ws-hr-nav" class="ws-nav-block" hidden>
+        <div class="nav-group nav-group--first"><span class="nav-group-label" data-i18n-ar="مساحتي" data-i18n-en="My Workspace">مساحتي</span>
+          <a href="./hr/hr-dashboard.html" data-page="hr-dashboard.html"><i class="fa-solid fa-house fa-fw"></i><span data-i18n-ar="لوحة المعلومات" data-i18n-en="HR Dashboard">لوحة المعلومات</span></a>
+          <a href="./hr/hr-attendance.html" data-page="hr-attendance.html"><i class="fa-solid fa-fingerprint fa-fw"></i><span data-i18n-ar="الحضور والانصراف" data-i18n-en="Attendance">الحضور والانصراف</span></a>
+          <a href="./hr/hr-leaves.html" data-page="hr-leaves.html"><i class="fa-solid fa-calendar-check fa-fw"></i><span data-i18n-ar="إدارة الإجازات" data-i18n-en="Leave Management">إدارة الإجازات</span></a>
+          <a href="./hr/hr-approvals.html" data-page="hr-approvals.html"><i class="fa-solid fa-list-check fa-fw"></i><span data-i18n-ar="الموافقات والطلبات" data-i18n-en="Approvals & Requests">الموافقات والطلبات</span></a>
+        </div>
+        <div class="nav-group"><span class="nav-group-label" data-i18n-ar="الأفراد والفرق" data-i18n-en="People & Teams">الأفراد والفرق</span>
+          <a href="./hr/hr-employees.html" data-page="hr-employees.html"><i class="fa-solid fa-users fa-fw"></i><span data-i18n-ar="الموظفون" data-i18n-en="Employees">الموظفون</span></a>
+          <a href="./hr/hr-profile.html" data-page="hr-profile.html"><i class="fa-solid fa-id-card fa-fw"></i><span data-i18n-ar="الملف الوظيفي" data-i18n-en="Employee Profile">الملف الوظيفي</span></a>
+          <a href="./hr/hr-shifts.html" data-page="hr-shifts.html"><i class="fa-solid fa-calendar-days fa-fw"></i><span data-i18n-ar="الشفتات والجداول" data-i18n-en="Shifts & Schedules">الشفتات والجداول</span></a>
+        </div>
+      </div>
     </nav>
   </aside>
 
@@ -102,6 +131,7 @@
         <i class="fa-solid fa-bars fa-fw"></i>
       </button>
       <span id="page-title" class="bar-title">Dashboard</span>
+      <div id="gem-hr-language" class="gem-hr-language" hidden><button type="button" data-lang="ar">عربي</button><button type="button" data-lang="en">EN</button></div>
       <span id="region-badge" class="region-badge" style="display:none"></span>
       <div class="bar-right">
         <button id="theme-toggle" class="bar-btn">🌙 Dark</button>
@@ -115,6 +145,7 @@
   </main>
 
   <script src="./scripts/shell.js"></script>
+  <script src="./scripts/workspace-switcher.js"></script>
 </body>
 
 </html>

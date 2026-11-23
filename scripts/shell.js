@@ -73,7 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const params = new URLSearchParams(location.search);
   const req = params.get("page");
-  if (req) go(req);
+  if (req) {
+    const requestedLink = [...links].find(a => a.dataset.page === req);
+    go(requestedLink ? requestedLink.getAttribute("href") : req);
+  }
   else highlight("dashboard.html");
 
   function openDrawer() {
