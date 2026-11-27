@@ -5,12 +5,12 @@ const V=[
 ["leaves","إدارة الإجازات","Leave Administration","calendar-check"],
 ["adjustments","حركات تعديل الأرصدة","Balance Adjustments","sliders"],
 ["carryover","إدارة أرصدة الإجازات المرحلة","Carried-forward Balances","wallet"],
-["logs","سجل حركات الدوام","Attendance Log","clock"],
+["logs","سجل الحضور والانصراف","Attendance Log","clock"],
 ["imports","سجل حركات الحضور المستوردة","Imported Attendance Logs","file-import"],
 ["shifts","ورديات عمل الموظفين","Employee Work Shifts","calendar-days"],
 ["locations","المواقع الجغرافية للموظفين","Employee Work Locations","location-dot"],
-["transactions","إدارة حركات الدوام","Attendance Transactions","fingerprint"],
-["missing","طلبات حركات الدوام غير المسجلة","Missing Punch Requests","triangle-exclamation"],
+["transactions","إدارة الحضور والانصراف","Attendance Transactions","fingerprint"],
+["missing","طلبات البصمات الناقصة","Missing Punch Requests","triangle-exclamation"],
 ["suggestions","الحركات المقترحة","Suggested Transactions","wand-magic-sparkles"]
 ];
 const key=document.body.dataset.view||"leaves";
@@ -122,10 +122,10 @@ const body=slice.length?slice.map(row=>'<tr>'+f.map(([k])=>'<td>'+value(row,k)+'
 (["leaves","missing","suggestions","adjustments"].includes(key)&&row.status==="pending"?'<button class="tm-link" data-action="approve" data-id="'+esc(row.id)+'">'+t("اعتماد","Approve")+'</button>':"")+'</div></td></tr>').join(""):'<tr><td class="tm-blank" colspan="'+(f.length+1)+'">'+t("لا توجد نتائج مطابقة","No matching records")+'</td></tr>';
 return '<div class="tm-table-wrap"><table><thead><tr>'+head+'<th>'+t("الإجراءات","Actions")+'</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
 '<div class="tm-pager"><span class="tm-muted tm-small">'+t("عرض","Showing")+" "+(list.length?start+1:0)+"–"+Math.min(start+10,list.length)+" / "+list.length+'</span><div class="tm-actions"><button class="tm-btn" data-action="prev" '+(page<=1?"disabled":"")+'>'+t("السابق","Previous")+'</button><span class="tm-chip">'+page+'</span><button class="tm-btn" data-action="next" '+(page*10>=list.length?"disabled":"")+'>'+t("التالي","Next")+'</button></div></div>'}
-function nav(){return '<nav class="tm-nav" aria-label="'+t("صفحات الإجازات والدوام","Leave and attendance pages")+'">'+V.map(v=>'<a href="./time-'+v[0]+'.html" class="'+(v[0]===key?"active":"")+'">'+icon(v[3])+" "+title(v)+'</a>').join("")+'</nav>'}
+function nav(){return '<nav class="tm-nav" aria-label="'+t("صفحات الإجازات والحضور والانصراف","Leave and attendance pages")+'">'+V.map(v=>'<a href="./time-'+v[0]+'.html" class="'+(v[0]===key?"active":"")+'">'+icon(v[3])+" "+title(v)+'</a>').join("")+'</nav>'}
 function render(){const root=$("#tm-root");root.dir=lang==="ar"?"rtl":"ltr";root.classList.toggle("tm-dark",localStorage.getItem("theme")==="dark");document.documentElement.dir=root.dir;document.documentElement.lang=lang;
 const list=filtered(),action=key==="imports"?'<button class="tm-btn primary" data-action="import">'+icon("file-arrow-up")+" "+t("استيراد ملف تجريبي","Simulate import")+"</button>":primary()?'<button class="tm-btn primary" data-action="add">'+icon("plus")+" "+t("إضافة سجل تجريبي","Add demo record")+"</button>":'';
-root.innerHTML='<header class="tm-top"><div><div class="tm-kicker">'+t("GEM HR / إدارة الإجازات والدوام","GEM HR / Leave & Attendance")+'</div><h1>'+icon(meta[3])+" "+title(meta)+'</h1><div class="tm-muted">'+t("إدارة ومتابعة بيانات الموارد البشرية من واجهة موحدة","Manage and review HR records in one workspace")+'</div></div><div class="tm-actions">'+action+'<button class="tm-btn" data-action="export">'+icon("file-csv")+" "+t("تصدير CSV","Export CSV")+"</button></div></header>"+
+root.innerHTML='<header class="tm-top"><div><div class="tm-kicker">'+t("GEM HR / إدارة الإجازات والحضور والانصراف","GEM HR / Leave & Attendance")+'</div><h1>'+icon(meta[3])+" "+title(meta)+'</h1><div class="tm-muted">'+t("إدارة ومتابعة بيانات الموارد البشرية من واجهة موحدة","Manage and review HR records in one workspace")+'</div></div><div class="tm-actions">'+action+'<button class="tm-btn" data-action="export">'+icon("file-csv")+" "+t("تصدير CSV","Export CSV")+"</button></div></header>"+
 '<div class="tm-footnote">'+icon("circle-info")+" "+t("وضع المحاكاة: بيانات افتراضية فقط؛ لا يتم الاتصال بأجهزة ZKTeco أو تعديل بيانات الإنتاج.","Demo mode: fictional data only. No ZKTeco connection or production changes.")+'</div>'+nav()+summary(rows())+
 '<section class="tm-card"><div class="tm-card-head"><h2>'+t("السجلات","Records")+'</h2><span class="tm-chip">'+list.length+" "+t("نتيجة","results")+'</span></div>'+
 '<div class="tm-toolbar"><input id="tm-q" class="tm-input tm-search" value="'+esc(query)+'" placeholder="'+t("البحث بالاسم أو الرقم أو التفاصيل...","Search employee, ID or details...")+'" aria-label="'+t("بحث","Search")+'">'+
