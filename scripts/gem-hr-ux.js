@@ -91,7 +91,9 @@
     if (!input.value) return;
     input.value = '';
     applySearch();
-    groups.forEach(g => { g.open = stored.includes(g.id) || !!g.querySelector('a.active'); });
+    let remembered = stored;
+    try { remembered = JSON.parse(sessionStorage.getItem('gem_hr_open_sections') || '[]'); } catch {}
+    groups.forEach(g => { g.open = remembered.includes(g.id) || !!g.querySelector('a.active'); });
   }
   groups.forEach(g => {
     if (stored.includes(g.id)) g.open = true;
