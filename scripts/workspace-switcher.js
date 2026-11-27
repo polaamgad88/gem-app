@@ -7,7 +7,7 @@
   const links=[...document.querySelectorAll('#nav a[data-page]')];
   let lang=localStorage.getItem('gem_hr_lang')==='en'?'en':'ar';
   const req=new URLSearchParams(location.search).get('page')||'';
-  let workspace=req.startsWith('hr-')?'hr':'operations';
+  let workspace=/^(hr-|time-|finance-)/.test(req)?'hr':'operations';
   function localize(){
     document.body.classList.toggle('gem-hr-rtl',workspace==='hr'&&lang==='ar');
     document.body.classList.toggle('gem-hr-ltr',workspace==='hr'&&lang==='en');
