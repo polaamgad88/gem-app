@@ -1,0 +1,50 @@
+/* GEM HR-only UX polish. Never styles GEM Operations workspace. */
+body.gem-hr-rtl,
+body.gem-hr-ltr{--gem-hr-focus:#79aafb;--gem-hr-navy:#203f73;--gem-hr-blue:#2563eb}
+body.gem-hr-rtl #ws-hr-nav,
+body.gem-hr-ltr #ws-hr-nav{padding-bottom:26px}
+#ws-hr-nav .gem-hr-nav-search{position:sticky;top:0;z-index:4;padding:12px 6px 13px;background:inherit;border-bottom:1px solid #e1eaf6;margin-bottom:8px}
+#ws-hr-nav .gem-hr-nav-search label{font-size:10px;letter-spacing:.02em;font-weight:800;color:#55729c;display:block;margin-bottom:6px}
+#ws-hr-nav .gem-hr-nav-search-field{display:flex;align-items:center;gap:8px;border:1px solid #cadcf5;background:#f8fbff;border-radius:11px;padding:0 10px;min-height:43px;transition:border-color .17s,box-shadow .17s}
+#ws-hr-nav .gem-hr-nav-search-field:focus-within{border-color:#3573e9;box-shadow:0 0 0 3px #2563eb24}
+#ws-hr-nav .gem-hr-nav-search-field>i{color:#6e87b0}
+#ws-hr-nav #gem-hr-nav-search-input{width:100%;min-width:0;border:0;background:transparent;outline:0;color:#203b63;font-size:12px;flex:1}
+#ws-hr-nav #gem-hr-nav-search-input::placeholder{color:#7489a8}
+#ws-hr-nav .gem-hr-nav-search-field kbd{font-size:9px;color:#8397b4;border:1px solid #d8e3f3;border-radius:6px;padding:1px 4px;white-space:nowrap}
+#ws-hr-nav .gem-hr-search-empty{font-size:11px;color:#6c7f9b;padding:11px 7px}
+#ws-hr-nav a[hidden],#ws-hr-nav details[hidden],#ws-hr-nav .gem-hr-search-empty[hidden]{display:none!important}
+#ws-hr-nav details.gem-hr-time-subnav{margin-top:7px;padding-top:7px;border-color:#e5edfa}
+#ws-hr-nav details.gem-hr-time-subnav summary{min-height:46px;line-height:1.5;letter-spacing:0;gap:10px;background:#f3f7ff;color:#294e82;border:1px solid transparent;transition:background .15s,border-color .15s}
+#ws-hr-nav details.gem-hr-time-subnav summary:hover{background:#eaf2ff;border-color:#d4e5ff}
+#ws-hr-nav details.gem-hr-time-subnav[open] summary{background:#eaf2ff;border-color:#d8e6f9;color:#1e58b6}
+#ws-hr-nav details.gem-hr-time-subnav summary>span{font-size:11.5px;line-height:1.65;min-width:0;overflow-wrap:anywhere}
+#ws-hr-nav .gem-hr-time-subnav-links{padding-block:5px 9px}
+#ws-hr-nav .gem-hr-time-subnav-links a{font-size:11.5px;min-height:40px;line-height:1.6;white-space:normal;text-overflow:clip;overflow:visible;align-items:flex-start;padding-block:8px;gap:9px}
+#ws-hr-nav .gem-hr-time-subnav-links a i{margin-top:2px}
+#ws-hr-nav .gem-hr-time-subnav-links a span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+#ws-hr-nav .nav-group a{min-height:44px}
+#ws-hr-nav a[aria-current="page"]{box-shadow:0 5px 13px #2563eb24}
+#ws-hr-nav a:focus-visible,
+#ws-hr-nav summary:focus-visible,
+#ws-hr-nav .gem-hr-nav-search-field:focus-within{outline:2px solid var(--gem-hr-focus,#79aafb);outline-offset:2px}
+body.gem-hr-rtl #ws-hr-nav .gem-hr-time-subnav-links{padding-inline-start:7px;padding-inline-end:2px}
+body.gem-hr-ltr #ws-hr-nav .gem-hr-time-subnav-links{padding-inline-start:7px;padding-inline-end:2px}
+body.gem-hr-rtl .drawer,body.gem-hr-ltr .drawer{scrollbar-width:thin;scrollbar-color:#bccce3 transparent}
+body.gem-hr-rtl #ws-hr-nav .gem-hr-nav-search-field input,
+body.gem-hr-rtl #ws-hr-nav .gem-hr-nav-search label{text-align:right}
+body.gem-hr-ltr #ws-hr-nav .gem-hr-nav-search-field input,
+body.gem-hr-ltr #ws-hr-nav .gem-hr-nav-search label{text-align:left}
+body.gem-hr-rtl .ws-trigger:focus-visible,body.gem-hr-ltr .ws-trigger:focus-visible,
+body.gem-hr-rtl .ws-choice:focus-visible,body.gem-hr-ltr .ws-choice:focus-visible,
+body.gem-hr-rtl .gem-hr-language button:focus-visible,body.gem-hr-ltr .gem-hr-language button:focus-visible{outline:3px solid #80aaff;outline-offset:2px}
+body.gem-hr-rtl .gem-hr-language button,body.gem-hr-ltr .gem-hr-language button{min-height:33px;padding-inline:13px}
+/* Keep shared iframe components consistent, without overriding each page's own visual identity. */
+@media(max-width:768px){
+ body.gem-hr-rtl #ws-hr-nav .gem-hr-time-subnav-links a,
+ body.gem-hr-ltr #ws-hr-nav .gem-hr-time-subnav-links a{min-height:44px}
+ body.gem-hr-rtl .drawer,body.gem-hr-ltr .drawer{width:min(86vw,320px)}
+ body.gem-hr-rtl .drawer.collapsed,body.gem-hr-ltr .drawer.collapsed{width:min(86vw,320px)}
+}
+@media(prefers-reduced-motion:reduce){
+ body.gem-hr-rtl #ws-hr-nav *,body.gem-hr-ltr #ws-hr-nav *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
