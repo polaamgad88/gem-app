@@ -8,3 +8,5 @@
 #ws-hr-nav .gem-hr-time-subnav-links{display:grid;gap:3px;padding:6px 0 6px 6px}
 #ws-hr-nav .gem-hr-time-subnav-links a{font-size:11px;min-height:36px;padding-inline:12px}
 body.gem-hr-rtl #ws-hr-nav .gem-hr-time-subnav-links{padding:6px 6px 6px 0}
+
+#ws-hr-nav #gw-reports-nav[open] .gem-hr-time-subnav-links{max-height:440px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
