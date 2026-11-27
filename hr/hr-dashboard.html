@@ -1,1 +1,105 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GEM HR</title><link rel="stylesheet" href="./hr.css"></head><body data-screen="dashboard"><div id="app"></div><script src="./hr.js"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEM HR | Dashboard</title>
+<link rel="stylesheet" href="./hr.css">
+<style>
+body[data-screen="dashboard"]{background:var(--bg)}
+.dash{max-width:1600px;margin:auto;padding:24px clamp(14px,2.2vw,32px) 40px}
+.dash-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.dash-head h1{font-size:clamp(23px,2.2vw,30px);margin:0;font-weight:800;color:var(--navy)}
+.dash-head p{margin:2px 0;color:var(--muted)}
+.dash-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.dash-nav .current{background:var(--navy);color:#fff;border-color:transparent}
+.dash-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.dash-col{display:grid;gap:16px;min-width:0}
+.dash-card{background:var(--pale);border:1px solid var(--edge);border-radius:19px;padding:15px;min-width:0}
+.dash-card h2{font-size:14px;font-weight:800;margin:0}
+.dash-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.dash-inner{background:var(--surface);border:1px solid var(--edge);border-radius:15px;padding:15px}
+.dash-balances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.dash-balance{display:flex;gap:9px;align-items:center;min-height:90px;padding:12px;border-radius:15px;background:var(--surface);border:1px solid var(--edge)}
+.dash-balance i{color:var(--blue);background:var(--pale);display:grid;place-items:center;width:32px;height:32px;border-radius:10px;flex:none}
+.dash-balance small,.dash-balance span{display:block;color:var(--muted);font-size:11px}
+.dash-balance strong{display:block;font-size:20px;line-height:1.4;color:var(--navy)}
+.dash-asof{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.dash-asof input{max-width:145px;padding:5px 7px;border:1px solid var(--edge);border-radius:8px;background:var(--surface);color:var(--ink)}
+.dash-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:150px;gap:7px}
+.dash-empty i{font-size:23px;color:var(--muted);background:var(--bg);border-radius:50%;width:48px;height:48px;display:grid;place-items:center}
+.dash-empty p{margin:0;color:var(--muted);font-size:11px}
+.dash-quick{display:flex;align-items:center;gap:10px;margin-top:8px}
+.dash-quick i{display:grid;place-items:center;border-radius:50%;background:var(--navy);color:#fff;width:32px;height:32px;flex:none}
+.dash-quick a{margin-inline-start:auto;font-weight:800;font-size:12px}
+.dash-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.dash-cal-buttons{display:flex;gap:5px}
+.dash-icon{width:34px;height:34px;border-radius:50%;padding:0;border:1px solid var(--edge);color:var(--ink);background:var(--surface);display:grid;place-items:center}
+.dash-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.dash-weekday{font-size:11px;color:var(--muted);padding:8px 0}
+.dash-day{background:transparent;border:1px solid transparent;color:var(--ink);border-radius:50%;aspect-ratio:1;max-width:42px;width:100%;justify-self:center;font-size:12px}
+.dash-day:hover{background:var(--pale);border-color:var(--edge)}
+.dash-day.today{border-color:var(--blue);color:var(--blue);font-weight:800}
+.dash-day.selected{background:var(--blue);color:white;font-weight:800}
+.dash-events{margin-top:22px;display:grid;gap:14px}
+.dash-events p{margin:2px 0;color:var(--muted)}
+.dash-punches{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dash-punches strong{display:block;font-size:19px}
+.dash .text-btn{font-size:12px}
+.dash a:focus-visible,.dash button:focus-visible,.dash input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+body.hr-dark .dash-nav .current{background:#315188;color:white}
+body.hr-dark .dash-quick i{background:#315188}
+@media(max-width:1050px){.dash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-col:last-child{grid-column:1/-1}}
+@media(max-width:640px){.dash{padding:14px 10px 30px}.dash-grid{grid-template-columns:1fr}.dash-col:last-child{grid-column:auto}.dash-card{padding:12px}.dash-balance{padding:9px}.dash-balance strong{font-size:18px}}
+</style>
+</head>
+<body data-screen="dashboard">
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+var lang=localStorage.getItem('gem_hr_lang')==='en'?'en':'ar';
+var now=new Date(), month=new Date(now.getFullYear(),now.getMonth(),1), selected=new Date(now.getFullYear(),now.getMonth(),now.getDate()), asof=key(now);
+var app=document.getElementById('app');
+function t(ar,en){return lang==='ar'?ar:en}
+function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmt(d,options){return new Intl.DateTimeFormat(lang==='ar'?'ar-EG':'en-GB',Object.assign({numberingSystem:'latn'},options)).format(d)}
+function icon(name){return '<i class="fa-solid fa-'+name+'" aria-hidden="true"></i>'}
+function link(page,label){return '<a data-hr-page="'+page+'" href="./'+page+'">'+label+'</a>'}
+function card(title,body,action){return '<section class="dash-card"><div class="dash-title"><h2>'+title+'</h2>'+(action||'')+'</div>'+body+'</section>'}
+function balance(label,value,symbol){return '<div class="dash-balance">'+icon(symbol)+'<div><small>'+label+'</small><strong>'+value+'</strong><span>'+t('أيام','Days')+'</span></div></div>'}
+function empty(symbol,title,description){return '<div class="dash-inner dash-empty">'+icon(symbol)+'<b>'+title+'</b><p>'+description+'</p></div>'}
+function quick(symbol,title,page){return '<div class="dash-inner dash-quick">'+icon(symbol)+'<b>'+title+'</b>'+link(page,t('مشاهدة','View'))+'</div>'}
+function calendar(){
+var y=month.getFullYear(),m=month.getMonth(),first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();
+var weekdays=t(['أحد','إثن','ثلا','أرب','خمي','جمع','سبت'],['Sun','Mon','Tue','Wed','Thu','Fri','Sat']);
+var cells=weekdays.map(function(d){return '<span class="dash-weekday">'+d+'</span>'}).join('');
+for(var i=0;i<first;i++)cells+='<span></span>';
+for(var d=1;d<=last;d++){var date=new Date(y,m,d),isToday=key(date)===key(now),isSelected=key(date)===key(selected);cells+='<button type="button" class="dash-day'+(isToday?' today':'')+(isSelected?' selected':'')+'" data-day="'+d+'" aria-pressed="'+isSelected+'" aria-label="'+fmt(date,{dateStyle:'full'})+'">'+d+'</button>'}
+return '<div class="dash-inner"><div class="dash-calendar-head"><strong>'+fmt(month,{month:'long',year:'numeric'})+'</strong><div class="dash-cal-buttons"><button class="dash-icon" type="button" data-month="-1" aria-label="'+t('الشهر السابق','Previous month')+'">'+icon(lang==='ar'?'chevron-right':'chevron-left')+'</button><button class="dash-icon" type="button" data-month="1" aria-label="'+t('الشهر التالي','Next month')+'">'+icon(lang==='ar'?'chevron-left':'chevron-right')+'</button></div></div><div class="dash-calendar">'+cells+'</div><div class="dash-events"><div><b>'+fmt(selected,{dateStyle:'full'})+'</b><p>'+t('لا توجد عطلات مسجلة في العرض التجريبي','No holidays in this demo')+'</p></div><div><b>'+t('الأحداث','Events')+'</b><p>'+t('لا توجد أحداث قادمة','No upcoming events')+'</p></div></div></div>'
+}
+function render(){
+document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.body.dir=document.documentElement.dir;
+document.body.classList.toggle('hr-dark',localStorage.getItem('theme')==='dark');
+var leave=card(t('رصيد إجازاتك','Your leave balances'),'<div class="dash-inner dash-asof"><label for="dash-date">'+t('الرصيد حتى تاريخ','Balance as of')+'</label><input id="dash-date" type="date" value="'+asof+'"><small class="muted">'+t('أرصدة توضيحية ثابتة','Static example balances')+'</small></div><div class="dash-balances">'+balance(t('إجازة مرضية','Sick leave'),'90.000','briefcase-medical')+balance(t('الإجازات السنوية','Annual leave'),'14.000','plane')+balance(t('الإجازات العارضة','Casual leave'),'5.000','hand')+'</div>',link('hr-leaves.html',t('اطلب إجازة','Request leave')));
+var actions=card(t('إجراءات سريعة','Quick actions'),quick('circle-check',t('الموافقات والطلبات','Approvals & requests'),'hr-approvals.html')+quick('calendar-days',t('جدولي','My schedule'),'hr-shifts.html')+quick('users',t('الموظفون','Employees'),'hr-employees.html'));
+var attendance=card(t('حركات الدوام لليوم','Today’s attendance'),'<div class="dash-inner dash-punches"><div><span class="muted">'+t('الحضور','Clock in')+'</span><strong>09:08</strong></div><div><span class="muted">'+t('الانصراف','Clock out')+'</span><strong>—</strong></div></div>',link('hr-attendance.html',t('عرض السجل','View history')));
+var tasks=card(t('مهامي (0)','My tasks (0)'),empty('file-lines',t('لا توجد مهام','No tasks'),t('لا توجد مهام معلقة في العرض التجريبي','No pending tasks in this demo')));
+var absent=card(t('المتغيبون / العاملون عن بُعد','Absent / remote employees'),empty('suitcase',t('لا توجد إجازات مسجلة','No absences recorded'),t('لا تتوفر بيانات فعلية في العرض التجريبي','No live employee data is connected')));
+app.innerHTML='<main class="dash"><header class="dash-head"><div><div class="hr-kicker">GEM HR / '+t('الموارد البشرية','Human Resources')+'</div><h1>'+t('مرحباً بك في GEM HR','Welcome to GEM HR')+'</h1><p>'+t('لوحة المعلومات الافتراضية','Your default dashboard')+'</p></div><span class="pill">'+icon('calendar-days')+' '+fmt(now,{dateStyle:'long'})+'</span></header><div class="hr-demo" role="note">'+icon('circle-info')+' '+t('عرض تجريبي للواجهة فقط. جميع الأرصدة وحركات الدوام أمثلة وليست بيانات فعلية.','Frontend preview only. All balances and attendance entries are examples, not live records.')+'</div><div class="dash-nav"><span class="pill current">'+t('الصفحة الرئيسية','Home')+'</span><span class="pill">'+t('لوحة المعلومات الافتراضية','Default dashboard')+'</span></div><div class="dash-grid"><div class="dash-col">'+leave+actions+attendance+'</div><div class="dash-col">'+tasks+absent+'</div><div class="dash-col">'+card(t('الأحداث','Events'),calendar())+'</div></div></main>'
+}
+app.addEventListener('click',function(e){
+var a=e.target.closest('[data-hr-page]');if(a&&window.parent!==window){e.preventDefault();window.parent.location.href='index.html?page='+encodeURIComponent(a.dataset.hrPage);return}
+var b=e.target.closest('[data-month],[data-day]');if(!b)return;
+if(b.hasAttribute('data-month')){month=new Date(month.getFullYear(),month.getMonth()+Number(b.dataset.month),1);selected=new Date(month)}
+else selected=new Date(month.getFullYear(),month.getMonth(),Number(b.dataset.day));
+render();
+var next=b.hasAttribute('data-month')?app.querySelector('[data-month="'+b.dataset.month+'"]'):app.querySelector('[data-day="'+b.dataset.day+'"]');if(next)next.focus();
+});
+app.addEventListener('change',function(e){if(e.target.id==='dash-date'){asof=e.target.value||key(now);render();document.getElementById('dash-date').focus()}});
+window.addEventListener('message',function(e){if(e.origin!==location.origin||e.source!==window.parent)return;if(e.data&&e.data.gemHrLang){lang=e.data.gemHrLang==='en'?'en':'ar';render()}if(e.data&&e.data.theme)document.body.classList.toggle('hr-dark',e.data.theme==='dark')});
+render();
+})();
+</script>
+</body>
+</html>
