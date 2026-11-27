@@ -48,3 +48,20 @@ body.gem-hr-rtl .gem-hr-language button,body.gem-hr-ltr .gem-hr-language button{
 @media(prefers-reduced-motion:reduce){
  body.gem-hr-rtl #ws-hr-nav *,body.gem-hr-ltr #ws-hr-nav *{transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
+/* HR-only dark sidebar search & grouping. */
+body.dark-mode.gem-hr-rtl #ws-hr-nav .gem-hr-nav-search,
+body.dark-mode.gem-hr-ltr #ws-hr-nav .gem-hr-nav-search{border-color:#344a69}
+body.dark-mode.gem-hr-rtl #ws-hr-nav .gem-hr-nav-search-field,
+body.dark-mode.gem-hr-ltr #ws-hr-nav .gem-hr-nav-search-field{background:#20334f;border-color:#365173}
+body.dark-mode.gem-hr-rtl #ws-hr-nav #gem-hr-nav-search-input,
+body.dark-mode.gem-hr-ltr #ws-hr-nav #gem-hr-nav-search-input{color:#eff5ff}
+body.dark-mode.gem-hr-rtl #ws-hr-nav .gem-hr-nav-search label,
+body.dark-mode.gem-hr-ltr #ws-hr-nav .gem-hr-nav-search label{color:#b1c8ea}
+body.dark-mode.gem-hr-rtl #ws-hr-nav details.gem-hr-time-subnav,
+body.dark-mode.gem-hr-ltr #ws-hr-nav details.gem-hr-time-subnav{border-color:#344968}
+body.dark-mode.gem-hr-rtl #ws-hr-nav details.gem-hr-time-subnav summary,
+body.dark-mode.gem-hr-ltr #ws-hr-nav details.gem-hr-time-subnav summary{background:#203955;color:#d4e5ff}
+body.dark-mode.gem-hr-rtl #ws-hr-nav details.gem-hr-time-subnav[open] summary,
+body.dark-mode.gem-hr-ltr #ws-hr-nav details.gem-hr-time-subnav[open] summary{background:#294970;border-color:#3d6189;color:#eaf3ff}
+body.dark-mode.gem-hr-rtl #ws-hr-nav .gem-hr-search-empty,
+body.dark-mode.gem-hr-ltr #ws-hr-nav .gem-hr-search-empty{color:#b4c7e0}
