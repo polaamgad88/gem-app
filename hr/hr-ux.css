@@ -1,0 +1,35 @@
+/* GEM HR unified design refinements.
+   Shared only by HR iframe pages through hr/hr.css. */
+:root{--gem-hr-shadow:0 3px 14px rgba(24,54,98,.055);--gem-hr-ring:#3278ed;--gem-hr-radius:16px}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root){font-synthesis:none;-webkit-font-smoothing:antialiased}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(button,input,select,textarea,a):focus-visible{outline:3px solid var(--gem-hr-ring);outline-offset:2px}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(button,a){-webkit-tap-highlight-color:transparent}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(button,.btn,.tm-btn,.rf-btn,.gw-btn,.rp-btn){transition:box-shadow .15s ease,transform .15s ease,border-color .15s ease,background-color .15s ease}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(button,.btn,.tm-btn,.rf-btn,.gw-btn,.rp-btn):not(:disabled):active{transform:translateY(1px)}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-card,.tm-card,.rf-card,.gw-card,.rp-card){box-shadow:var(--gem-hr-shadow)}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-table-wrap,.tm-table-wrap,.rf-table,.gw-table-wrap,.rp-table){overscroll-behavior-x:contain;scrollbar-width:thin}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(th){position:relative;line-height:1.5}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(td){line-height:1.7}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(input,select,textarea){accent-color:#2563eb}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(input,select,textarea)::placeholder{opacity:1;color:#899bb5}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.empty,.tm-blank,.rf-empty,.gw-empty,.rp-empty){line-height:2.1}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-kicker,.tm-kicker,.rf-kicker,.gw-top-kicker,.rp-kicker){letter-spacing:.02em;line-height:1.6}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-top h1,.tm-top h1,.rf-head h1,.gw-top h1,.rp-top h1){text-wrap:balance}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-toolbar,.tm-toolbar,.rf-toolbar,.gw-toolbar){row-gap:10px}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-nav,.tm-nav,.rf-tabs,.gw-nav,.rp-nav){scrollbar-width:thin}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-badge,.tm-chip,.rf-badge,.gw-pill,.rp-chip){font-variant-numeric:tabular-nums}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-search,.tm-search,.rf-search,.gw-search){min-height:42px}
+:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-card,.tm-card,.rf-card,.gw-card,.rp-card){min-width:0}
+@media(max-width:720px){
+ :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(button,.btn,.tm-btn,.rf-btn,.gw-btn,.rp-btn){min-height:40px}
+ :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-top,.tm-top,.rf-head,.gw-top,.rp-top){gap:12px}
+ :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-metrics,.tm-metrics,.rf-summary,.gw-metrics,.rp-metrics){gap:9px}
+ :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-table-wrap,.tm-table-wrap,.rf-table,.gw-table-wrap,.rp-table){margin-inline:-2px}
+}
+@media(prefers-reduced-motion:reduce){
+ :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) *, :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) *::before,:is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+@media print{
+ :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-floating,.hr-demo,.tm-footnote,.rf-banner,.gw-note,.rp-note){display:none!important}
+ :is(.hr-wrap,.tm-root,.rf-root,.gw-root,.rp-root) :is(.hr-card,.tm-card,.rf-card,.gw-card,.rp-card){break-inside:avoid;box-shadow:none}
+}
