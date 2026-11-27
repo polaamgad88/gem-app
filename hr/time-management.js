@@ -85,7 +85,7 @@ suggestions:[
 };
 function read(){try{return JSON.parse(localStorage.getItem("gem_hr_time_demo_v1"))||{}}catch{return {}}}
 let stored=read();
-function rows(){return [...(base[key]||[]),...(stored[key]||[])].map(x=>({...x}))}
+function rows(){const merged=new Map((base[key]||[]).map(x=>[String(x.id),{...x}]));(stored[key]||[]).forEach(x=>merged.set(String(x.id),{...x}));return [...merged.values()].reverse()}
 function persist(item){stored[key]||=[];stored[key].unshift(item);localStorage.setItem("gem_hr_time_demo_v1",JSON.stringify(stored))}
 function chip(v){let labels={
 pending:[t("قيد المراجعة","Pending"),"warn"],approved:[t("تمت الموافقة","Approved"),"good"],rejected:[t("مرفوض","Rejected"),"bad"],active:[t("نشط","Active"),"good"],expired:[t("منتهي","Expired"),"bad"],present:[t("منتظم","Present"),"good"],late:[t("متأخر","Late"),"warn"],missing:[t("حركة ناقصة","Missing punch"),"bad"],partial:[t("جزئي","Partial"),"warn"],complete:[t("مكتمل","Complete"),"good"],assigned:[t("مجدول","Scheduled"),"good"]};
