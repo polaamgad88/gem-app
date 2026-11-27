@@ -1,0 +1,10 @@
+/* Scoped to the HR workspace; Operations navigation is unchanged. */
+#ws-hr-nav .gem-hr-time-subnav{margin:14px 0 3px;border-top:1px solid #e6ecf7;padding-top:12px}
+#ws-hr-nav .gem-hr-time-subnav summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:800;color:#1f58b5;background:#f1f6ff}
+#ws-hr-nav .gem-hr-time-subnav summary::-webkit-details-marker{display:none}
+#ws-hr-nav .gem-hr-time-subnav summary>span{flex:1}
+#ws-hr-nav .gem-hr-time-chevron{font-size:10px;transition:transform .15s}
+#ws-hr-nav .gem-hr-time-subnav[open] .gem-hr-time-chevron{transform:rotate(180deg)}
+#ws-hr-nav .gem-hr-time-subnav-links{display:grid;gap:3px;padding:6px 0 6px 6px}
+#ws-hr-nav .gem-hr-time-subnav-links a{font-size:11px;min-height:36px;padding-inline:12px}
+body.gem-hr-rtl #ws-hr-nav .gem-hr-time-subnav-links{padding:6px 6px 6px 0}
